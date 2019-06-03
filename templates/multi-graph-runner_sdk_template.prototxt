@@ -1,0 +1,199 @@
+engines_file: "../engines/basic_detections.prototxt"
+
+environment:
+{
+  debug_level: 2
+  profile: false
+  analysis_thread_count: 2
+  gui: NO
+  drop_off: {}
+  kafka_broker_list: "$KAFKA_BROKER_LIST"
+  kafka_topic_prefix: "$KAFKA_TOPIC_PREFIX."
+}
+
+########################CAMERA 1##############################
+data_run:
+{
+  input:
+  {
+    file_name: "$INPUT_STREAM"
+  }
+
+  data_flow:
+  {
+    data_node: {type: FRAME name: "input"}
+    data_node: {type: FRAME name: "anonymized"}
+    data_node: {type: FRAME_INFO name: "frameinfo"}
+    data_node: {type: DETECTIONS name: "dets"}
+    data_node: {type: DETECTIONS name: "dets_anonymization"}
+    data_node: {type: DETECTIONS name: "dets_filtered"}
+    data_node: {type: HEAD_POSE_3DS name: "poses"}
+    data_node: {type: FEATURE_VECTORS name: "fvecs"}
+    data_node: {type: GENDERS name: "genders"}
+    data_node: {type: AGES name: "ages"}
+    data_node: {type: DETECTIONS name: "fb_crops"}
+    data_node: {type: FEATURE_VECTORS name: "fb_fvecs"}
+
+    process_node:
+    {
+      type: FRAME_INFO_EXTRACTOR
+      name: "frameinfocalc"
+      logging: false
+      frame_info_extractor_config:
+      {
+        input_frame: "input"
+        output_info: "frameinfo"
+      }
+    }
+
+    process_node:
+    {
+      type: OBJ_DETECTOR
+      name: "det"
+      logging: false
+      obj_det_config:
+      {
+        type: HEAD
+        input: "input"
+        bounding_boxes: "dets_anonymization"
+        min_height_in_pixels: 20
+        max_height_in_pixels: 256
+        confidence_threshold: 0.1
+        image_scale_factor: 1.0
+      }
+    }
+
+    process_node {
+      type: DRAW_RECTS
+      name: "anonymization"
+      draw_rects_config {
+        input_frame: "input"
+        input_bounding_boxes: "dets_anonymization"
+        output_frame: "anonymized"
+        blur: true
+        blur_kernel_size: 31
+        blur_sigma: 40
+        draw_rect: false
+        draw_properties: false
+        head_padding_top: 0
+        head_padding_bottom: 7
+        head_padding_left: 1
+        head_padding_right: 1
+        det_color: { red: 0 green: 0 blue: 0 }
+      }
+    }
+
+    process_node {
+      type: OBJ_FILTER
+      name: "det_filter"
+      obj_filter_config {
+        input_bounding_boxes: "dets_anonymization"
+        output_bounding_boxes: "dets"
+        filter_detection_confidence_threshold: 0.8
+      }
+    }
+
+    process_node:
+    {
+      type: HEAD_POSE_CALC
+      name: "headposecalc"
+      logging: false
+      head_pose_calc_config:
+      {
+        input_frame: "input"
+        input_bounding_boxes: "dets"
+        output_poses: "poses"
+      }
+    }
+
+    process_node:
+    {
+      type: HEAD_POSE_FILTER
+      name: "headposefilter"
+      logging: false
+      head_pose_filter_config:
+      {
+        input_frame: "input"
+        input_bounding_boxes: "dets"
+        input_poses: "poses"
+        output_bounding_boxes: "dets_filtered"
+        head_pose_3d_threshold: {
+          minPitch: -10
+          maxPitch: 10
+          minJaw:-25
+          maxJaw: 25
+          minRoll: -25
+          maxRoll: 25
+        }
+      }
+    }
+
+    process_node:
+    {
+      type: FACE_FEATURE_CALC
+      name: "facerec"
+      logging: false
+      face_feature_calc_config:
+      {
+        input_frame: "input"
+        input_dets: "dets_filtered"
+        output_features: "fvecs"
+      }
+    }
+
+    process_node:
+    {
+      type: FACE_DEMOGRAPHY_CALC
+      name: "demography"
+      logging: false
+      face_demography_calc_config:
+      {
+        input_frame: "input"
+        input_detections: "dets_filtered"
+        output_genders: "genders"
+        output_ages: "ages"
+        use_multicrop: true
+      }
+    }
+
+    process_node:
+    {
+      type: FULL_BODY_CROP_BOX_CALC
+      name: "fullbodyboxcalc"
+      logging: false
+      full_body_crop_box_calc_config:
+      {
+        input_dets: "dets"
+        output_dets: "fb_crops"
+        extend_scale: 1.0
+        left_scale: 0.75
+        right_scale: 0.75
+        height_scale: 7.0
+      }
+    }
+
+    process_node:
+    {
+      type: FULL_BODY_FEATURE_CALC
+      name: "fullbodyfeaturecalc"
+      logging: false
+      full_body_feature_calc_config:
+      {
+        input_frame: "input"
+        input_dets: "fb_crops"
+        output_features: "fb_fvecs"
+      }
+    }
+
+    # kafka output
+    process_node:{type: KAFKA_OUTPUT name: "vid_out"        kafka_output_config: {topic_name: "lowres.Image.jpg"                      input_node: "anonymized"}}
+    process_node:{type: KAFKA_OUTPUT name: "frameinfo_out"  kafka_output_config: {topic_name: "frameinfo.FrameInfoRecord.json"        input_node: "frameinfo"}}
+    process_node:{type: KAFKA_OUTPUT name: "det_out"        kafka_output_config: {topic_name: "dets.ObjectDetectionRecord.json"       input_node: "dets"}}
+    process_node:{type: KAFKA_OUTPUT name: "pose_out"       kafka_output_config: {topic_name: "poses.HeadPose3DRecord.json"           input_node: "poses"}}
+    process_node:{type: KAFKA_OUTPUT name: "fvecs_out"      kafka_output_config: {topic_name: "fvecs.FeatureVectorRecord.json"        input_node: "fvecs"}}
+    process_node:{type: KAFKA_OUTPUT name: "gender_out"     kafka_output_config: {topic_name: "genders.GenderRecord.json"             input_node: "genders"}}
+    process_node:{type: KAFKA_OUTPUT name: "age_out"        kafka_output_config: {topic_name: "ages.AgeRecord.json"                   input_node: "ages"}}
+    process_node:{type: KAFKA_OUTPUT name: "fb_crops_out"   kafka_output_config: {topic_name: "fb_crops.ObjectDetectionRecord.json"   input_node: "fb_crops"}}
+    process_node:{type: KAFKA_OUTPUT name: "fb_fvecs_out"   kafka_output_config: {topic_name: "fb_fvecs.FeatureVectorRecord.json"     input_node: "fb_fvecs"}}
+  }
+}

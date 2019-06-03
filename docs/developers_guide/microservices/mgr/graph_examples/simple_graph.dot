@@ -1,0 +1,10 @@
+digraph {
+  input [shape=box];
+  lowres [shape=box];
+  detections [shape=box];
+  
+  input -> resize -> lowres;
+  input -> head_detector -> detections;
+  lowres -> kafka_output_low_res;
+  detections -> kafka_output_detections;
+}

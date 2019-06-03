@@ -1,0 +1,65 @@
+engines_file: "/home/bogyom/ultinous/dlservice/models/engines/BUD_retail_reid.prototxt"
+
+environment:
+{
+  debug_level: 4
+  profile: true
+  analysis_thread_count: 2
+  gui: NORMAL
+  drop_off: {}
+  kafka_broker_list: "localhost:9092"
+}
+
+data_run:
+{
+  input:
+  {
+    #file_name: "rtsp://user:pwd@192.168.102.134"
+    file_name: "/dev/video0"
+  }
+
+  data_flow:
+  {
+    data_node: {type: FRAME name: "input"}
+    data_node: {type: FRAME name: "lowres"}
+    data_node: {type: DETECTIONS name: "dets"}
+    data_node: {type: DETECTIONS name: "dets_filtered"}
+    data_node: {type: HEAD_POSE_3DS name: "poses"}
+    data_node: {type: FEATURE_VECTORS name: "fvecs"}
+
+    process_node:
+    {
+      type: OBJ_DETECTOR
+      name: "det"
+      logging: false
+      obj_det_config:
+      {
+        type: HEAD
+        input: "input"
+        bounding_boxes: "dets"
+        min_height_in_pixels: 16
+        max_height_in_pixels: 256
+        confidence_threshold: 0.5
+        image_scale_factor: 1.0
+      }
+    }
+
+    process_node:
+    {
+      type: RESIZE
+      name: "downscale"
+      logging: false
+      resize_config:
+      {
+        type: ABSOLUTE_SIZE
+        input: "input"
+        output: "lowres"
+        width: 640
+      }
+    }
+
+    # kafka output
+    process_node:{type: KAFKA_OUTPUT name: "det_out"    kafka_output_config: {topic_name: "gyuri_test2.cam.1.dets.ObjectDetectionRecord.json" input_node: "dets"}}
+  }
+}
+
