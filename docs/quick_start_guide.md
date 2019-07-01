@@ -211,7 +211,7 @@ Create a demo with people counting in area and if there are more then 1 person g
 Details:  
 - Modify an existing demo script.
 - You camera's resolution is 1920x1080.
-- The area is a rectangles, coordinates of top left corner: (100,100) and coordinates of bottom right corner: (800, 600), draw it on the screen with a while line.
+- The area is a rectangles, coordinates of top left corner: (200,200) and coordinates of bottom right corner: (1200, 900), draw it on the screen with a while line.
 - For the visualization use an 'Alert' image (/image/alert.png) and change the rectangle color to red.
 
 #### See the s(h)elf

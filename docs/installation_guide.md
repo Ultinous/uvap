@@ -194,9 +194,9 @@ The UVAP provides several sample streams over Kafka where the integrator can con
 The way how Kafka is started is just an example, which can be easily and quickly carried out. The developer guide covers the necessary steps to permanently install and configure a Kafka environment that is suitable for production use cases.  
 The following steps should be performed in a single boot up period of the node. After a reboot each step should be stared all over.
 
-1. Edit your /etc/hosts file
+1. Edit your /etc/hosts file: add `zookeeper` and `kafka` as names for `127.0.0.1`.
    ```
-   $ sudo sed -i 's/^127.0.0.1.*/127.0.0.1\tlocalhost zookeeper kafka/' /etc/hosts
+   echo -e -n "\n127.0.0.1 kafka zookeeper\n" >> /etc/hosts
    ```
 1. Create a separate internal network for the docker-containerized environment
    ```
@@ -260,7 +260,7 @@ The components of UVAP have been protected against illegal access, so in order t
 1. Based on the above information you will receive:
    1. The licence
    1. Access to the docker repository `ultinous/uvap`
-   1. A download URL for AI resources (valid for only 24 hours)
+   1. A download URL for AI resources (valid for only 72 hours)
 1. The licence is provided within 2 files:  
    E.g.: license.txt:
    ```
