@@ -1,1 +1,58 @@
-../../../../../proto_files/ultinous/proto/common/kafka_config.proto
+/*
+Structures for Kafka streams containing Ultinous video analysis results.
+Copyright (C) 2014,2018 Ultinous Inc.
+*/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This proto describes the fundamental building blocks of video analysis configuration.
+//
+
+syntax = "proto3";
+
+package ultinous.proto.kafka;
+
+option java_package = "com.ultinous.proto.kafka";
+option java_multiple_files = true;
+
+import "ultinous/proto/common/kafka_common.proto";
+
+// Configuration for tracking
+// To be used with kafka-tracker-ms or kafka-tracker-cli
+message TrackingConfigRecord
+{
+  // confidence threshold to filter tracks
+  // value can be between 0.0f and 1.0f
+  // default: 0.0f, means no filtering
+  float detectionThreshold = 1;
+}
+
+// Configuration for pass detection
+// To be used with kafka-passdet-ms or kafka-passdet-cli
+message PassDetConfigRecord
+{
+  message PassLine
+  {
+    string id = 1; // Identifier of the polyline; this is referred in PassDetectionRecords
+    repeated Point poly = 2; // the polyline; must have at least 2 points
+  }
+
+  repeated PassLine passLines = 1; // passing polylines; must have at least 1 line
+}
+
+// Configuration for filtering of detections
+message RoiFilterConfig
+{
+  string id = 1; // Identifier, must be unique
+  float minConfidence = 2; // minimum confidence in [0..1] that a detection needs to have to pass
+  repeated ObjectType detectionTypes = 3; // set of allowed types for pass
+  repeated Point poly = 4; // polygon that a detection centroid needs to be inside to pass; needs exactly 0 or at least 3 points
+}
+
+// Configuration for multiple filtering of detections
+// To be used with kafka-roifilter-ms and kafka-roifilter-cli
+message RoiFiltersConfigRecord
+{
+  repeated RoiFilterConfig filters = 1; // at least one ROI filter
+}
+

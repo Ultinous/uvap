@@ -1,0 +1,2 @@
+mgr
+uvap_demo_applications

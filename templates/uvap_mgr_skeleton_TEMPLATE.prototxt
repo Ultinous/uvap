@@ -1,0 +1,42 @@
+engines_file: "$ENGINES_FILE"
+
+environment:
+{
+  debug_level: 2
+  profile: false
+  analysis_thread_count: 2
+  gui: NO
+  drop_off: {}
+  kafka_broker_list: "$KAFKA_BROKER_LIST"
+  kafka_topic_prefix: "$KAFKA_TOPIC_PREFIX."
+}
+
+########################CAMERA 1##############################
+data_run:
+{
+  input:
+  {
+    file_name: "$INPUT_STREAM"
+    drop_rate: $DROP_RATE
+  }
+
+  data_flow:
+  {
+    data_node: {type: FRAME name: "input"}
+    data_node: {type: SKELETONS name: "skeletons"}
+
+    process_node:
+    {
+      type: SKELETON_ESTIMATOR
+      name: "skeleton_estimator"
+      skeleton_estimator_config {
+        input_frame: "input"
+        skeletons: "skeletons"
+      }
+    }
+
+    # kafka output
+    process_node:{type: KAFKA_OUTPUT name: "skeletons_out"  kafka_output_config: {topic_name: "cam.0.skeletons.SkeletonRecord.json"   input_node: "skeletons"}}
+    process_node:{type: KAFKA_OUTPUT name: "vid_out"        kafka_output_config: {topic_name: "cam.0.lowres.Image.jpg"                input_node: "input"}}
+  }
+}

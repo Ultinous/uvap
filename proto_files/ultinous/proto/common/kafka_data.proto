@@ -1,1 +1,208 @@
-../../../../../proto_files/ultinous/proto/common/kafka_data.proto
+/*
+Structures for Kafka streams containing Ultinous video analysis results.
+Copyright (C) 2014,2018 Ultinous Inc.
+*/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This proto describes the fundamental building blocks of video analysis results.
+//
+// For each analyzed video frame, a series of detection records are created, corresponding to the number of
+// people deteceted in that frame. The detection records belonging to a single video frame are indexed sequentially
+// thus these indices are only unique within a single frame. Therefore a combined key is generated from the
+// the timestamp of the source video frame and the detection index to make it unique for the entire video stream.
+//
+// For some of the detections, additional analysis results are available as well, such as head pose, gender, age, and
+// feature vector for face recognition. These results appear in the Kafka streams as individual records and
+// each of them is linked to a specific detection record by having the same key as the corresponding detection record.
+// The individual analysis record types are documented below.
+//
+// Each record type has a boolean end_of_frame field. This is to indicate that no more records for the given
+// input video frame will be inserted into the stream. When this flag is true, all other fields of the record are invalid.
+
+syntax = "proto3";
+
+import "ultinous/proto/common/skeleton.proto";
+
+package ultinous.proto.kafka;
+
+option java_package = "com.ultinous.proto.kafka";
+option java_multiple_files = true;
+
+import "ultinous/proto/common/kafka_common.proto";
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Common helper structures
+//
+
+// Feature vector
+message FeatureVector {
+  enum FeatureType
+  {
+    PERSON_FACE = 0; // Face feature calculation result type
+    PERSON_FULL_BODY = 1; // Full-body feature calculation result type
+  }
+  string model_id = 1; // unique id of the model (neural network) that generated the vector
+  repeated float feature = 2; // model specific internal feature representation
+  FeatureType type = 3; // type of features represented by the feature vector
+}
+
+// 3D rotation coordinates for head pose.
+// Coordinates are given in degrees and can be positive or negative as well.
+// (0, 0, 0) degrees means the head directly facing the camera.
+// see e.g. https://howthingsfly.si.edu/flight-dynamics/roll-pitch-and-yaw
+message Orientation3D {
+  float yaw = 1;
+  float roll = 2;
+  float pitch = 3;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Kafka records
+//
+
+// Detection record.
+// One instance of this record is generated for each detected head/face on each frame.
+//
+// time: timestamp of the input video frame
+// key: time + "_" + sequential index within frame
+message ObjectDetectionRecord
+{
+  ObjectType type = 1; // Result type
+  Rect bounding_box = 2; // Rectangular box containing the head/face
+  float detection_confidence = 3; // Confidence between 0 and 1 of the algorithm about a head being detected
+  bool end_of_frame = 4; // When true, all other fields of the record are invalid.
+}
+
+// Head pose record.
+// One instance of this record is generated if the head pose of the detection can be determined.
+//
+// time: timestamp of the input video frame
+// key: same as the key of the corresponding ObjectDetectionRecord
+message HeadPose3DRecord
+{
+  Orientation3D pose = 1; // Rotation coordinates
+  bool end_of_frame = 2; // When true, all other fields of the record are invalid.
+}
+
+// Feature vector record.
+// One instance of this record is generated if the feature vector of the detection can be determined.
+// This record type is only to be used by other Ultinous software components for face recognition.
+//
+// time: timestamp of the input video frame
+// key: same as the key of the corresponding ObjectDetectionRecord
+message FeatureVectorRecord
+{
+  FeatureVector features = 1; // Internal representation of the detected face.
+  bool end_of_frame = 2; // When true, all other fields of the record are invalid.
+}
+
+// Gender record.
+// One instance of this record is generated if the gender of the detected person can be determined.
+//
+// time: timestamp of the input video frame
+// key: same as the key of the corresponding ObjectDetectionRecord
+message GenderRecord
+{
+  enum Gender {
+    MALE = 0;
+    FEMALE = 1;
+  }
+
+  Gender gender = 1; // Gender of detected person.
+  float confidence = 2; // Confidence between 0 and 1 of the algorithm about the gender decision.
+  bool end_of_frame = 3; // When true, all other fields of the record are invalid.
+}
+
+// Age record.
+// One instance of this record is generated if the age of the detected person can be determined.
+//
+// time: timestamp of the input video frame
+// key: same as the key of the corresponding ObjectDetectionRecord
+message AgeRecord
+{
+  uint32 age = 1; // Age of detected person in years
+  float confidence = 2; // Confidence between 0 and 1 of the algorithm about the age decision.
+  bool end_of_frame = 3; // When true, all other fields of the record are invalid.
+}
+
+// Frame info record.
+// One instance of this record is generated for each input video frame.
+//
+// time: timestamp of the input video frame
+message FrameInfoRecord
+{
+  uint32 columns = 1; // Number of pixels in the horizontal dimension.
+  uint32 rows = 2; // Number of pixels in the vertical dimension.
+}
+
+// Track change.
+// A track is a movement of an object on a camera view.
+// A track change is an element of a track.
+// A track change can be predicted or detected. See detectionKey.
+// Track id is a serial number starting from 0 when the application starts.
+// time: time of the frame
+// key: trackStartTime_trackId
+message TrackChangeRecord
+{
+  bool end_of_track = 1; // No more data for this track. Ignore all other data in this record.
+  string detectionKey = 2; // Empty means there is no detectionKey, because the change is predicted.
+
+  Point point = 3; // Point. Missing if end_of_track is true.
+}
+
+// A pass occures when a track transition crosses a passline.
+// Three kinds of events:
+// * A predicted or not predicted track section crosses a pass. Key is passId.
+// * A prediction becomes reality, key is empty, trackKey is key of track.
+// * A heartbeat is when there were passes, but no events for 1s. Key is empty, trackKey is empty.
+// time: time of the second frame of the pass.
+// key: passId or empty on pass confirmation and heartbeat.
+message PassDetectionRecord
+{
+  enum CrossDirection {
+    NONE = 0; // At special cases: end_of_track_passes, detection found to predicted passing, heartbeat.
+    LR = 1; // Left to right passing of the poly-line in a CW (aka. screen) coordinate system.
+    RL = 2; // Right to left passing of the poly-line in a CW (aka. screen) coordinate system.
+  }
+
+  string passId = 1; // the polyline's id that has been crossed
+  CrossDirection crossDir = 2; // the dir in which the polyline has been crossed
+  uint32 sectionIdx = 3; // the poly-line segment index that has been crossed, starting from 0.
+  Point crossPoint = 4; // the crosspoint
+
+  string trackKey = 5; // -> TrackChangeRecord key (trackStartTime_trackId), emptry on heartbeat
+  bool is_extrapolated = 6; // true if pass detected with predicted track, false if detected with real track
+  bool end_of_track_passes = 7; // no more passes for this track; ignore all other data in this record
+}
+
+// An object detection record that passed a filter.
+// time: Time of object detection record
+// key: copied from the contained ObjectDetectionRecord
+message FilteredObjectDetectionRecord
+{
+  string filterId = 1; // Identifier of the passing filter
+  ObjectDetectionRecord detection = 2; // the detection that passed
+}
+
+// One instance of this record is generated for each detected person on each frame.
+//
+// Skeleton detection record.
+// time: timestamp of the input video frame
+// key: time + "_" + sequential index within frame
+message SkeletonRecord
+{
+  // A single point in the skeleton.
+  message SkeletonPoint
+  {
+    float x = 1; // Horizontal co-ordinate in pixels, sub-pixel precision
+    float y = 2; // Vertical co-ordinate in pixels, sub-pixel precision
+    common.SkeletonPointType type = 3; // Type corresponding to a specific body part, see skeleton.proto
+    float confidence = 4; // Point detection confidence
+  }
+
+  repeated SkeletonPoint points = 1; // Each point has a different type, i.e. each body part occurs once or not at all.
+  bool end_of_frame = 2; // No more skeletons in this frame. Ignore all other data in this record.
+}

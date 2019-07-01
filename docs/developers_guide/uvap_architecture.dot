@@ -11,10 +11,11 @@ digraph {
     Age [shape=box];
     Gender [shape=box];
     Face_Feature_Vectors [shape=box];
+    Skeletons [shape=box];
     {
         edge[style=invis]
         rank = same;
-        Head_Detections -> Track_Changes -> Pass_Detections -> Head_Poses -> Age -> Gender -> Face_Feature_Vectors;
+        Head_Detections -> Track_Changes -> Pass_Detections -> Head_Poses -> Age -> Gender -> Face_Feature_Vectors -> Skeletons
     }
   }
   RTSP_Stream [shape=box];
@@ -26,6 +27,7 @@ digraph {
   Multi_Graph_Runner -> Age;
   Multi_Graph_Runner -> Gender;
   Multi_Graph_Runner -> Face_Feature_Vectors;
+  Multi_Graph_Runner -> Skeletons;
 
   // Tracking
   Head_Detections -> Tracker -> Track_Changes;

@@ -1,4 +1,4 @@
-engines_file: "../engines/basic_detections.prototxt"
+engines_file: "$ENGINES_FILE"
 
 environment:
 {
@@ -17,6 +17,7 @@ data_run:
   input:
   {
     file_name: "$INPUT_STREAM"
+    drop_rate: $DROP_RATE
   }
 
   data_flow:
@@ -28,11 +29,8 @@ data_run:
     data_node: {type: DETECTIONS name: "dets_anonymization"}
     data_node: {type: DETECTIONS name: "dets_filtered"}
     data_node: {type: HEAD_POSE_3DS name: "poses"}
-    data_node: {type: FEATURE_VECTORS name: "fvecs"}
     data_node: {type: GENDERS name: "genders"}
     data_node: {type: AGES name: "ages"}
-    data_node: {type: DETECTIONS name: "fb_crops"}
-    data_node: {type: FEATURE_VECTORS name: "fb_fvecs"}
 
     process_node:
     {
@@ -130,19 +128,6 @@ data_run:
 
     process_node:
     {
-      type: FACE_FEATURE_CALC
-      name: "facerec"
-      logging: false
-      face_feature_calc_config:
-      {
-        input_frame: "input"
-        input_dets: "dets_filtered"
-        output_features: "fvecs"
-      }
-    }
-
-    process_node:
-    {
       type: FACE_DEMOGRAPHY_CALC
       name: "demography"
       logging: false
@@ -156,44 +141,13 @@ data_run:
       }
     }
 
-    process_node:
-    {
-      type: FULL_BODY_CROP_BOX_CALC
-      name: "fullbodyboxcalc"
-      logging: false
-      full_body_crop_box_calc_config:
-      {
-        input_dets: "dets"
-        output_dets: "fb_crops"
-        extend_scale: 1.0
-        left_scale: 0.75
-        right_scale: 0.75
-        height_scale: 7.0
-      }
-    }
-
-    process_node:
-    {
-      type: FULL_BODY_FEATURE_CALC
-      name: "fullbodyfeaturecalc"
-      logging: false
-      full_body_feature_calc_config:
-      {
-        input_frame: "input"
-        input_dets: "fb_crops"
-        output_features: "fb_fvecs"
-      }
-    }
-
     # kafka output
-    process_node:{type: KAFKA_OUTPUT name: "vid_out"        kafka_output_config: {topic_name: "lowres.Image.jpg"                      input_node: "anonymized"}}
-    process_node:{type: KAFKA_OUTPUT name: "frameinfo_out"  kafka_output_config: {topic_name: "frameinfo.FrameInfoRecord.json"        input_node: "frameinfo"}}
-    process_node:{type: KAFKA_OUTPUT name: "det_out"        kafka_output_config: {topic_name: "dets.ObjectDetectionRecord.json"       input_node: "dets"}}
-    process_node:{type: KAFKA_OUTPUT name: "pose_out"       kafka_output_config: {topic_name: "poses.HeadPose3DRecord.json"           input_node: "poses"}}
-    process_node:{type: KAFKA_OUTPUT name: "fvecs_out"      kafka_output_config: {topic_name: "fvecs.FeatureVectorRecord.json"        input_node: "fvecs"}}
-    process_node:{type: KAFKA_OUTPUT name: "gender_out"     kafka_output_config: {topic_name: "genders.GenderRecord.json"             input_node: "genders"}}
-    process_node:{type: KAFKA_OUTPUT name: "age_out"        kafka_output_config: {topic_name: "ages.AgeRecord.json"                   input_node: "ages"}}
-    process_node:{type: KAFKA_OUTPUT name: "fb_crops_out"   kafka_output_config: {topic_name: "fb_crops.ObjectDetectionRecord.json"   input_node: "fb_crops"}}
-    process_node:{type: KAFKA_OUTPUT name: "fb_fvecs_out"   kafka_output_config: {topic_name: "fb_fvecs.FeatureVectorRecord.json"     input_node: "fb_fvecs"}}
+    process_node:{type: KAFKA_OUTPUT name: "vid_out"            kafka_output_config: {topic_name: "cam.0.lowres.Image.jpg"                      input_node: "input"}}
+    process_node:{type: KAFKA_OUTPUT name: "anonymized_vid_out" kafka_output_config: {topic_name: "cam.0.anonymized_lowres.Image.jpg"           input_node: "anonymized"}}
+    process_node:{type: KAFKA_OUTPUT name: "frameinfo_out"      kafka_output_config: {topic_name: "cam.0.frameinfo.FrameInfoRecord.json"        input_node: "frameinfo"}}
+    process_node:{type: KAFKA_OUTPUT name: "det_out"            kafka_output_config: {topic_name: "cam.0.dets.ObjectDetectionRecord.json"       input_node: "dets"}}
+    process_node:{type: KAFKA_OUTPUT name: "pose_out"           kafka_output_config: {topic_name: "cam.0.poses.HeadPose3DRecord.json"           input_node: "poses"}}
+    process_node:{type: KAFKA_OUTPUT name: "gender_out"         kafka_output_config: {topic_name: "cam.0.genders.GenderRecord.json"             input_node: "genders"}}
+    process_node:{type: KAFKA_OUTPUT name: "age_out"            kafka_output_config: {topic_name: "cam.0.ages.AgeRecord.json"                   input_node: "ages"}}
   }
 }
