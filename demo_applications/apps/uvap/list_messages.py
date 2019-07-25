@@ -14,7 +14,7 @@ def get_messages(broker: str, topic: str):
         True,
         begin_flag=BeginFlag.BEGINNING
     )
-    ret = consumer.getMessage()
+    ret = consumer.getMessages()
     return ret
 
 

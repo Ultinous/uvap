@@ -24,7 +24,18 @@ message TrackingConfigRecord
   // confidence threshold to filter tracks
   // value can be between 0.0f and 1.0f
   // default: 0.0f, means no filtering
-  float detectionThreshold = 1;
+  float detection_threshold = 1;
+
+  // We won't associate a tracker with a bounding box if the
+  // distance between the two is greater than the bounding box's width multiplied by this parameter
+  // default: 2.0f
+  float distance_threshold = 2;
+
+  // Kill a tracker if it has gone timePassedThreshold milliseconds
+  // without receiving a measurement.
+  // default: 1000
+  uint32 time_passed_threshold = 3;
+
 }
 
 // Configuration for pass detection
@@ -37,15 +48,15 @@ message PassDetConfigRecord
     repeated Point poly = 2; // the polyline; must have at least 2 points
   }
 
-  repeated PassLine passLines = 1; // passing polylines; must have at least 1 line
+  repeated PassLine pass_lines = 1; // passing polylines; must have at least 1 line
 }
 
 // Configuration for filtering of detections
 message RoiFilterConfig
 {
   string id = 1; // Identifier, must be unique
-  float minConfidence = 2; // minimum confidence in [0..1] that a detection needs to have to pass
-  repeated ObjectType detectionTypes = 3; // set of allowed types for pass
+  float min_confidence = 2; // minimum confidence in [0..1] that a detection needs to have to pass
+  repeated ObjectType detection_types = 3; // set of allowed types for pass
   repeated Point poly = 4; // polygon that a detection centroid needs to be inside to pass; needs exactly 0 or at least 3 points
 }
 
@@ -56,3 +67,49 @@ message RoiFiltersConfigRecord
   repeated RoiFilterConfig filters = 1; // at least one ROI filter
 }
 
+/**
+ * Configuration for Reidentification Microservice and CLI.
+ * Concept: Our inputs can be feature vector series coming from video cameras and manually managed
+ *   data streams of feature vectors. We remember (aka. register) feature vectors and later we
+ *   search for them (aka. reidentification) and return their identification data (kafka message
+ *   key). We can use manually edited data for both registration and reidentification. The very same
+ *   goes for data streams from cameras. Examples:
+ *   - Registering manually crafted data: Loading staff database for entrance system.
+ *   - Reidentification from  manually crafted data: Searching for people similar to a photo I have
+ *     now.
+ *   - Registering data from camera: Dwell time approximation, first camera.
+ *   - Reidentification from data from camera: Dwell time approximation, second camera. Searching
+ *     amongst manually registered staff.
+ * On reidentification each stream that is used for registration will provide a top list of matches,
+ * the final result will be the concatenation of these top lists. Each top list has a maximum size
+ * configured for that registration stream (reid_max_count). A top list can be shorter if there are
+ * not enough matches reaching the minimum required score (reid_min_score). Registration only happen
+ * if the closest match is at most reg_max_score good. For manually managed streams we recommend this
+ * settinng to be 1 (one) as scores are between 0 and 1. Registrations are kept in memory for
+ * reg_retention_period milliseconds.
+ * Input: Any record that has feature vector and associated model id.
+ *   For streams that are used for registration the record will be updated in memory if the key
+ *   already exists, deleted if its payload is empty.
+ * Output: ReidentificationRecord
+ */
+message ReidConfigRecord
+{
+  /** The way a given input is accessed and handled. */
+  message InputConfig
+  {
+    string stream_id = 1; ///< Identifier to be used for referencing this input.
+    string fv_field = 2; ///< Field name of FeatureVector typed field.
+    string is_active_field = 3; ///< Field name of bool typed field, can be empty. If false then key will be removed if isReg is true.
+    string to_be_ignored_field = 4; ///< Field name of bool typed field, can be empty. If true then event will be ignored.
+    bool do_reid = 5; // Given input is source for reidentification tasks.
+    bool do_reg = 6; // Given input is source for remembering objects and reidentificating against.
+
+    /// The properties below are valid for REG streams.
+    float reid_min_score = 7; ///< Similarity score required to reach the list of top matching elements [0..1]
+    uint32 reid_max_count = 8; ///< Length of top list served from this registration.
+    float reg_max_score = 9; ///< Maximum similarity (exclusive) to any other object for allowing remembering. [0..1]
+    int64 reg_retention_period = 10; ///< Registration memory window size [ms]. Also at startup we rewind input this much. 0 means infinite.
+  }
+
+  repeated InputConfig inputs = 1; ///< Exactly as many configurations as inputs configured for the service.
+}

@@ -147,7 +147,7 @@ For very detailed configurations options look at the [this proto file](../../../
 
 ## Deployment
 
-To run MGR the server must have an nvidia GPU (1060 or better). MGR is dockerized and must be run with nvidia-docker. If the server has more GPUs a separate MGR instance should run on each GPU for optimal performance.
+To run MGR the server must have an nvidia GPU (1060 with 6G gpu memory or better). MGR is dockerized and must be run with nvidia-docker. If the server has more GPUs a separate MGR instance should run on each GPU for optimal performance.
 
 ## Runtime performance
 

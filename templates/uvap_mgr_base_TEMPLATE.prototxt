@@ -6,7 +6,7 @@ environment:
   profile: false
   analysis_thread_count: 2
   gui: NO
-  drop_off: {}
+  drop_on: {}
   kafka_broker_list: "$KAFKA_BROKER_LIST"
   kafka_topic_prefix: "$KAFKA_TOPIC_PREFIX."
 }

@@ -33,6 +33,10 @@ while test "${#}" -gt 0; do
 			shift
 			license_key_file_path="${1}"
 		;;
+    --image-tag)
+			shift
+			image_tag="${1}"
+		;;
 		--)
 			shift
 			break
@@ -84,8 +88,14 @@ elif test ! -f "${license_key_file_path}"; then
     exit 1
 fi
 
-release_tag="$(git -C "$(dirname "$(realpath "${0}")")" tag --list --sort=-creatordate --merged HEAD 'release/*' | head -n1 | cut -f2 -d/)"
-${docker_binary_path} pull "ultinous/uvap:mgr_${release_tag}"
+
+if test -z "${image_tag:-}"; then
+  image_tag="$(git -C "$(dirname "$(realpath "${0}")")" tag --list --sort=-creatordate --merged HEAD 'release/*' | head -n1 | cut -f2 -d/)"
+fi
+
+image_name="ultinous/uvap:mgr_${image_tag}"
+
+${docker_binary_path} pull ${image_name}
 mgr_property_file_path="/ultinous_app/models/uvap-mgr/uvap_mgr.properties"
 
 user_id="$(id -u)"
@@ -100,4 +110,4 @@ ${nvidia_docker_binary_path} run \
     --mount "type=bind,readonly,source=$(realpath "${license_data_file_path}"),destination=/ultinous_app/license_data.txt" \
     --mount "type=bind,readonly,source=$(realpath "${license_key_file_path}"),destination=/ultinous_app/licence.key" \
     ${@} \
-    "ultinous/uvap:mgr_${release_tag}"
+    ${image_name}

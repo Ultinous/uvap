@@ -51,6 +51,8 @@ def _get_message_type(message_topic):
         return 'age'
     elif '.GenderRecord' in message_topic:
         return 'gender'
+    elif '.TrackChangeRecord' in message_topic:
+        return 'track'
     return 'unknown'
 
 
@@ -92,8 +94,8 @@ def message_list_to_frame_structure(messages: List[Message]) -> dict:
 
         if type == 'image':
             frame_dict[ts][stream][cam][type] = value
-        elif value['end_of_frame'] is False:
-            if type == 'skeleton':
+        elif not value.get("end_of_frame", False):
+            if type in ('skeleton', 'track'):
                 frame_dict[ts][stream][cam][type][detection] = value
             else:
                 frame_dict[ts][stream][cam]['head_detection'][detection][type] = value

@@ -1,35 +1,17 @@
-# Overview
 
-## What is UVAP?
+# UVAP Developer's Guide
+## Table of contents
+1. [Overview](#overview)
+1. [Architecture](#architecture)
+1. [Data model](#dataModel)
+1. [Microservices](#microservices)
+1. [Tutorial](#tutorial)
+1. [Extending UVAP](#extendingUVAP)
 
-Ultinous Video Analysis Platform (UVAP) is a set of software services that can be composed and extended in a flexible way to build scaleable, distributed **video processing applications** in multiple domains such as **retail**, **security** or **elderly care**.
+<a name="overview"></a>
+# [Overview](../Readme.md/#overview)
 
-## Video analysis capabilities
-
-UVAP provides a rich set of **deep learning based advanced video analysis** models. These models are industry leading in accuracy along with efficient processing. The available core models are:
-
-- head/face detection
-- 3D head pose
-- face recognition, re-identification
-- full body re-identification
-- age
-- gender
-- human body pose
-- tracking
-- pass detection, counting
-
-##  Example use cases
-
-UVAP has been used to solve real world problems in different domains. Some examples:
-
-- Queue management system for retail stores. Customers are counted at the doors and in the queuing area in real-time. A prediction model can tell if there will be a queue in the next few minutes and staff is alerted before it happens.
-
-- Fall detection in elderly care homes. The system uses two 3D calibrated cameras per room and runs human body pose estimation. Based on the body pose fallen body pose can be recognized. An alert is sent to the staff in real-time. Staff personals can look at the alert, validate the images and decide to take action.
-
-- Measure waiting time on Airports. Face recognition is applied at the entrance and exit points in real-time to measure actual waiting time. Prediction is applied and displayed to customers entering the queue.
-
-- Recognize unsafe escalator usage. Based on head detection, tracking and full body pose different unsafe situations are recognized such as: wrong direction, leaning out, crowd.
-
+<a name="architecture"></a>
 # Architecture
 
 UVAP implements a **dataflow programming model** where the data is processed by multiple simple processors (potentially running on different hosts) connected by channels. This model is widely used in the video processing domain for example in [ffmpeg](https://ffmpeg.org) or [gstreamer](https://gstreamer.freedesktop.org). UVAP uses [Apache Kafka](https://kafka.apache.org) for data channels and [Docker](https://www.docker.com) to run the processors. These technologies provides a generic and flexible framework to build stream processing applications.
@@ -43,11 +25,15 @@ The data channels between microservices are **Kafka topics**. Head of the topics
 
 [Multi graph runner (MGR)](microservices/mgr/mgr.md) takes the video streams and runs all deep learning based image processing models (eg.: head detection, face recognition). [MGR](microservices/mgr/mgr.md) outputs only lightweight data such as head detection streams or face recognition feature vectors. **It is very important the uncompressed video data never transfered over kafka, all low level image processing is done inside [MGR](microservices/mgr/mgr.md).** Kafka is only used to exchange lightweight data.
 
+[Tracker microservice](microservices/tracker.md) uses Head_Detections kafka topic produced by [MGR](microservices/mgr/mgr.md) and produces Track_Changes topic. A track is a sequence of head detections of an individual on a video stream from the first detection to the disappearance. Besides the path of movement, a track can help to calculate how long an individual stayed in an area of interest.
+
+<a name="dataModel"></a>
 # Data model
 As shown in *Figure 1.* the microservices are connected via kafka topics. This section provides information about the schema and format of these topics.
 
 **The data model of UVAP is normalized.** Every topic contains one piece of information, **if the user needs information from multiple topics the topics have to be joined**.
 
+<a name="topicNamingConvention"></a>
 ## Topic naming convention
 
 Kafka topics cannot be structured to hierarchical folders so UVAP package a lot of information into the topic name to help the users. Topic names follow a simple naming convention:
@@ -55,7 +41,7 @@ Kafka topics cannot be structured to hierarchical folders so UVAP package a lot 
 <domain>.cam.<stream_id>.<data_name>.<schema>.<serialization_format>
 ```
 
-Let's take an example:
+### Example
 
 ```
 demo.cam.117.dets.ObjectDetectionRecord.json
@@ -63,11 +49,14 @@ demo.cam.117.dets.ObjectDetectionRecord.json
 
 This topic is produced by MGR, `dets` here refers to the MGR data node. `ObjectDetectionRecord` refers to the schema of the data, it is described in the [data model](../../proto_files/ultinous/proto/common/kafka_data.proto).
 
+
 `json` describes the serialization format. Currently only json is supported for structured data. It is recommended to turn lz4 compression on in the kafka broker to spare storage and bandwidth as uncompressed json can be prohibitive.
 
 ## Topic schemas
 
-As mentioned above the data model is **normalized**. The schema of all the structured topics are described [here](../../proto_files/ultinous/proto/common/kafka_data.proto) with comments embedded for explanation. The schema of the value part of the kafka records are defined in proto messages ending with ```Record```. The comment before the definition describes the key as well. Example:
+As mentioned above the data model is **normalized**. The schema of all the structured topics are described [here](../../proto_files/ultinous/proto/common/kafka_data.proto) with comments embedded for explanation. The schema of the value part of the kafka records are defined in proto messages ending with ```Record```. The comment before the definition describes the key as well. 
+
+####Example
 
 ```
 // Detection record.
@@ -83,8 +72,7 @@ message ObjectDetectionRecord
   bool end_of_frame = 4;          // When true, all other fields of the record are invalid.
 }
 ```
-
-Example dump of json detection topic with this schema:
+This is a dump of json detection topic with this schema:
 
 ```
 $ kafkacat -C -b localhost -t demo.dets.ObjectDetectionRecord.json -o-1 -f "%k,%s\n"
@@ -98,22 +86,100 @@ $ kafkacat -C -b localhost -t demo.dets.ObjectDetectionRecord.json -o-1 -f "%k,%
 1561981650803,{"type":"PERSON_HEAD","detection_confidence":0,"end_of_frame":true}
 1561981651003,{"type":"PERSON_HEAD","detection_confidence":0,"end_of_frame":true}
 ```
+### Technical progress records
 
-## Technical progress records
+Note that in the detection topic example there are timestamps (eg.:`1561981650803`) with no detections, only a record with `end_of_frame` set to `true`. Different topics have different technical progress record properties eg. records produced by the [Tracker](microservices/tracker.md) microservice contain `end_of_track` property.   
+In general all microservices emit progress (or heartbeat) records to make joining these topics easier in real-time.
+ Therefore when processing detections, if the `end_of_frame` is *true*, the microservice can emit all the information for the particular frame.
 
-Note that in the example there are timestamps (eg.:`1561981650803`) with no detections only a record with `end_of_frame` set to `true`. In general all microservices emit  progress (or heartbeat) records to make joining these topics easier in real-time. (If the `end_of_frame` received the microservice can emit all the information for the particular frame.)
+
+### Cross references
+
+Records in topics produced by a [microservice](#microservices) often contain references to other topics' records. A chain of references ensures the possibility to link useful data with each other, for example demographic data with tracks.   
+
+   
+#### Example
+
+The **detection_key** property of 
+[this TrackChangeRecord](microservices/tracker.md/#trackChangeRecord) produced by [Tracker](microservices/tracker.md) microservice refers to an 
+[ObjectDetectionRecord](../../proto_files/ultinous/proto/common/kafka_data.proto) **key** 
+and an [AgeRecord](../../proto_files/ultinous/proto/common/kafka_data.proto) **key** 
+in two other topics produced by [MGR](microservices/mgr/mgr.md). 
+Note that the **key** of the [TrackChangeRecord](microservices/tracker.md/#trackChangeRecord) 
+is usually not equal to its **detection_key**, 
+for its **key** refers to the detection of the *first* record of the track. ([Learn more...](microservices/tracker.md/#trackChangeRecord))
 
 ## Join
 As the data model is normalized it is common to read and join multiple topics. Joining kafka topics is solved in the java kafka streams API. We also provide a [python implementation](../../demo_applications/utils/kafka/time_ordered_generator_with_timeout.py) as part of the package, see the demo applications for more details.
 
+<a name="microservices"></a>
 # Microservices
 
 ## [Multi graph runner (MGR)](microservices/mgr/mgr.md)
 
-Future versions of UVAP will contain many more microservices such as tracking and reidentification.
+## [Tracker](microservices/tracker.md)
 
+Future versions of UVAP will contain many more microservices such as reidentification.
+
+<a name="tutorial"></a>
 # Tutorial
 Comming soon...
 
+<a name="extendingUVAP"></a>
 # Extending UVAP
-Comming soon...
+## Environment for Python Developers
+Our demos run in the docker because this solution is quick and easy. For more information please visit [Quick start guide](quick_start_guide.md).  
+The developers require a local environment to solve real world problems instead of starting a few pre-written demos.
+In this chapter you will find:
+- The same installation package like in the **uvap_demo_applications** docker container, and
+- How to install a useful editor for python programming language.
+
+### Requirements
+- Ubuntu 18.04 Bionic Beaver
+- Privileged access to your Ubuntu System as root or via sudo command is required.
+
+### Python3.6
+If you would like to create the same environment like **uvap_demo_applications** docker container need to run the following group of commands:
+```
+sudo apt-get update \
+&& sudo apt-get -y install \
+    kafkacat \
+    python3 \
+    python3-pip \
+    python3-setuptools \
+    mc \
+    vim \
+    screen \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+&& sudo apt-get clean \
+&& sudo rm -rf /var/lib/apt/lists/* \
+&& sudo pip3 install \
+    confluent-kafka \
+    numpy \
+    scipy \
+    pandas \
+    protobuf \
+    flask \
+    WSGIserver \
+    sklearn \
+    jsons \
+    xlrd \
+    opencv-python \
+    gevent \
+    sortedcontainers
+```
+### PyCharm
+#### Install PyCharm using Snaps
+Simplest and recommended way to install PyCharm on Ubuntu 18.04 is by use of snaps package manager. The following linux command will install PyCharm community edition on Ubuntu 18.04 Bionic Beaver:
+
+```
+$ sudo snap install pycharm-community --classic
+pycharm-community 2019.1.3 from jetbrains✓ installed
+```
+#### Start PyCharm
+You can start PyCharm from command line by executing the following linux command:
+```
+$ pycharm-community
+```

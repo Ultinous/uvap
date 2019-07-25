@@ -1,27 +1,43 @@
-import numpy as np
 import argparse
+from collections import defaultdict
+from itertools import cycle
+from typing import DefaultDict, Any
+
 import cv2
+import numpy as np
 from confluent_kafka.cimpl import Producer
 
 from utils.kafka.time_ordered_generator_with_timeout import TimeOrderedGeneratorWithTimeout, TopicInfo
-from utils.uvap.graphics import draw_overlay, Position, draw_nice_bounding_box, draw_nice_text
+from utils.uvap.graphics import draw_nice_bounding_box, draw_overlay, Position, TYPE_TO_COLOR
 from utils.uvap.uvap import message_list_to_frame_structure, encode_image_to_message
+
+colors = cycle(TYPE_TO_COLOR.values())
+
+
+class Track:
+    MAX_SIZE = 30
+
+    def __init__(self, color: tuple) -> None:
+        self.color = color
+        self.points = []
+
+    def add_point(self, point: tuple):
+        self.points.append(point)
+        if len(self.points) > Track.MAX_SIZE:
+            self.points = self.points[-Track.MAX_SIZE:]
 
 
 def main():
     parser = argparse.ArgumentParser(
         epilog=
         """Description:
-           Plays a video from a jpeg topic,
-           visualizes the head detection with an orage bounding box around a head
-           and writes demography data (gender & age) data above the heads.
-           Displays ('-d') or stores ('-o') the result of this demo in the kafka topic.
+           Plays a video from a jpeg topic, visualizes the head detections and tracks.
+           Displays the result on screen ('-d') or stores result in kafka ('-o').
            
            Required topics:
            - <prefix>.cam.0.lowres.Image.jpg
            - <prefix>.cam.0.dets.ObjectDetectionRecord.json
-           - <prefix>.cam.0.genders.GenderRecord.json
-           - <prefix>.cam.0.ages.AgeRecord.json
+           - <prefix>.cam.0.tracks.TrackChangeRecord.json
            """
         , formatter_class=argparse.RawTextHelpFormatter
     )
@@ -42,12 +58,11 @@ def main():
 
     image_topic = f"{args.prefix}.cam.0.lowres.Image.jpg"
     detection_topic = f"{args.prefix}.cam.0.dets.ObjectDetectionRecord.json"
-    gender_topic = f"{args.prefix}.cam.0.genders.GenderRecord.json"
-    age_topic = f"{args.prefix}.cam.0.ages.AgeRecord.json"
-    output_topic_name = f"{args.prefix}.cam.0.demography.Image.jpg"
+    track_topic = f"{args.prefix}.cam.0.tracks.TrackChangeRecord.json"
+    output_topic_name = f"{args.prefix}.cam.0.tracks.Image.jpg"
 
     # handle full screen
-    window_name = "DEMO: Demography (gender & age)"
+    window_name = "DEMO: Head detection"
     if args.full_screen:
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
@@ -58,39 +73,43 @@ def main():
         "detection",
         [
             TopicInfo(image_topic),
-            TopicInfo(detection_topic),
-            TopicInfo(gender_topic),
-            TopicInfo(age_topic),
+            TopicInfo(track_topic, drop=False),
+            TopicInfo(detection_topic)
         ],
         100,
         None,
         True
     )
-
     i = 0
-    for msgs in consumer.getMessages():
+
+    tracks: DefaultDict[Any, Track] = defaultdict(lambda: Track(next(colors)))
+
+    for msgs in consumer.getMessage():
         for time, v in message_list_to_frame_structure(msgs).items():
+            for track_key, track_val in v[args.prefix]["0"]["track"].items():
+                if track_val["end_of_track"]:
+                    if track_key in tracks:
+                        del tracks[track_key]
+                    continue
+                point = track_val["point"]["x"], track_val["point"]["y"]
+                tracks[track_key].add_point(point)
             img = v[args.prefix]["0"]["image"]
             if type(img) == np.ndarray:
+                # draw bounding_box
                 for head_detection in v[args.prefix]["0"]["head_detection"]:
                     object_detection_record = v[args.prefix]["0"]["head_detection"][head_detection]["bounding_box"]
-                    age_record = v[args.prefix]["0"]["head_detection"][head_detection]["age"]
-                    gender_record = v[args.prefix]["0"]["head_detection"][head_detection]["gender"]
-                    age = "" if age_record['age'] == {} else age_record['age']
-                    gender = "" if gender_record['gender'] == {} else gender_record['gender']
-                    # draw bounding_box
-                    img = draw_nice_bounding_box(
-                        img,
-                        object_detection_record["bounding_box"],
-                        (10, 95, 255)
+                    if object_detection_record["type"] == "PERSON_HEAD":
+                        img = draw_nice_bounding_box(img, object_detection_record["bounding_box"], (10, 95, 255))
+
+                for t_key, t in tracks.items():
+                    cv2.polylines(
+                        img=img,
+                        pts=[np.array(t.points, np.int32)],
+                        isClosed=False,
+                        color=t.color,
+                        thickness=3
                     )
-                    # write age and gender
-                    img = draw_nice_text(
-                        img,
-                        str(gender) + " " + str(age),
-                        object_detection_record["bounding_box"],
-                        (10, 95, 255)
-                    )
+
                 # draw ultinous logo
                 img = draw_overlay(img, overlay, Position.BOTTOM_RIGHT)
 
@@ -100,6 +119,7 @@ def main():
                     producer.poll(0)
                     if i % 100 == 0:
                         producer.flush()
+                        i = 0
                     i += 1
 
                 # display

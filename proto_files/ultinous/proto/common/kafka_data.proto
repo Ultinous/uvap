@@ -141,25 +141,30 @@ message FrameInfoRecord
 // Track change.
 // A track is a movement of an object on a camera view.
 // A track change is an element of a track.
-// A track change can be predicted or detected. See detectionKey.
+// A track change can be predicted or detected. See detection_key.
 // Track id is a serial number starting from 0 when the application starts.
 // time: time of the frame
 // key: trackStartTime_trackId
 message TrackChangeRecord
 {
   bool end_of_track = 1; // No more data for this track. Ignore all other data in this record.
-  string detectionKey = 2; // Empty means there is no detectionKey, because the change is predicted.
+  string detection_key = 2; // Empty means there is no detection_key, because the change is predicted. Otherwise this is a cross reference to key of ObjectDetectionRecord.
 
   Point point = 3; // Point. Missing if end_of_track is true.
 }
 
 // A pass occures when a track transition crosses a passline.
-// Three kinds of events:
-// * A predicted or not predicted track section crosses a pass. Key is passId.
-// * A prediction becomes reality, key is empty, trackKey is key of track.
-// * A heartbeat is when there were passes, but no events for 1s. Key is empty, trackKey is empty.
+// Four kinds of events:
+// * A predicted or not predicted track section crosses a pass.
+//     Key is pass_id, track_key is key of track, end_of_track_passes is false.
+// * A prediction becomes reality.
+//     Key is empty, track_key is key of track, end_of_track_passes is false.
+// * A track has ended.
+//     Key is empty, track_key is key of track, end_of_track_passes is true.
+// * A heartbeat: when there is input, but no message was sent in the last second.
+//     Key is empty, track_key is empty, end_of_track_passes is false.
 // time: time of the second frame of the pass.
-// key: passId or empty on pass confirmation and heartbeat.
+// key: pass_id or empty on pass confirmation and heartbeat.
 message PassDetectionRecord
 {
   enum CrossDirection {
@@ -168,12 +173,12 @@ message PassDetectionRecord
     RL = 2; // Right to left passing of the poly-line in a CW (aka. screen) coordinate system.
   }
 
-  string passId = 1; // the polyline's id that has been crossed
-  CrossDirection crossDir = 2; // the dir in which the polyline has been crossed
-  uint32 sectionIdx = 3; // the poly-line segment index that has been crossed, starting from 0.
-  Point crossPoint = 4; // the crosspoint
+  string pass_id = 1; // the polyline's id that has been crossed
+  CrossDirection cross_dir = 2; // the dir in which the polyline has been crossed
+  uint32 section_idx = 3; // the poly-line segment index that has been crossed, starting from 0.
+  Point cross_point = 4; // the crosspoint
 
-  string trackKey = 5; // -> TrackChangeRecord key (trackStartTime_trackId), emptry on heartbeat
+  string track_key = 5; // -> TrackChangeRecord key (trackStartTime_trackId), emptry on heartbeat
   bool is_extrapolated = 6; // true if pass detected with predicted track, false if detected with real track
   bool end_of_track_passes = 7; // no more passes for this track; ignore all other data in this record
 }
@@ -183,7 +188,7 @@ message PassDetectionRecord
 // key: copied from the contained ObjectDetectionRecord
 message FilteredObjectDetectionRecord
 {
-  string filterId = 1; // Identifier of the passing filter
+  string filter_id = 1; // Identifier of the passing filter
   ObjectDetectionRecord detection = 2; // the detection that passed
 }
 
@@ -205,4 +210,47 @@ message SkeletonRecord
 
   repeated SkeletonPoint points = 1; // Each point has a different type, i.e. each body part occurs once or not at all.
   bool end_of_frame = 2; // No more skeletons in this frame. Ignore all other data in this record.
+}
+
+
+/**
+ * A reidentification or registration event.
+ * time: Time of event that were used.
+ * key: Serialized event reference that were used.
+ */
+message ReidRecord
+{
+  message SubjectRef
+  {
+    string stream_id = 1; ///< References input stream with the help of the service config.
+    string key = 2; ///< Corresponding message key in the input stream.
+  }
+  message ScoredSubjectRef
+  {
+    SubjectRef subject = 1;
+    float score = 2;
+  }
+  enum Type { REID = 0; REG = 1; };
+
+  Type type = 1; ///< Type of event.
+  SubjectRef event = 2; ///< Event record that we were acted upon.
+  repeated ScoredSubjectRef reg_refs = 3; ///< REID: Matched elements that made to the top list. REG: Empty list.
+}
+
+/**
+ * A record which contains the waiting time.
+ * time: Time of event that were used at the reid moment.
+ * key: Serialized event reference that were used.
+ */
+message WaitingTimeRecord 
+{
+  message SubjectRef
+  {
+    string stream_id = 1; ///< References input stream with the help of the service config.
+    string key = 2; ///< Corresponding message key in the input stream.
+  }
+  int32 waiting_time_ms = 1; //waiting time in milliseconds
+  SubjectRef enter = 2;
+  SubjectRef exit = 3;
+  float score = 4;
 }
