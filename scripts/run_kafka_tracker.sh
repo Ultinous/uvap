@@ -64,11 +64,10 @@ if test -z "${image_tag:-}"; then
     echo "finding image tag was failed"
     exit 1
   fi
+  image_tag="ultinous/uvap:kafka_tracker_${image_tag}"
 fi
 
-image_name="ultinous/uvap:kafka_tracker_${image_tag}"
-
-${docker_binary_path} pull ${image_name}
+${docker_binary_path} pull ${image_tag}
 tracker_property_file_path="/ultinous_app/models/uvap-kafka-tracker/uvap_kafka_tracker.properties"
 
 user_id="$(id -u)"
@@ -83,4 +82,4 @@ ${docker_binary_path} run \
     --mount "type=bind,readonly,source=$(realpath "${config_directory}"),destination=/ultinous_app/models/uvap-kafka-tracker" \
     --env KAFKA_TRACKER_MS_PROPERTY_FILE_PATHS="${tracker_property_file_path}" \
     ${@} \
-    ${image_name}
+    ${image_tag}

@@ -182,5 +182,5 @@ When you finished the work with these Kafka topics, you can remove them with the
 ```
 $ docker rm -f zookeeper
 $ docker rm -f kafka
-$ docker volume prune zookeeper-data kafka-data
+$ docker volume prune
 ```

@@ -1,3 +1,14 @@
+/*
+Structures for Kafka streams containing Ultinous video analysis results.
+Copyright (C) 2014,2018 Ultinous Inc.
+*/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This proto describes helper structures specific to skeleton deteection.
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 syntax = "proto3";
 
 package ultinous.proto.common;
@@ -5,7 +16,8 @@ package ultinous.proto.common;
 option java_package = "com.ultinous.proto.common";
 option java_multiple_files = true;
 
-// Skeleton point types corresponding to body parts
+/** Skeleton point types corresponding to body parts
+*/
 enum SkeletonPointType
 {
   NOSE = 0;
@@ -28,23 +40,24 @@ enum SkeletonPointType
   LEFT_EAR = 17;
 }
 
-// To draw a full skeleton, you can use a common-sense anatomical model for connecting skeleton points.
-// For example, you might want to connect these pairs of points:
-// (NECK, NOSE)
-// (NOSE, RIGHT_EYE)
-// (NOSE, LEFT_EYE)
-// (NECK, RIGHT_SHOULDER)
-// (NECK, LEFT_SHOULDER)
-// (NECK, RIGHT_HIP)
-// (NECK, LEFT_HIP)
-// (RIGHT_SHOULDER, RIGHT_ELBOW)
-// (RIGHT_ELBOW, RIGHT_WRIST)
-// (LEFT_SHOULDER, LEFT_ELBOW)
-// (LEFT_ELBOW, LEFT_WRIST)
-// (RIGHT_HIP, RIGHT_KNEE)
-// (RIGHT_KNEE, RIGHT_ANKLE)
-// (LEFT_HIP, LEFT_KNEE)
-// (LEFT_KNEE, LEFT_ANKLE)
-// (RIGHT_EYE, RIGHT_EAR)
-// (LEFT_EYE, LEFT_EAR)
-
+/**
+To draw a full skeleton, you can use a common-sense anatomical model for connecting skeleton points.
+ For example, you might want to connect these pairs of points:
+ (NECK, NOSE)
+ (NOSE, RIGHT_EYE)
+ (NOSE, LEFT_EYE)
+ (NECK, RIGHT_SHOULDER)
+ (NECK, LEFT_SHOULDER)
+ (NECK, RIGHT_HIP)
+ (NECK, LEFT_HIP)
+ (RIGHT_SHOULDER, RIGHT_ELBOW)
+ (RIGHT_ELBOW, RIGHT_WRIST)
+ (LEFT_SHOULDER, LEFT_ELBOW)
+ (LEFT_ELBOW, LEFT_WRIST)
+ (RIGHT_HIP, RIGHT_KNEE)
+ (RIGHT_KNEE, RIGHT_ANKLE)
+ (LEFT_HIP, LEFT_KNEE)
+ (LEFT_KNEE, LEFT_ANKLE)
+ (RIGHT_EYE, RIGHT_EAR)
+ (LEFT_EYE, LEFT_EAR)
+*/

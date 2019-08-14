@@ -16,8 +16,8 @@
 1. [Licensed access](#privateAccess)
    1. [Collecting information for Licensing](#collectingInformationForLicensing)
    1. [Acquiring the private resources](#acquiringTheLicensedResources)
-1. [Install UVAP](#installUVAP)
-
+1. [Installing UVAP](#installUVAP)
+1. [Updating UVAP](#updateUVAP)
 
 <a name="introduction"></a>
 ## Introduction
@@ -331,10 +331,33 @@ auto-generated password, which you are using nowhere else.
 quickly check that you have been granted access to all the resources you need
 
 <a name="installUVAP"></a>
-### Install UVAP
+### Installing UVAP
 The following script collects all docker images for UVAP.
 Run the install script:
 ```
 $ ~/uvap/scripts/install.sh
 ```
-The installation is over. You can proceed with the [Quick start guide](quick_start_guide.md).
+Installation is complete. You can proceed with the [Quick start guide](quick_start_guide.md).
+
+<a name="updateUVAP"></a>
+### Updating UVAP
+New versions of UVAP are released regularly. You can use the following set of commands to upgrade to the latest version of UVAP.
+1. Use 'ultinous' user  
+    Make sure you are logged in as 'ultinous' (log out and log in with 'ultinous' user)
+1. Check license validity
+    ```
+    grep "Expiration Date" ~/uvap/license/license.txt
+    ```
+    The received date must be in the future.
+    If your license has expired, please contact `support@ultinous.com`.
+1. Update helper scripts from github  
+    ```
+    cd ~/uvap
+    git pull
+    ```
+1. Update docker images  
+    Run the install script, it will collect all docker images for UVAP:
+    ```
+    $ ~/uvap/scripts/install.sh
+    ```
+The update is complete. You can proceed with the [Quick start guide](quick_start_guide.md).

@@ -68,7 +68,7 @@ def main():
     )
 
     i = 0
-    for msgs in consumer.getMessage():
+    for msgs in consumer.getMessages():
         for time, v in message_list_to_frame_structure(msgs).items():
             img = v[args.prefix]["0"]["image"]
             if type(img) == np.ndarray:

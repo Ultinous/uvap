@@ -9,7 +9,7 @@
 1. [Extending UVAP](#extendingUVAP)
 
 <a name="overview"></a>
-# [Overview](../Readme.md/#overview)
+# [Overview](../Readme.md#overview)
 
 <a name="architecture"></a>
 # Architecture
@@ -21,12 +21,27 @@ The **microservice** term is used in the rest of the document for processors. Th
 The data channels between microservices are **Kafka topics**. Head of the topics are kept in persistent storage for configurable time or size. For example the user can configure to keep the last two weeks of video data and keep all object detentions for a year.
 
 ![](uvap_architecture.gif)
-*Fugire 1. Data flow architecture of UVAP. Rectangles are data channels, ellipses are processing units.*
+*Figure 1. Data flow architecture of UVAP. Rectangles are data channels, ellipses are processing units.*
+>**Note:** Node labels in this figure are not technical names. Actual topic names can be listed with 
+UVAP [helper scripts](../quick_start_guide.md#helperScripts).
 
-[Multi graph runner (MGR)](microservices/mgr/mgr.md) takes the video streams and runs all deep learning based image processing models (eg.: head detection, face recognition). [MGR](microservices/mgr/mgr.md) outputs only lightweight data such as head detection streams or face recognition feature vectors. **It is very important the uncompressed video data never transfered over kafka, all low level image processing is done inside [MGR](microservices/mgr/mgr.md).** Kafka is only used to exchange lightweight data.
 
-[Tracker microservice](microservices/tracker.md) uses Head_Detections kafka topic produced by [MGR](microservices/mgr/mgr.md) and produces Track_Changes topic. A track is a sequence of head detections of an individual on a video stream from the first detection to the disappearance. Besides the path of movement, a track can help to calculate how long an individual stayed in an area of interest.
+[Multi graph runner (MGR)](microservices/mgr/mgr.md) takes the video streams and runs all deep learning based image 
+processing models (eg.: head detection, face recognition). [MGR](microservices/mgr/mgr.md) outputs only lightweight 
+data such as head detection streams or face recognition feature vectors. **It is very important the uncompressed video 
+data never transfered over kafka, all low level image processing is done inside [MGR](microservices/mgr/mgr.md).** 
+Kafka is only used to exchange lightweight data.
 
+[Kafka Tracker microservice](microservices/tracker.md) uses *Head Detections* kafka topic produced by 
+[MGR](microservices/mgr/mgr.md) and produces *Track Changes* topic. A track is a sequence of head detections of an 
+individual on a video stream from the first detection to the disappearance. Besides the path of movement, a track can 
+help to calculate how long an individual stayed in an area of interest.
+
+[Kafka Pass Detection microservice](microservices/kafka_pass_detection.md) uses *Track Changes* 
+kafka topic produced by [Kafka Tracker microservice](microservices/tracker.md) and produces *Pass Detections* topic. 
+If one or more directed polylines (pass lines) are specified in the microservice's configuration, 
+the service detects and produces records whenever a track intersects a pass line. Pass Detection helps to
+detect whenever an individual enters or leaves an area of interest.
 <a name="dataModel"></a>
 # Data model
 As shown in *Figure 1.* the microservices are connected via kafka topics. This section provides information about the schema and format of these topics.
@@ -54,7 +69,7 @@ This topic is produced by MGR, `dets` here refers to the MGR data node. `ObjectD
 
 ## Topic schemas
 
-As mentioned above the data model is **normalized**. The schema of all the structured topics are described [here](../../proto_files/ultinous/proto/common/kafka_data.proto) with comments embedded for explanation. The schema of the value part of the kafka records are defined in proto messages ending with ```Record```. The comment before the definition describes the key as well. 
+As mentioned above the data model is **normalized**. The schema of all the structured topics are described [here](../../proto_files/ultinous/proto/common/kafka_data.proto) with comments embedded for explanation. The schema of the value part of the kafka records are defined in proto messages ending with ```Record```. The comment before the definition describes the key as well.
 
 ####Example
 
@@ -88,7 +103,7 @@ $ kafkacat -C -b localhost -t demo.dets.ObjectDetectionRecord.json -o-1 -f "%k,%
 ```
 ### Technical progress records
 
-Note that in the detection topic example there are timestamps (eg.:`1561981650803`) with no detections, only a record with `end_of_frame` set to `true`. Different topics have different technical progress record properties eg. records produced by the [Tracker](microservices/tracker.md) microservice contain `end_of_track` property.   
+Note that in the detection topic example there are timestamps (eg.:`1561981650803`) with no detections, only a record with `end_of_frame` set to `true`. Different topics have different technical progress record properties eg. records produced by the [Kafka Tracker microservice](microservices/tracker.md) contain `end_of_track` property.   
 In general all microservices emit progress (or heartbeat) records to make joining these topics easier in real-time.
  Therefore when processing detections, if the `end_of_frame` is *true*, the microservice can emit all the information for the particular frame.
 
@@ -97,17 +112,21 @@ In general all microservices emit progress (or heartbeat) records to make joinin
 
 Records in topics produced by a [microservice](#microservices) often contain references to other topics' records. A chain of references ensures the possibility to link useful data with each other, for example demographic data with tracks.   
 
-   
+
 #### Example
 
 The **detection_key** property of 
-[this TrackChangeRecord](microservices/tracker.md/#trackChangeRecord) produced by [Tracker](microservices/tracker.md) microservice refers to an 
+[this TrackChangeRecord](microservices/tracker.md#trackChangeRecord) produced by [Kafka Tracker microservice](microservices/tracker.md) refers to an 
 [ObjectDetectionRecord](../../proto_files/ultinous/proto/common/kafka_data.proto) **key** 
 and an [AgeRecord](../../proto_files/ultinous/proto/common/kafka_data.proto) **key** 
 in two other topics produced by [MGR](microservices/mgr/mgr.md). 
-Note that the **key** of the [TrackChangeRecord](microservices/tracker.md/#trackChangeRecord) 
+
+> Note: **key** in [TrackChangeRecord](microservices/tracker.md#trackChangeRecord) 
 is usually not equal to its **detection_key**, 
-for its **key** refers to the detection of the *first* record of the track. ([Learn more...](microservices/tracker.md/#trackChangeRecord))
+for its **key** refers to the detection of the *first* record of the track. ([Learn more...](microservices/tracker.md#trackChangeRecord))
+
+This simple example is only a sneak peek of UVAP's capabilities. For example with [Kafka Pass Detection microservice](microservices/kafka_pass_detection.md) even more information can
+be received about a [TrackChangeRecord](microservices/tracker.md#trackChangeRecord) (which can be associated with [AgeRecord](../../proto_files/ultinous/proto/common/kafka_data.proto)s).
 
 ## Join
 As the data model is normalized it is common to read and join multiple topics. Joining kafka topics is solved in the java kafka streams API. We also provide a [python implementation](../../demo_applications/utils/kafka/time_ordered_generator_with_timeout.py) as part of the package, see the demo applications for more details.
@@ -117,7 +136,9 @@ As the data model is normalized it is common to read and join multiple topics. J
 
 ## [Multi graph runner (MGR)](microservices/mgr/mgr.md)
 
-## [Tracker](microservices/tracker.md)
+## [Kafka Tracker](microservices/tracker.md)
+
+## [Kafka Pass Detection](microservices/kafka_pass_detection.md)
 
 Future versions of UVAP will contain many more microservices such as reidentification.
 
@@ -154,8 +175,7 @@ sudo apt-get update \
     libxext6 \
     libxrender-dev \
 && sudo apt-get clean \
-&& sudo rm -rf /var/lib/apt/lists/* \
-&& sudo pip3 install \
+&& pip3 install \
     confluent-kafka \
     numpy \
     scipy \

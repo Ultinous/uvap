@@ -1,7 +1,8 @@
-import cv2
 import json
-import numpy as np
 from typing import List
+
+import cv2
+import numpy as np
 from confluent_kafka import Message
 
 
@@ -53,6 +54,8 @@ def _get_message_type(message_topic):
         return 'gender'
     elif '.TrackChangeRecord' in message_topic:
         return 'track'
+    elif '.PassDetectionRecord' in message_topic:
+        return "passdet"
     return 'unknown'
 
 
@@ -95,7 +98,7 @@ def message_list_to_frame_structure(messages: List[Message]) -> dict:
         if type == 'image':
             frame_dict[ts][stream][cam][type] = value
         elif not value.get("end_of_frame", False):
-            if type in ('skeleton', 'track'):
+            if type in ('skeleton', 'track', 'passdet'):
                 frame_dict[ts][stream][cam][type][detection] = value
             else:
                 frame_dict[ts][stream][cam]['head_detection'][detection][type] = value

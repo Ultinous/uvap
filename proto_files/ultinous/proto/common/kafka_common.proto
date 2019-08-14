@@ -3,6 +3,12 @@ Structures for Kafka streams containing Ultinous video analysis results.
 Copyright (C) 2014,2018 Ultinous Inc.
 */
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This proto describes the low-level structures used in other proto files.
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 syntax = "proto3";
 
 package ultinous.proto.kafka;
@@ -11,24 +17,32 @@ option java_package = "com.ultinous.proto.kafka";
 option java_multiple_files = true;
 
 
-// Two dimensional point
+/** Two dimensional point
+renge: [(0,0)..(width,height)); (0,0) is upper left corner
+unit: pixels
+*/
 message Point {
-  int32 x = 1; // Horizontal coordinate
-  int32 y = 2; // Vertical coordinate
+  int32 x = 1; ///< Horizontal coordinate
+  int32 y = 2; ///< Vertical coordinate
 }
 
-// Rectangle
+/**  Rectangle
+unit: pixels
+*/
 message Rect {
-  int32 x = 1; // X pixel position of the upper left corner.
-  int32 y = 2; // Y pixel position of the upper left corner.
+  int32 x = 1; ///< Horizontal coordinate of the upper left corner.
+  int32 y = 2; ///< Vertical coordinate of the upper left corner.
   uint32 width = 3; // Rectangle width in pixels.
   uint32 height = 4; // Rectangle height in pixels.
 }
 
+/** Type of objects detected as a result of object detection.
+Appears as 'type' in ObjectDetectionRecord.
+*/
 enum ObjectType
 {
-  PERSON_HEAD = 0; // Head detection result type
-  PERSON_FACE = 1; // Face detection result type
-  PERSON_FULL_BODY = 2; // Person detection result type
+  PERSON_HEAD = 0; ///< Head detection result type
+  PERSON_FACE = 1; ///< Face detection result type
+  PERSON_FULL_BODY = 2; ///< Person detection result type
 }
 

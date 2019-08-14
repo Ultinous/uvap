@@ -13,6 +13,10 @@ while test "${#}" -gt 0; do
 			shift
 			docker_binary_path="${1}"
 		;;
+    --config-directory)
+            shift
+      config_directory="${1}"
+		;;
 		--docker-json-path)
 			shift
 			docker_json_path="${1}"
@@ -21,11 +25,7 @@ while test "${#}" -gt 0; do
 			shift
 			nvidia_docker_binary_path="${1}"
 		;;
-    --config-directory)
-            shift
-      config_directory="${1}"
-    ;;
-    --image-tag)
+		--image-tag)
 			shift
 			image_tag="${1}"
 		;;
@@ -68,27 +68,29 @@ elif test ! -d "${config_directory}"; then
     exit 1
 fi
 
+# find latest release git hash if not set
 if test -z "${image_tag:-}"; then
   image_tag="$(git -C "$(dirname "$(realpath "${0}")")" tag --list --sort=-creatordate --merged HEAD 'release/*' | head -n1 | cut -f2 -d/)"
   if test -z "${image_tag:-}"; then
     echo "finding image tag was failed"
     exit 1
   fi
-  image_tag="ultinous/uvap:uvap_web_player_${image_tag}"
 fi
 
-${docker_binary_path} pull ${image_tag}
-web_player_property_file_path="/ultinous_app/models/uvap-web_player/uvap_web_player.properties"
+image_name="ultinous/uvap:kafka_passdet_${image_tag}"
+container_name="uvap_kafka_passdet"
+
+${docker_binary_path} pull ${image_name}
+passdet_property_file_path="/ultinous_app/models/uvap-kafka-passdet/uvap_kafka_passdet.properties"
 
 user_id="$(id -u)"
-docker rm --force "uvap_web_player" 2> /dev/null || true
+docker rm --force ${container_name} 2> /dev/null || true
 # run image
 ${nvidia_docker_binary_path} run \
-    --name "uvap_web_player" \
+    --name ${container_name} \
     --detach \
     --user "${user_id}" \
-    --net host \
-    --env UVAP_WEB_PLAYER_FILE_PATHS="${web_player_property_file_path}" \
-    --mount "type=bind,readonly,source=$(realpath "${config_directory}"),destination=/ultinous_app/models/uvap-web_player/" \
+    --mount "type=bind,readonly,source=$(realpath "${config_directory}"),destination=/ultinous_app/models/uvap-kafka-passdet/" \
+    --env KAFKA_PASSDET_MS_PROPERTY_FILE_PATHS="${passdet_property_file_path}" \
     ${@} \
-    ${image_tag}
+    ${image_name}

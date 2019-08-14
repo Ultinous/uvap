@@ -1,4 +1,4 @@
-engines_file: "$ENGINES_FILE"
+engines_file: "{{ ENGINES_FILE }}"
 
 environment:
 {
@@ -7,17 +7,17 @@ environment:
   analysis_thread_count: 2
   gui: NO
   drop_on: {}
-  kafka_broker_list: "$KAFKA_BROKER_LIST"
-  kafka_topic_prefix: "$KAFKA_TOPIC_PREFIX."
+  kafka_broker_list: "{{ KAFKA_BROKER_LIST }}"
+  kafka_topic_prefix: "{{ KAFKA_TOPIC_PREFIX }}."
 }
 
-########################CAMERA 1##############################
+{% for INPUT_STREAM in INPUT_STREAMS %}
 data_run:
 {
   input:
   {
-    file_name: "$INPUT_STREAM"
-    drop_rate: $DROP_RATE
+    file_name: "{{ INPUT_STREAM }}"
+    drop_rate: {{ DROP_RATE }}
   }
 
   data_flow:
@@ -142,12 +142,13 @@ data_run:
     }
 
     # kafka output
-    process_node:{type: KAFKA_OUTPUT name: "vid_out"            kafka_output_config: {topic_name: "cam.0.lowres.Image.jpg"                      input_node: "input"}}
-    process_node:{type: KAFKA_OUTPUT name: "anonymized_vid_out" kafka_output_config: {topic_name: "cam.0.anonymized_lowres.Image.jpg"           input_node: "anonymized"}}
-    process_node:{type: KAFKA_OUTPUT name: "frameinfo_out"      kafka_output_config: {topic_name: "cam.0.frameinfo.FrameInfoRecord.json"        input_node: "frameinfo"}}
-    process_node:{type: KAFKA_OUTPUT name: "det_out"            kafka_output_config: {topic_name: "cam.0.dets.ObjectDetectionRecord.json"       input_node: "dets"}}
-    process_node:{type: KAFKA_OUTPUT name: "pose_out"           kafka_output_config: {topic_name: "cam.0.poses.HeadPose3DRecord.json"           input_node: "poses"}}
-    process_node:{type: KAFKA_OUTPUT name: "gender_out"         kafka_output_config: {topic_name: "cam.0.genders.GenderRecord.json"             input_node: "genders"}}
-    process_node:{type: KAFKA_OUTPUT name: "age_out"            kafka_output_config: {topic_name: "cam.0.ages.AgeRecord.json"                   input_node: "ages"}}
+    process_node:{type: KAFKA_OUTPUT name: "vid_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.lowres.Image.jpg"                      input_node: "input"}}
+    process_node:{type: KAFKA_OUTPUT name: "anonymized_vid_out" kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.anonymized_lowres.Image.jpg"           input_node: "anonymized"}}
+    process_node:{type: KAFKA_OUTPUT name: "frameinfo_out"      kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.frameinfo.FrameInfoRecord.json"        input_node: "frameinfo"}}
+    process_node:{type: KAFKA_OUTPUT name: "det_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.dets.ObjectDetectionRecord.json"       input_node: "dets"}}
+    process_node:{type: KAFKA_OUTPUT name: "pose_out"           kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.poses.HeadPose3DRecord.json"           input_node: "poses"}}
+    process_node:{type: KAFKA_OUTPUT name: "gender_out"         kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.genders.GenderRecord.json"             input_node: "genders"}}
+    process_node:{type: KAFKA_OUTPUT name: "age_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.ages.AgeRecord.json"                   input_node: "ages"}}
   }
 }
+{% endfor %}

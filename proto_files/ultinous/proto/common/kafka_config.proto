@@ -1,12 +1,13 @@
 /*
-Structures for Kafka streams containing Ultinous video analysis results.
+Configuration for UVAP Microservices.
 Copyright (C) 2014,2018 Ultinous Inc.
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// This proto describes the fundamental building blocks of video analysis configuration.
+// This proto describes the functional configuration of the building blocks of video analysis.
 //
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 syntax = "proto3";
 
@@ -17,99 +18,156 @@ option java_multiple_files = true;
 
 import "ultinous/proto/common/kafka_common.proto";
 
-// Configuration for tracking
-// To be used with kafka-tracker-ms or kafka-tracker-cli
+/** Configuration for kafka_tracker
+*/
 message TrackingConfigRecord
 {
-  // confidence threshold to filter tracks
-  // value can be between 0.0f and 1.0f
-  // default: 0.0f, means no filtering
+  /** Confidence threshold for filtering input ObjectDetectionRecords.
+  Records whose detection_confidence value is above this threshold will be kept.
+  range: [0..1); 0 means no filtering
+  default: 0
+  */
   float detection_threshold = 1;
 
-  // We won't associate a tracker with a bounding box if the
-  // distance between the two is greater than the bounding box's width multiplied by this parameter
-  // default: 2.0f
+  /** Maximum distance of track points in subsequent frames for track to be connected.
+  unit: bounding box width
+  range: (0..+inf)
+  default: 2
+  */
   float distance_threshold = 2;
 
-  // Kill a tracker if it has gone timePassedThreshold milliseconds
-  // without receiving a measurement.
-  // default: 1000
+  /** Maximum lifetime of a track without new detection.
+  unit: msec
+  range: [0..+inf)
+  default: 1000
+  */
   uint32 time_passed_threshold = 3;
-
 }
 
-// Configuration for pass detection
-// To be used with kafka-passdet-ms or kafka-passdet-cli
+/** Configuration for kafka_passdet
+*/
 message PassDetConfigRecord
 {
   message PassLine
   {
-    string id = 1; // Identifier of the polyline; this is referred in PassDetectionRecords
-    repeated Point poly = 2; // the polyline; must have at least 2 points
+    /** Identifier of the polygonal chain 'poly'
+    It can be anything that is unique within a PassDetConfigRecord.
+    */
+    string id = 1;
+
+    /** Polygonal chain (broken line)
+    Must consist of at least two points
+    The direction from the first point to the last one is important: it determines the passage direction in the result.
+    */
+    repeated Point poly = 2;
   }
 
-  repeated PassLine pass_lines = 1; // passing polylines; must have at least 1 line
+  /** Lines through which passage will be detected.
+  Must contain at least one line.
+  Each detection event is associated with exactly one of these lines and the result record will contain its id.
+  */
+  repeated PassLine pass_lines = 1;
 }
 
-// Configuration for filtering of detections
+/** Configuration for a single ROI filter in RoiFiltersConfigRecord
+*/
 message RoiFilterConfig
 {
-  string id = 1; // Identifier, must be unique
-  float min_confidence = 2; // minimum confidence in [0..1] that a detection needs to have to pass
-  repeated ObjectType detection_types = 3; // set of allowed types for pass
-  repeated Point poly = 4; // polygon that a detection centroid needs to be inside to pass; needs exactly 0 or at least 3 points
+  /** Identifier of the roi filter.
+  It can be anything that is unique within a RoiFiltersConfigRecord.
+  */
+  string id = 1;
+
+  /** Minimum confidence of detection for passing the filter
+  Compared to the 'detection_confidence' value of ObjectDetectionRecord.
+  range: [0..1); 0 means no confidence based filtering
+  default: 0
+  */
+  float min_confidence = 2;
+
+  /** Set of allowed  detection types for passing the filter
+  Empty set means no detection type based filtering
+  */
+  repeated ObjectType detection_types = 3;
+
+  /** ROI: (closed) polygon that a detection centroid needs to be inside to pass
+  Empty set means no location based filtering
+  Otherwise must contain at least three points, corresponding to polygon vertices
+  */
+  repeated Point poly = 4;
 }
 
-// Configuration for multiple filtering of detections
-// To be used with kafka-roifilter-ms and kafka-roifilter-cli
+/** Configuration for kafka_roifilter
+Each ROI filter can filter ObjectDetectionRecords by any combination of
+- detection type
+- detection confidence
+- location (must be within a ROI)
+*/
 message RoiFiltersConfigRecord
 {
   repeated RoiFilterConfig filters = 1; // at least one ROI filter
 }
 
 /**
- * Configuration for Reidentification Microservice and CLI.
- * Concept: Our inputs can be feature vector series coming from video cameras and manually managed
- *   data streams of feature vectors. We remember (aka. register) feature vectors and later we
- *   search for them (aka. reidentification) and return their identification data (kafka message
- *   key). We can use manually edited data for both registration and reidentification. The very same
- *   goes for data streams from cameras. Examples:
- *   - Registering manually crafted data: Loading staff database for entrance system.
- *   - Reidentification from  manually crafted data: Searching for people similar to a photo I have
- *     now.
- *   - Registering data from camera: Dwell time approximation, first camera.
- *   - Reidentification from data from camera: Dwell time approximation, second camera. Searching
- *     amongst manually registered staff.
- * On reidentification each stream that is used for registration will provide a top list of matches,
- * the final result will be the concatenation of these top lists. Each top list has a maximum size
- * configured for that registration stream (reid_max_count). A top list can be shorter if there are
- * not enough matches reaching the minimum required score (reid_min_score). Registration only happen
- * if the closest match is at most reg_max_score good. For manually managed streams we recommend this
- * settinng to be 1 (one) as scores are between 0 and 1. Registrations are kept in memory for
- * reg_retention_period milliseconds.
- * Input: Any record that has feature vector and associated model id.
- *   For streams that are used for registration the record will be updated in memory if the key
- *   already exists, deleted if its payload is empty.
- * Output: ReidentificationRecord
+ Configuration for kafka_reid.
+
+ Concept:
+   Inputs are feature vector streams that may be extracted from video camera images or from manually managed images.
+   Feature vectors are registered, i.e. stored as a new identity when they are dissimilar to any other stored feature vector.
+   Feature vectors are reidentified as an existing identity when they are similar enough to a registered feature vector.
+   Each input stream can be used for registration, reidentification, or both.
+   Examples:
+   - Registering manually managed data: Loading staff database for entrance system.
+   - Reidentification from  manually managed data: Searching for people similar to a given photo.
+   - Registering data from camera: Dwell time measurement, first camera.
+   - Reidentification from data from camera: Dwell time measurement, second camera.
+
+   On reidentification, each stream that is used for registration will provide a top list of matches,
+   the final result will be the concatenation of these top lists.
+   Each top list has a maximum size configured for that registration stream (reid_max_count).
+   A top list can be shorter if there are not enough matches reaching the minimum required score (reid_min_score).
+
+   Registration only happens if the score of the closest match is less than reg_max_score.
+   For manually managed streams we recommend this settinng to be 1 (one).
+   Registrations are kept in memory for reg_retention_period milliseconds.
+
+ Input: Can be any record type that contains feature vectors and associated model ids.
+   For streams that are used for registration, input messages with an already existing key in memory will
+   - delete the in-memory feature vector if the payload of the input message is empty
+   - update the in-memory feature vector otherwise.
+
+ Output: ReidentificationRecord
  */
 message ReidConfigRecord
 {
-  /** The way a given input is accessed and handled. */
+  /** Configuration for a single input stream
+  */
   message InputConfig
   {
-    string stream_id = 1; ///< Identifier to be used for referencing this input.
-    string fv_field = 2; ///< Field name of FeatureVector typed field.
-    string is_active_field = 3; ///< Field name of bool typed field, can be empty. If false then key will be removed if isReg is true.
-    string to_be_ignored_field = 4; ///< Field name of bool typed field, can be empty. If true then event will be ignored.
-    bool do_reid = 5; // Given input is source for reidentification tasks.
-    bool do_reg = 6; // Given input is source for remembering objects and reidentificating against.
+    enum RegistrationMethod
+    {
+      NONE = 0; ///< Should be used when doReg is false
+      USE_LAST = 1; ///< Stored feature vectors are updated with the latest observation of the same identity
+      SIMPLE_AVERAGE = 2; ///< Stored feature vectors are averages of all observations of the same identity
+    }
 
-    /// The properties below are valid for REG streams.
-    float reid_min_score = 7; ///< Similarity score required to reach the list of top matching elements [0..1]
-    uint32 reid_max_count = 8; ///< Length of top list served from this registration.
-    float reg_max_score = 9; ///< Maximum similarity (exclusive) to any other object for allowing remembering. [0..1]
-    int64 reg_retention_period = 10; ///< Registration memory window size [ms]. Also at startup we rewind input this much. 0 means infinite.
+    string stream_id = 1; ///< Identifier of input stream.
+    string fv_field = 2; ///< Name of the field of type FeatureVector in input records.
+    string is_active_field = 3; ///< Optional name of a boolean field to filter input records. Only records with a 'true' value will be considered.
+    string to_be_ignored_field = 4; ///< Optional name of a boolean field to filter input records. Records with a 'true' value will be ignored.
+    bool do_reid = 5; // Input stream can be used for reidentification.
+    bool do_reg = 6; // Input stream can be used for registration.
+
+    /** The properties below are only valid when do_reg is 'true'.
+    !Note that even reidentification parameters are associated with the stream where registration happens!
+    */
+
+    float reid_min_score = 7; ///< Minimum similarity score for reidentification, i.e. to be included in the list of top matching elements.
+    uint32 reid_max_count = 8; ///< Length of the list of top matching elements from this registration stream.
+    RegistrationMethod reg_method = 9; ///< Method of storing feature vectors, see RegistrationMethod.
+    float reg_max_score = 10; ///< Maximum similarity score (exclusive) to any stored feature vactor, in order for feature vector to be registered.
+    int64 reg_retention_period = 11; ///< Registration memory window size [ms]. Also at startup we rewind input this much. 0 means infinite.
   }
 
-  repeated InputConfig inputs = 1; ///< Exactly as many configurations as inputs configured for the service.
+  repeated InputConfig inputs = 1; ///< Exactly as many configurations as input streams configured for the service.
 }

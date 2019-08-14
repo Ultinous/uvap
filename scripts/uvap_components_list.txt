@@ -1,4 +1,5 @@
 kafka_tracker
+kafka_passdet
 mgr
 uvap_demo_applications
 uvap_web_player

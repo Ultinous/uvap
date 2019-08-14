@@ -1,4 +1,4 @@
-# Kafka Tracker
+# Kafka Tracker microservice
 
 ## Table of contents
 1. [Introduction](#introduction)
@@ -7,7 +7,7 @@
 1. [Quick Start Guide](#quickStartGuide)
 
 ## Introduction
-The Tracker microservice builds routes based on the result of head detection. If a head detection is close enough 
+Kafka Tracker microservice builds routes based on the result of head detection. If a head detection is close enough 
 to a former head detection then they form a track. Each following head detections close enough extend this track with new entries. 
 Geometric and temporal distance thresholds can be configured.
 
@@ -76,7 +76,7 @@ topic. The Tracker can run in *batch mode* therefore the microservice stops afte
   - Default: `1`
   - Value type: `uint16`
 
-Template properties file can be found [here](../../../templates/uvap_kafka_tracker_TEMPLATE.properties).
+Template properties file can be found [here](../../../templates/uvap_kafka_tracker_base_TEMPLATE.properties).
 
 <a name="trackChangeRecord"></a>
 ## Record schemas
@@ -94,16 +94,13 @@ Example of a `TrackChangeRecord` from Kafka:
       "x": 1487,
       "y": 503
     }
-  },
-  "headers": "[
-    ('type', b'TrackChange'),
-    ('format', b'json')
-  ]"
-},
+  }
+}
 ```
+<a name="emptyDetectionKey"></a>
 **Note**:
 Sometimes the detection_key field is empty. In this case there is no "real" detection and the change is a prediction of the next track position (or an end of a track). 
 This means that there is *no reference* to any video frames or to any detections in another Kafka topic, but these records are necessary for processing the whole "lifecycle" of a track.
 
 <a name="quickStartGuide"></a>
-## [Quick Start Guide](../../quick_start_guide.md#tracking)
+## [Quick Start Guide](../../quick_start_guide.md)

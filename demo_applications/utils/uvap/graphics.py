@@ -1,7 +1,13 @@
-import cv2
 import enum
-import numpy as np
 from typing import List, Tuple
+
+import cv2
+import numpy as np
+
+PASS_EVENT_CHARS = {
+    "LR": ">",
+    "RL": "<"
+}
 
 # The original COCO skeleton type
 COCO_MODEL = (
@@ -517,3 +523,28 @@ def draw_head_pose(
         (int(a13 * axis_length), int(-a23 * axis_length))
     ]
     return _draw_3d_lines(canvas, center, imgpnts)
+
+
+def draw_polyline(
+        canvas: np.array,
+        points: List[Tuple[int, int]],
+        color: Tuple[int, int, int],
+        thickness: int = 3,
+        is_closed: bool = False
+) -> np.array:
+    """
+    Draw a polyline on the input image
+    :param canvas: target image
+    :param points: Points of the polylinye
+    :param color: BRG color of the line
+    :param thickness: thickness of the line.
+    :param is_closed: If true, the line will be closed.
+    :return: image with polyline
+    """
+    return cv2.polylines(
+        img=canvas,
+        pts=[np.array(points, np.int32)],
+        isClosed=is_closed,
+        color=color,
+        thickness=thickness
+    )
