@@ -37,7 +37,7 @@ data_run:
 
     # kafka output
     process_node:{type: KAFKA_OUTPUT name: "skeletons_out"  kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.skeletons.SkeletonRecord.json"   input_node: "skeletons"}}
-    process_node:{type: KAFKA_OUTPUT name: "vid_out"        kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.lowres.Image.jpg"                input_node: "input"}}
+    process_node:{type: KAFKA_OUTPUT name: "vid_out"        kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.original.Image.jpg"                input_node: "input"}}
   }
 }
 {% endfor %}

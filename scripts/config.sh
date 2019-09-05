@@ -1,155 +1,96 @@
 #!/bin/bash
 
 set -eu
+source "$(dirname "$(realpath "$0")")/uvap_bash_functions"
 
-docker_binary_path="$(which docker)"
-current_directory="$(dirname "$(realpath "${0}")")"
-demo_applications_directory=$HOME/uvap/demo_applications
-templates_directory=$HOME/uvap/templates
-keep_rate=1
-stream_urls=()
+current_directory="${current_directory}" # the above source declares it - this just clears IDE warnings
+set -a
+demo_applications_dir="${current_directory}/../demo_applications"
+templates_dir="${current_directory}/../templates"
+config_ac_dir="${current_directory}/../config"
+keep_rate_number=1
+image_name="_auto_detected_"
+set +a
 
-while test "${#}" -gt 0 ; do
-	case "${1}" in
-	  --docker-binary-path)
-  		shift
-  		docker_binary_path="${1}"
-  	;;
-		--keep-rate)
-			shift
-			keep_rate="${1}"
-		;;
-		--demo-mode)
-			shift
-			demo_mode="${1}"
-		;;
-		--stream-url)
-			shift
-			stream_urls+=("${1}")
-		;;
-		--demo-applications-directory)
-			shift
-			demo_applications_directory="${1}"
-		;;
-		--templates-directory)
-			shift
-			templates_directory="${1}"
-		;;
-		--models-directory)
-			shift
-			models_directory="${1}"
-		;;
-		--image-name)
-			shift
-			image_name="${1}"
-		;;
-		*)
-			echo "ERROR: unrecognized option: ${1}"
-			exit 1
-		;;
-	esac
-	shift
-done
+parse_all_arguments "${@}"
+parse_argument_with_value "demo_mode" "<base|skeleton|fve>"
+parse_argument_with_multi_value "stream_uri" "file name / device name / RTSP URL of a stream to analyze - may be specified multiple times"
+parse_argument_with_value "demo_applications_dir" "directory path of demo applications scripts - default: ${demo_applications_dir}"
+parse_argument_with_value "templates_dir" "directory path of configuration templates - default: ${templates_dir}"
+parse_argument_with_value "config_ac_dir" "directory path of configuration files - will be created if not existent - default: ${config_ac_dir}"
+parse_argument_with_value "keep_rate_number" "frequency of analysis on frames - default: ${keep_rate_number}"
+parse_argument_with_value "image_name" "tag of docker image to use - default: will be determined by git tags"
+validate_remaining_cli_arguments
 
-if test -z "${docker_binary_path:-}"; then
-    echo "docker-binary-path is unset! Override with --docker-binary-path"
-    exit 1
-elif test ! -f "${docker_binary_path}"; then
-    echo "${docker_binary_path} not found! Override with --docker-binary-path"
-    exit 1
-elif test -z "${stream_urls:-}"; then
-	echo "stream-url is unset! Specify with --stream-url"
-	exit 1
-elif test -z "${demo_applications_directory:-}"; then
-	echo "models-directory is unset! Specify with --demo-applications-directory"
-	exit 1
-elif test ! -d "${demo_applications_directory}"; then
-	echo "${demo_applications_directory} does not exist! Override with --demo-applications-directory"
-	exit 1
-elif test -z "${templates_directory:-}"; then
-	echo "models-directory is unset! Specify with --templates-directory"
-	exit 1
-elif test ! -d "${templates_directory}"; then
-	echo "${templates_directory} does not exist! Override with --templates-directory"
-	exit 1
-elif test -z "${models_directory:-}"; then
-	echo "models-directory is unset! Specify with --models-directory"
-	exit 1
-elif test ! -d "${models_directory}"; then
-	echo "${models_directory} does not exist! Override with --models-directory"
-	exit 1
-elif test -z "${demo_mode:-}"; then
-	echo "demo_mode is unset! Choose one from: [base, skeleton] Specify with --demo-mode"
-	exit 1
-elif ! [ "${keep_rate}" -eq "${keep_rate}" ];then
-	echo "${keep_rate} is not a number"
-	exit 1
+test_executable "docker"
+test_executable "tar"
+
+demo_mode="${demo_mode}" # parse_argument_with_value declares it - this just clears IDE warnings
+if ! [[ "${demo_mode}" =~ ^(base|skeleton|fve)$ ]]; then
+	echo "ERROR: unrecognized demo mode: ${demo_mode}" >&2
+	echo "ERROR: override with --demo-mode" >&2
+	print_help
+fi
+config_ac_dir="${config_ac_dir}" # parse_argument_with_value declares it - this just clears IDE warnings
+stream_uris="${stream_uris}" # parse_argument_with_value declares it - this just clears IDE warnings
+
+if test "${image_name:-}" = "_auto_detected_"; then
+	image_name="$(get_docker_image_tag_for_component uvap_demo_applications)"
 fi
 
-mkdir -p "${models_directory}/uvap-mgr/"
-mkdir -p "${models_directory}/uvap-kafka-tracker/"
-mkdir -p "${models_directory}/uvap-web_player/"
-mkdir -p "${models_directory}/uvap-kafka-passdet/"
+docker pull "${image_name}" > /dev/null
 
-cp -a "${current_directory}/../templates/uvap_mgr.properties"        "${models_directory}/uvap-mgr/uvap_mgr.properties"
-cp -a "${current_directory}/../templates/uvap_web_player.properties" "${models_directory}/uvap-web_player/uvap_web_player.properties"
+jinja_yaml_param_file_path="${config_ac_dir}/params.yaml"
+trap "rm -f ${jinja_yaml_param_file_path}" TERM INT EXIT
 
-# find latest release git hash if not set
-if test -z "${image_name:-}"; then
-  image_tag="$(git -C "$(dirname "$(realpath "${0}")")" tag --list --sort=-creatordate --merged HEAD 'release/*' | head -n1 | cut -f2 -d/)"
-  echo ${image_tag}
-  if test -z "${image_tag:-}"; then
-    echo "finding image tag was failed"
-    exit 1
-  fi
-  image_name="ultinous/uvap:uvap_demo_applications_${image_tag}"
-fi
-
-${docker_binary_path} pull ${image_name}
-
-jinja_yaml_param_file_path="${models_directory}/params.yaml"
-
-echo "\
-ENGINES_FILE: /ultinous_app/models/engines/basic_detections.prototxt
+echo "ENGINES_FILE: /ultinous_app/models/engines/basic_detections.prototxt
 KAFKA_BROKER_LIST: kafka
 KAFKA_TOPIC_PREFIX: ${demo_mode}
-INPUT_STREAMS:" > ${jinja_yaml_param_file_path}
+DROP_RATE: ${keep_rate_number}
+INPUT_STREAMS:" > "${jinja_yaml_param_file_path}"
 
-for ELEMENT in ${stream_urls[@]}
-do
-echo "  - $ELEMENT" >> ${jinja_yaml_param_file_path}
+for stream_url in ${stream_uris}; do
+	echo "  - ${stream_url}" >> "${jinja_yaml_param_file_path}"
 done
 
-echo "\
-DROP_RATE: ${keep_rate}
-" >> ${jinja_yaml_param_file_path}
+mounted_config_dir="/config"
+mounted_templates_dir="/templates"
 
-MOUNTED_MODEL_DIR="/models"
-MOUNTED_TEMPLATES_DIR="/templates"
+jinja_run_script_path="${config_ac_dir}/run_jinja.sh"
+trap "rm -f ${jinja_yaml_param_file_path} ${jinja_run_script_path}" TERM INT EXIT
+echo "#!/bin/sh" > "${jinja_run_script_path}"
+echo "set -eu" >> "${jinja_run_script_path}"
+chmod +x "${jinja_run_script_path}"
 
-JINJA_RUN="/usr/bin/python3.6 apps/uvap/run_jinja.py ${MOUNTED_MODEL_DIR}/params.yaml"
+jinja_run="/usr/bin/python3.6 utils/jinja_template_filler.py ${mounted_config_dir}/params.yaml"
 
-if [ "${demo_mode}" == "base" ]; then
-JINJA_RUN_SCRIPT="
-  ${JINJA_RUN} ${MOUNTED_TEMPLATES_DIR}/uvap_mgr_${demo_mode}_TEMPLATE.prototxt             ${MOUNTED_MODEL_DIR}/uvap-mgr/multi-graph-runner.prototxt
-  ${JINJA_RUN} ${MOUNTED_TEMPLATES_DIR}/uvap_kafka_tracker_${demo_mode}_TEMPLATE.properties ${MOUNTED_MODEL_DIR}/uvap-kafka-tracker/uvap_kafka_tracker.properties
-  ${JINJA_RUN} ${MOUNTED_TEMPLATES_DIR}/uvap_kafka_passdet_TEMPLATE.properties              ${MOUNTED_MODEL_DIR}/uvap-kafka-passdet/uvap_kafka_passdet.properties
-"
-elif [ "${demo_mode}" == "skeleton" ]; then
-JINJA_RUN_SCRIPT="
-  ${JINJA_RUN} ${MOUNTED_TEMPLATES_DIR}/uvap_mgr_${demo_mode}_TEMPLATE.prototxt             ${MOUNTED_MODEL_DIR}/uvap-mgr/multi-graph-runner.prototxt
-"
-fi
+for uvap_component in $(get_uvap_components_list AND "properties" "${demo_mode}" | force_uvap_prefix); do
+	mkdir -p "${config_ac_dir}/${uvap_component}/"
+	echo "${jinja_run} ${mounted_templates_dir}/${uvap_component}_${demo_mode}_TEMPLATE.properties ${mounted_config_dir}/${uvap_component}/${uvap_component}.properties" >> "${jinja_run_script_path}"
+	test -e "${templates_dir}/${uvap_component}_${demo_mode}_TEMPLATE.json" &&
+		echo "${jinja_run} ${mounted_templates_dir}/${uvap_component}_${demo_mode}_TEMPLATE.json ${mounted_config_dir}/${uvap_component}/${uvap_component}.json" >> "${jinja_run_script_path}"
+done
+for uvap_component in $(get_uvap_components_list AND "data_flow" "${demo_mode}" | force_uvap_prefix); do
+	mkdir -p "${config_ac_dir}/${uvap_component}/"
+	echo "${jinja_run} ${mounted_templates_dir}/${uvap_component}_${demo_mode}_TEMPLATE.prototxt ${mounted_config_dir}/${uvap_component}/${uvap_component}.prototxt" >> "${jinja_run_script_path}"
+done
 
+container_name="uvap_config"
+test "$(docker container ls --filter name="${container_name}" --all --quiet | wc -l)" -eq 1 \
+	&& docker container stop "${container_name}" > /dev/null \
+	&& docker container rm "${container_name}" > /dev/null
 
-${docker_binary_path}  run \
-    --rm \
-    --interactive \
-    --mount "type=bind,readonly,source=$(realpath "${demo_applications_directory}"),destination=/ultinous_app/" \
-    --mount "type=bind,readonly,source=$(realpath "${templates_directory}"),destination=${MOUNTED_TEMPLATES_DIR}" \
-    --mount "type=bind,source=$(realpath "${models_directory}"),destination=${MOUNTED_MODEL_DIR}" \
-    --net=uvap \
-    ${image_name} \
-    /bin/bash \
-    -c \
-    "$JINJA_RUN_SCRIPT"
+docker container create \
+	--rm \
+	--name "${container_name}" \
+	--user "$(id -u)" \
+	--mount "type=bind,readonly,source=${templates_dir},destination=${mounted_templates_dir}" \
+	--mount "type=bind,source=${config_ac_dir},destination=${mounted_config_dir}" \
+	--net=none \
+	"${image_name}" \
+	"${mounted_config_dir}/run_jinja.sh" \
+	> /dev/null
+
+tar -c -C "${demo_applications_dir}" -h -f - . | docker container cp --archive - "${container_name}:/ultinous_app/"
+
+docker container start --attach "${container_name}" > /dev/null

@@ -12,8 +12,8 @@ import numpy as np
 from confluent_kafka.cimpl import Producer
 
 from utils.kafka.time_ordered_generator_with_timeout import TimeOrderedGeneratorWithTimeout, TopicInfo
-from utils.uvap.graphics import draw_nice_bounding_box, draw_overlay, Position, TYPE_TO_COLOR, draw_polyline, \
-    PASS_EVENT_CHARS
+from utils.uvap.graphics import draw_nice_bounding_box, draw_overlay, Position, draw_polyline
+from utils.uvap.graphics import PASS_EVENT_CHARS, TYPE_TO_COLOR
 from utils.uvap.uvap import message_list_to_frame_structure, encode_image_to_message
 
 track_colors = cycle(TYPE_TO_COLOR.values())
@@ -55,7 +55,7 @@ def main():
            Displays the result on screen ('-d') or stores result in kafka ('-o').
            
            Required topics:
-           - <prefix>.cam.0.lowres.Image.jpg
+           - <prefix>.cam.0.original.Image.jpg
            - <prefix>.cam.0.dets.ObjectDetectionRecord.json
            - <prefix>.cam.0.tracks.TrackChangeRecord.json
            - <prefix>.cam.0.passdet.PassDetectionRecord.json
@@ -97,7 +97,7 @@ def main():
         for pl in passdet_config_json["passLines"]
     }
 
-    image_topic = f"{args.prefix}.cam.0.lowres.Image.jpg"
+    image_topic = f"{args.prefix}.cam.0.original.Image.jpg"
     detection_topic = f"{args.prefix}.cam.0.dets.ObjectDetectionRecord.json"
     track_topic = f"{args.prefix}.cam.0.tracks.TrackChangeRecord.json"
     passdet_topic = f"{args.prefix}.cam.0.passdet.PassDetectionRecord.json"
@@ -137,10 +137,17 @@ def main():
                 point = track_val["point"]["x"], track_val["point"]["y"]
                 tracks[track_key].add_point(point)
             for pass_det in v[args.prefix]["0"]["passdet"].values():
-                pass_id = pass_det["pass_id"]
-                cross_dir = pass_det["cross_dir"]
-                if pass_id in passlines:
-                    passlines[pass_id].add_event(cross_dir)
+                if pass_det["type"] == "HEARTBEAT":
+                    continue
+                elif pass_det["type"] == "END_OF_TRACK":
+                    continue
+                elif pass_det["type"] == "PASS_CANDIDATE":
+                    pass_id = pass_det["pass_candidate"]["pass"]["pass_line_id"]
+                    cross_dir = pass_det["pass_candidate"]["pass"]["cross_dir"]
+                    if pass_id in passlines:
+                        passlines[pass_id].add_event(cross_dir)
+                elif pass_det["type"] == "PASS_REALIZED":
+                    continue
 
             img = v[args.prefix]["0"]["image"]
             if type(img) == np.ndarray:

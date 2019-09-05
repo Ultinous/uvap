@@ -25,7 +25,7 @@ topic. The Tracker can run in *batch mode* therefore the microservice stops afte
 - `ultinous.service.kafka.tracker.source.consumer.group`: The source consumer group.
   - Optional. Default: `default.consumer`
   - Value type: `string`
-- `ultinous.service.kafka.tracker.source.topic`: The [source topic name](../../developers_guide/developers_guide.md#topicNamingConvention).
+- `ultinous.service.kafka.tracker.source.topic`: The [source topic name](../../developers_guide.md#topicNamingConvention).
   - Required 
   - Value type: `string`
 - `ultinous.service.kafka.tracker.source.username`: The SASL authentication username of the source.
@@ -51,7 +51,7 @@ topic. The Tracker can run in *batch mode* therefore the microservice stops afte
 - `ultinous.service.kafka.tracker.target.broker.list`: Target's broker list.
   - Required
   - Value type: `string`
-- `ultinous.service.kafka.tracker.target.topic`: [Target topic name](../../developers_guide/developers_guide.md#topicNamingConvention).
+- `ultinous.service.kafka.tracker.target.topic`: [Target topic name](../../developers_guide.md#topicNamingConvention).
   - Required
   - Value type: `string`
 - `ultinous.service.kafka.tracker.target.username`: The SASL authentication username of the target
@@ -66,7 +66,7 @@ topic. The Tracker can run in *batch mode* therefore the microservice stops afte
     - `REPLACE`: Delete target topic.
     - `CHECK_TS`: Raise error if topic exists with more recent *latest timestamp*.
     - `SKIP_TS`: Skip events up to the latest timestamp in target topic.
-- `ultinous.service.kafka.tracker.config`: Tracking configuration file path. The `TrackingConfigRecord` definition should be in JSON format as defined in [this proto3 message](../../../proto_files/ultinous/proto/common/kafka_config.proto).
+- `ultinous.service.kafka.tracker.config`: Tracking configuration file path. The `TrackingConfigRecord` definition should be in JSON format as defined in [this proto3 message](../../../../proto_files/ultinous/proto/common/kafka_config.proto).
   - Required 
   - Value type: `string`
 - `ultinous.service.kafka.tracker.monitoring.port`: Monitoring server port
@@ -76,11 +76,11 @@ topic. The Tracker can run in *batch mode* therefore the microservice stops afte
   - Default: `1`
   - Value type: `uint16`
 
-Template properties file can be found [here](../../../templates/uvap_kafka_tracker_base_TEMPLATE.properties).
+Template properties file can be found [here](../../../../templates/uvap_kafka_tracker_base_TEMPLATE.properties).
 
 <a name="trackChangeRecord"></a>
 ## Record schemas
-The schema definition of `ObjectDetectionRecord` and `TrackChangeRecord` can be found [here](../../../proto_files/ultinous/proto/common/kafka_data.proto).
+The schema definition of `ObjectDetectionRecord` and `TrackChangeRecord` can be found [here](../../../../proto_files/ultinous/proto/common/kafka_data.proto).
 
 Example of a `TrackChangeRecord` from Kafka:
 ```

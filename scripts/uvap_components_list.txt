@@ -1,5 +1,6 @@
-kafka_tracker
-kafka_passdet
-mgr
+kafka_tracker:ms:properties:base
+kafka_passdet:ms:properties:base
+kafka_reid:ms:properties:fve
+mgr:ms:properties:data_flow:base:skeleton:fve:nvidia:video
 uvap_demo_applications
-uvap_web_player
+uvap_web_player:properties:base:skeleton:fve

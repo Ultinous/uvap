@@ -185,9 +185,9 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
                                         message with the timestamp.
         """
         if begin_timestamp is not None and begin_flag is not None:
-            raise Exception('You can set the begin timestamp and a flag in the same time.')
+            raise Exception('You can not set the begin timestamp and a flag in the same time.')
         if end_timestamp is not None and end_flag is not None:
-            raise Exception('You can set the end timestamp and a flag in the same time.')
+            raise Exception('You can not set the end timestamp and a flag in the same time.')
         if begin_timestamp is not None and end_timestamp is not None and begin_timestamp >= end_timestamp:
             raise Exception('The begin timestamp is larger then the end timestamp.')
         if begin_flag is not None and end_flag is not None and \
@@ -207,6 +207,7 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
                 , 'enable.auto.commit': False
                 , 'auto.offset.reset': 'latest'
                 , 'enable.partition.eof': True
+                , 'fetch.wait.max.ms': 50
             }
         )
         self.tps = []

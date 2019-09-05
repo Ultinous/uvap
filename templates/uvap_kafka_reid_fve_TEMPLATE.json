@@ -1,0 +1,52 @@
+{
+  "sources":[
+    {% for INPUT_STREAM in INPUT_STREAMS %}
+    {
+      "broker_list":"{{ KAFKA_BROKER_LIST }}",
+      "name":"{{ KAFKA_TOPIC_PREFIX }}.cam.{{loop.index - 1}}.fvecs.FeatureVectorRecord.json"
+    }{{ "," if not loop.last }}
+    {% endfor %}
+  ],
+  "source_options":{
+    "start":"START_NOW",
+    "end":"END_NEVER"
+  },
+  "target_options":{
+    "handling":"REPLACE"
+  },
+  "target":{
+    "broker_list":"{{ KAFKA_BROKER_LIST }}",
+    "name":"{{ KAFKA_TOPIC_PREFIX }}.cam.99.reids.ReidRecord.json"
+  },
+  "config_data":{
+    "inputs": [
+      {% for INPUT_STREAM in INPUT_STREAMS %}
+      {
+        "stream_id":"uvap{{loop.index - 1}}",
+        "fv_field":"features",
+        "to_be_ignored_field":"end_of_frame",
+
+
+
+
+      {% if not loop.last or INPUT_STREAMS|length == 1 %}
+      "do_reg":"true",
+      "reid_min_score":0.8,
+      "reid_max_count":1,
+      "reg_max_score":0.9,
+      "reg_retention_period":35000,
+      {% else %}
+      "do_reg":"false",
+      {% endif %}
+
+      {% if loop.last or INPUT_STREAMS|length == 1 %}
+      "do_reid":"true"
+      {% else %}
+      "do_reid":"false"
+      {% endif %}
+
+      }{{ "," if not loop.last }}
+      {% endfor %}
+    ]
+  }
+}

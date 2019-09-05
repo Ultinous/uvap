@@ -4,16 +4,16 @@
 
 MGR takes the video streams and runs **image processing algorithm** and outputs lightweight data streams such as detection stream, or face feature vector stream.
 MGR has many built-in image processing algorithms that can be combined in a flexible way to produce the desired output. There are two types of algorithms:
- - Deep learning models (e.g.: face detection, face recognition, full body pose etc)
- - Traditional image processing algorithms (e.g.: image resize, image rotation, cropping, drawing, etc)
+ - Deep learning models (e.g. face detection, face recognition, full body pose...)
+ - Traditional image processing algorithms (e.g. image resize, image rotation, cropping, drawing...)
 
-Output of MGR is typically lightweight data streams written to Kafka, however MGR can also produce image sequences or video streams for debugging or presentation purposes **but these always have to be compressed before it hits kafka**. Kafka cannot handle uncompressed video streams since their bandwidth is typically close to or over disk and network I/O limits. Modern video compression algorithms such as H254 has a compression ratio better than 1:100.
+Output of MGR is typically lightweight data streams written to Kafka, however MGR can also produce image sequences or video streams for debugging or presentation purposes **but these always have to be compressed before it hits kafka**. Kafka cannot handle uncompressed video streams since their bandwidth is typically close to or over disk and network I/O limits. Modern video compression algorithms such as H264 has a compression ratio better than 1:100.
 
-MGR uses Nvidia GPUs to do most of the data processing. One MGR instance can process multiple video stream real-time. One MGR can handle only one GPU so **for each GPU a separate MGR instance has to run**.
+MGR uses Nvidia GPUs to do most of the data processing. One MGR instance can process multiple video streams real-time. One MGR can handle only one GPU so **for each GPU a separate MGR instance has to run**.
 
 ## Configuration
 
-To configure an MGR instance one needs to specify how to combine the different algorithms. **MGR can be configured with a dataflow graph.**. The MGR's data flow is a directed [bipartite graph](https://en.wikipedia.org/wiki/Bipartite_graph) consisting of **data nodes** and **process nodes**.
+To configure an MGR instance one needs to specify how to combine the different algorithms. **MGR can be configured with a dataflow graph.** The MGR's data flow is a directed [bipartite graph](https://en.wikipedia.org/wiki/Bipartite_graph) consisting of **data nodes** and **process nodes**.
 
 This model is very similar to the UVAP dataflow, one could ask why two data flow models are needed? MGR deals with very high bit rate data: uncompressed video streams. This data cannot be transfered over Kafka due to the I/O and network limitations. MGR deals with all the low level image processing algorithms while the rest of the microservices deal with lightweight higher level data.
 
@@ -21,7 +21,7 @@ Another significant difference is that the **MGR dataflow is synchronized**: all
 
 ### Config file format
 
-The dataflow config is text file following the [proto text](https://developers.google.com/protocol-buffers/docs/overview) format. It is a simple structured format best can be understood from an examples (see more below). Formal definition of the config file is given in [this proto file](../../../../proto_files/ultinous/proto/dataflow/dataflow_pub.proto). **Notice that proto and prototxt are two different formats!** Prototxt is used to configure MGR while [proto](https://developers.google.com/protocol-buffers/docs/proto) is used to formally define what are the possible configuration options. Let's see an example. We can specify  a region of interest cropping (ROI) process node in the following config part (prototxt):
+The dataflow config is text file following the [proto text](https://developers.google.com/protocol-buffers/docs/overview) format. It is a simple structured format best can be understood from an example (see more examples below). Formal definition of the config file is given in [this proto file](../../../../proto_files/ultinous/proto/dataflow/dataflow_pub.proto). **Notice that proto and prototxt are two different formats!** Prototxt is used to configure MGR while [proto](https://developers.google.com/protocol-buffers/docs/proto) is used to formally define what are the possible configuration options. Let's see an example. We can specify  a region of interest cropping (ROI) process node in the following config part (prototxt):
 ```
 ...
 # comment is hash mark in prototxt
@@ -72,10 +72,10 @@ message ROIConfig {
 }
 ...
 ```
-Let's see a full example dataflow configuration file. This simply reads the webcam camera stream, runs head detector on every other frame and writes the detection results to a kafka stream. This is the graph itself, comments for better understanding are embedded:
+Let's see a full example dataflow configuration file. This simply reads the webcam camera stream, runs head detector on every second frame and writes the detection results to a kafka stream. This is the graph itself, comments for better understanding are embedded:
 
 ```
-# loads the necessary engines (set of models that will be used)
+# load the necessary engines (set of models that will be used)
 engines_file: "/opt/ultinous/models/engines/head_det.prototxt"
 
 environment:
@@ -111,7 +111,7 @@ data_run:
       obj_det_config:
       {
         type: HEAD
-        input: "input"              # connects to the input data node
+        input: "input"              # connect to the input data node
         bounding_boxes: "detections"
         min_height_in_pixels: 16
         max_height_in_pixels: 256
@@ -147,11 +147,11 @@ For very detailed configurations options look at the [this proto file](../../../
 
 ## Deployment
 
-To run MGR the server must have an nvidia GPU (1060 with 6G gpu memory or better). MGR is dockerized and must be run with nvidia-docker. If the server has more GPUs a separate MGR instance should run on each GPU for optimal performance.
+To run MGR the server must have an nvidia GPU (1060 with 6G GPU memory or better). MGR has to be executed with nvidia-docker. If the server has more GPUs, a separate MGR instance should run on each GPU for optimal performance.
 
 ## Runtime performance
 
-One MGR instance can process multiple video streams but the load of the system has to be carefully calculated. If the MGR has more tasks that it can perform it can throw away input frames without processing or it can queue them. This can be controlled with the drop mode in the ```environment``` section:
+One MGR instance can process multiple video streams but the load of the system has to be carefully calculated. If the MGR has more tasks than it is able to handle, it can throw away input frames without processing or it can queue them. This can be controlled with the drop mode in the ```environment``` section:
 ```
 environment:
 {
@@ -167,7 +167,7 @@ environment:
 
 We recommend to use the `nvidia-smi` tool to monitor GPU load.
 
-Runtime performance depends on a lot of factor but these are the most expensive operations:
+Runtime performance depends on a lot of factors but these are the most expensive operations:
 
  - Running deep learning models
  - Encoding video
@@ -178,7 +178,7 @@ Runtime performance depends on a lot of factor but these are the most expensive 
 The first deep learning model is typically a detector (e.g.: head detector). This is one of the most expensive operations. Cost of the detector is a complex function but these are the most important factors:
 
  - FPS: cost of the detector is linear with the frame rate. If the system is overloaded one of the easiest way to decrease is to decrease the frame rate. It can be done on the camera or by using the ```drop_rate``` parameter (see above)
- - Resolution: cost of the detector is linear with the number of pixel (quadratic with the image size!). Use the ```scaling_factor``` parameter of the detector to control the resolution. Halving the ```scaling_factor``` decreases the cost of the detector four times!
+ - Resolution: cost of the detector is linear with the number of pixels (quadratic with the image size!). Use the ```scaling_factor``` parameter of the detector to control the resolution. Halving the ```scaling_factor``` decreases the cost of the detector four times!
 
 ### Skeleton
 
@@ -186,7 +186,7 @@ Skeleton models has the same cost characteristics as the detector. It does not s
 
 ### Other models
 
-Cost of head pose, face rec, demographics are all linear with the number of crops, the load can be very different in crowded environments. TODO: use object filter to limit the number of crops.
+Cost of head pose, face recognition, demographics are all linear with the number of crops. The load can be very different in crowded environments. TODO: use object filter to limit the number of crops.
 
 ### Saving video
 Saving video always involves video encoding which is a computation heavy operation.

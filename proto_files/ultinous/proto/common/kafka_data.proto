@@ -193,28 +193,18 @@ message TrackChangeRecord
   Point point = 3; ///< Centroid of the detection or predicted point.
 }
 
-/** Output of kafka_passdet.
-
-  One instance of this record is generated when any of the following events happens:
-  E1. Passage event:
-    A track crosses a pass line. That is, the previous and current TrackChangeRecord points are
-    on opposite sides of the pass line. The last point of the track can be either detected or predicted.
-      Key is pass_id, track_key is key of track, end_of_track_passes is false.
-      Time is the time of the frame containing the last point of the track.
-  E2. Passage Realization event:
-    A prediction based passage event is confirmed by a true detection.
-      Key is empty, track_key is key of track, end_of_track_passes is false.
-      Time is the time of the frame immediately after the passage, i.e. the one containing a prediction for this track.
-  E3. End of Track event:
-    A track has ended.
-      Key is empty, track_key is key of track, end_of_track_passes is true.
-      Time is the time of the TrackChangeRecord with end_of_track=true.
-  E4. Heartbeat event:
-    There is input but no message was sent in the last second.
-      Key is empty, track_key is empty, end_of_track_passes is false.
-      Time is the time of the last input.
+/** Identifier structure for a PassEvent
 */
-message PassDetectionRecord
+message PassEventId
+{
+  string track_key = 1; ///< Key of the TrackChangeRecord message corresponding to the track crossing the line in this event.
+  uint32 serial = 2; ///< Serial number of the current passage within the same track (starts from 0).
+}
+
+/**  Details of a passage event.
+  Used by PassDetectionRecord and PassCounterRecord.
+*/
+message PassEvent
 {
   /** Direction of line crossing.
     The pass line itself is considered to have a direction, from its first point to the last one.
@@ -223,19 +213,69 @@ message PassDetectionRecord
   */
   enum CrossDirection
   {
-    NONE = 0; ///< No crossing happens in this event
-    LR = 1; ///< Left to right crossing
-    RL = 2; ///< Right to left crossing
+    LR = 0; ///< Left to right crossing
+    RL = 1; ///< Right to left crossing
   }
 
-  string pass_id = 1; ///<  E1: The 'id' of the PassLine in PassDetConfigRecord being crossed. E2-E4: Empty.
-  CrossDirection cross_dir = 2; ///< E1: Crossing direction. E2-E4: NONE
-  uint32 section_idx = 3; ///< E1: The poly-line segment index that has been crossed, starting from 0.
-  Point cross_point = 4; ///< E1: Point of intersection of the track and the pass line.
+  PassEventId id = 1; ///< Identifier of the current PassEvent.
+  string pass_line_id = 2; ///< The 'id' of the PassLine in PassDetConfigRecord being crossed.
+  CrossDirection cross_dir = 3; ///< Crossing direction.
+  uint32 section_idx = 4; ///< The poly-line segment index that has been crossed, starting from 0.
+  Point cross_point = 5; ///< Point of intersection of the track and the pass line.
+}
 
-  string track_key = 5; ///< E1-E3: TrackChangeRecord key. E4: Empty.
-  bool is_extrapolated = 6; ///< E1: True if pass detected with predicted track, false if detected with real track
-  bool end_of_track_passes = 7; ///< When true, no more results will be returned for this track; all other fields of the record are invalid.
+/** Output of kafka_passdet.
+
+  One instance of this record is generated when any of the following events happens:
+  E1. Passage event:
+    A track crosses a pass line. That is, the previous and current TrackChangeRecord points are
+    on opposite sides of the pass line. The last point of the track can be either detected or predicted.
+      Key is pass_line_id.
+      Time is the time of the frame containing the last point of the track.
+  E2. Passage Realization event:
+    A prediction based passage event is confirmed by a true detection.
+      Key is empty.
+      Time is the time of the frame immediately after the passage, i.e. the one containing a prediction for this track.
+  E3. End of Track event:
+    A track has ended.
+      Key is empty.
+      Time is the time of the TrackChangeRecord with end_of_track=true.
+  E4. Heartbeat event:
+    There is input but no message was sent in the last second.
+      Key is empty.
+      Time is the time of the last input.
+*/
+message PassDetectionRecord
+{
+  enum Type
+  {
+    HEARTBEAT = 0;
+    PASS_CANDIDATE = 1;
+    PASS_REALIZED = 2;
+    END_OF_TRACK= 3;
+  }
+  message PassCandidate
+  {
+    PassEvent pass = 1; ///< Details of the passing event
+    bool is_extrapolated = 2; ///< True if pass detected with predicted track, false if detected with real track
+  }
+  message PassRealized
+  {
+    PassEventId pass_event_ref = 1; ///< Identifier of an earlier PassDetectionRecord with type=PASS_CANDIDATE that is realized.
+  }
+  message EndOfTrack
+  {
+    string track_key = 1; ///< TrackChangeRecord key
+  }
+
+  Type type = 1; ///< Event type
+
+  oneof details ///< Not set when type = HEARTBEAT
+  {
+    PassCandidate pass_candidate = 2; ///< Only for type=PASS_CANDIDATE
+    PassRealized pass_realized = 3; ///< Only for type=PASS_REALIZED
+    EndOfTrack end_of_track = 4; ///< Only for type=END_OF_TRACK
+  }
 }
 
 /** Output of kafka_roifilter.
@@ -258,6 +298,7 @@ message FilteredObjectDetectionRecord
     A list of matching identities are returned, together with their score of matching.
   E2. Registration event:
     The feature vector input is either registered as a new identity or updates the feature vector of a stored identity.
+  In both cases the returned identities are containing the timestamp of the (first) registration time which can be used for dwell time calculations.
 
   The input records can be of any record type that contains feature vectors and associated model ids.
   time: Time of the current input record.

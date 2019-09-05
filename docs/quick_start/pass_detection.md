@@ -2,33 +2,28 @@
 
 ![Pass detection demo](../images/passdet-demo.png)
 
-
 Plays video from a jpeg topic, and visualizes the tracks of detected individuals,
  predefined polylines (passlines), and shows if any track intersects a passline.
 
-
-
-
 Required topics:
-- `<prefix>.cam.0.lowres.Image.jpg`
-- `<prefix>.cam.0.dets.ObjectDetectionRecord.json`
-- `<prefix>.cam.0.tracks.TrackChangeRecord.json`
-- `<prefix>.cam.0.passdet.PassDetectionRecord.json`
+- `base.cam.0.original.Image.jpg`
+- `base.cam.0.dets.ObjectDetectionRecord.json`
+- `base.cam.0.tracks.TrackChangeRecord.json`
+- `base.cam.0.passdet.PassDetectionRecord.json`
 
 The results can be displayed with opencv-python or in browser.
 
 ## Display with opencv-python
 
-1. Run the docker container in interactive mode (detailed description can be found [here](../quick_start_guide.md#interactiveDockerMode)).
+1. Run the Docker container in interactive mode (detailed description can be found [here](../quick_start_guide.md#interactiveDockerMode)).
 The demo application must know about the passlines to visualize it, and it can parse the properties file of the Kafka Pass Detection service,
-therefore you have to mount it into the container. 
-:
+therefore you have to mount it into the container:
    ```
    $ xhost +
    $ docker run -it --rm --name "python_env" \
    -v "/tmp/.X11-unix":"/tmp/.X11-unix" \
-   -v "$HOME/uvap/demo_applications":"/ultinous_app" \
-   --mount type=bind,readonly,source=$HOME/uvap/models/uvap-kafka-passdet/uvap_kafka_passdet.properties,destination=/ultinous_app/models/uvap-kafka-passdet/uvap_kafka_passdet.properties \
+   -v "${UVAP_HOME}/demo_applications":"/ultinous_app" \
+   --mount type=bind,readonly,source=${UVAP_HOME}/config/uvap_kafka_passdet/uvap_kafka_passdet.properties,destination=/ultinous_app/config/uvap_kafka_passdet/uvap_kafka_passdet.properties \
    -e DISPLAY=$DISPLAY \
    --net=uvap \
    --env="QT_X11_NO_MITSHM=1" \
@@ -38,17 +33,17 @@ therefore you have to mount it into the container.
    1. Display output on screen:
       ```
       <DOCKER># cd /ultinous_app
-      <DOCKER># /usr/bin/python3.6 apps/uvap/pass_detection_DEMO.py kafka:9092 base /ultinous_app/models/uvap-kafka-passdet/uvap_kafka_passdet.properties -d
+      <DOCKER># /usr/bin/python3.6 apps/uvap/pass_detection_DEMO.py kafka:9092 base /ultinous_app/config/uvap_kafka_passdet/uvap_kafka_passdet.properties -d
       ```
    1. Display output on full screen:
       ```
       <DOCKER># cd /ultinous_app
-      <DOCKER># /usr/bin/python3.6 apps/uvap/pass_detection_DEMO.py kafka:9092 base /ultinous_app/models/uvap-kafka-passdet/uvap_kafka_passdet.properties -f -d
+      <DOCKER># /usr/bin/python3.6 apps/uvap/pass_detection_DEMO.py kafka:9092 base /ultinous_app/config/uvap_kafka_passdet/uvap_kafka_passdet.properties -f -d
       ```
-   1. Write output to `<prefix>.cam.0.tracks.Image.jpg`:
+   1. Write output to `base.cam.0.tracks.Image.jpg`:
       ```
       <DOCKER># cd /ultinous_app
-      <DOCKER># /usr/bin/python3.6 apps/uvap/pass_detection_DEMO.py kafka:9092 base /ultinous_app/models/uvap-kafka-passdet/uvap_kafka_passdet.properties -o
+      <DOCKER># /usr/bin/python3.6 apps/uvap/pass_detection_DEMO.py kafka:9092 base /ultinous_app/config/uvap_kafka_passdet/uvap_kafka_passdet.properties -o
       ```
 
 ## Web display for Kafka topic
@@ -56,15 +51,18 @@ The generally web display demo description can be found [here](../quick_start_gu
 
 1. Use case of the `run_demo.sh` (from the [Topic Writer Demo](../quick_start_guide.md#topicWriterDemoStarting) chapter):
    ```
-   $ ~/uvap/scripts/run_demo.sh --name-of-demo pass_detection --demo-mode base --config-file $HOME/uvap/models/uvap-kafka-passdet/uvap_kafka_passdet.properties
+   $ "${UVAP_HOME}"/scripts/run_demo.sh --demo-name pass_detection \
+   --demo-mode base \
+   --config-file-name ${UVAP_HOME}/config/uvap_kafka_passdet/uvap_kafka_passdet.properties \
+   -- --net uvap
    ```
    :exclamation: **Warning** :exclamation: After the first run of these scripts
-    [set_retention.sh](../quick_start_guide.md#setRetention) script should be executed 
+    [set_retention.sh](../quick_start_guide.md#setRetention) script should be executed
     manually because new (`*.Image.jpg`) topics are created.
 
 1. Starting UVAP web player (detailed description can be found [here](../quick_start_guide.md#playInTheBowser)):
    ```
-   $ ~/uvap/scripts/run_web_player.sh --config-directory  "$HOME/uvap/models/uvap-web_player"
+   $ "${UVAP_HOME}"/scripts/run_web_player.sh -- --net uvap
    ```
 
 1. Display in web browser

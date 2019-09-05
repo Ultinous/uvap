@@ -1,0 +1,211 @@
+#@IgnoreInspection BashAddShebang
+
+current_dir="$(dirname "$(realpath "$0")")"
+current_directory="${current_dir}"
+
+print_help() {
+	if grep -Fq "validate_remaining_cli_arguments" "${0}"; then
+		echo "Usage: ${0} [OPTION]..."
+	else
+		echo "Usage: ${0} [OPTION]... ..."
+	fi
+	echo
+	echo "Options (those, that do not have a default value, are mandatory options):"
+	max_width="$(grep -E "^[[:space:]]*parse_argument_with[a-z_]*_value" "${0}" | \
+		tr -d "'" | tr -d '"' | \
+		sed -E -e 's/^.*parse_argument_with[a-z_]*_value[[:space:]]+([A-Za-z0-9_-]+)[[:space:]]*.*$/\1/' | \
+		wc -L)"
+	grep -E "^[[:space:]]*parse_argument_with[a-z_]*_value" "${0}" | \
+		tr -d "'" | tr -d '"' | \
+		envsubst | \
+		sed -E -e 's/^.*parse_argument_with[a-z_]*_value[[:space:]]+([A-Za-z0-9_-]+)[[:space:]]*(.*)?$/printf "\t%-'"$((max_width+2))"'s\t%s" "$(echo --\1 | tr _ -)" "\2"/e'
+	exit 1
+}
+
+parse_not_our_arguments() {
+	not_our_args=()
+	while test "$#" -gt 0; do
+		not_our_args+=("$1")
+		shift
+	done
+}
+
+parse_all_arguments() {
+	cli_args=()
+	while test "$#" -gt 0; do
+		if test "${1}" = "--"; then
+			shift
+			parse_not_our_arguments "${@}"
+			break
+		fi
+		if test "${1}" = "-h" -o "${1}" = "--help"; then
+			print_help
+		fi
+		cli_args+=("$1")
+		shift
+	done
+}
+
+dump_cli_args() {
+	echo "-------------- cli args ------------------" >&2
+	for i in ${!cli_args[@]}; do
+		echo "[$i] = ${cli_args[i]}" >&2
+	done
+	echo "-------------- cli args ------------------" >&2
+}
+
+test_string_ends_with() {
+	case "${1}" in *"${2}") true;; *) false;; esac;
+}
+
+test_executable() {
+	EXE_NAME="${1}"
+	if ! echo "${EXE_NAME}" | grep -qF '/'; then
+		EXE_PATH="$(which ${EXE_NAME})" || (echo "ERROR: could not find location of \`${EXE_NAME}'. Make sure it is installed." >&2 && return 1)
+	else
+		EXE_PATH="${EXE_NAME}"
+	fi
+	if test ! -x "${EXE_PATH}"; then
+		echo "ERROR: \`${EXE_PATH}' is not runnable." >&2 && return 1
+	fi
+}
+
+validate_not_zero_length() {
+	if test -z "${!2:-}"; then
+		echo "${1} is unset or empty! Specify with --${1}" >&2
+		print_help
+	fi
+}
+
+validate_path() {
+	validate_not_zero_length "${@}"
+	export real_path="$(realpath "${!2}")"
+	if test -z "${real_path}" -o ! -e "${real_path}"; then
+		echo "ERROR: Path ${!2} given with argument --${1} is not an existing path" >&2
+		print_help
+	fi
+	export "${2}"="${real_path}"
+	unset real_path
+}
+
+validate_executable() {
+	validate_path "${@}"
+	if test ! -x "${!2:-}"; then
+		echo "${!2:-} is not an executable! Override with --${1}" >&2
+		print_help
+	fi
+}
+
+validate_file() {
+	validate_path "${@}"
+	if test ! -f "${!2:-}"; then
+		echo "ERROR: ${!2:-} is not a regular file! Override with --${1}" >&2
+		print_help
+	fi
+}
+
+validate_directory() {
+	validate_path "${@}"
+	if test ! -d "${!2:-}"; then
+		echo "${!2:-} is not a directory! Override with --${1}" >&2
+		print_help
+	fi
+	validate_executable "${@}"
+}
+
+validate_socket() {
+	validate_path "${@}"
+	if test ! -S "${!2:-}"; then
+		echo "${!2:-} is not a socket! Override with --${1}" >&2
+		print_help
+	fi
+}
+
+uri_regex="^([a-z0-9+.-]+):(?://(?:((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*)@)?((?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*)(?::(\d*))?(/(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?|(/?(?:[a-z0-9-._~!$&'()*+,;=:@]|%[0-9A-F]{2})+(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?)(?:\?((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?(?:#((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?$"
+validate_uri() {
+	validate_not_zero_length "${@}"
+#	TODO: fix $uri_regex, so it would work
+#	if ! [[ "${!2:-}" =~ "${uri_regex}" ]]; then
+#		echo "${!2:-} is not a valid URI! Override with --${1}" >&2
+#		print_help
+#	fi
+}
+
+validate_number() {
+	validate_not_zero_length "${@}"
+	if ! test "${!2}" -eq "${!2}"; then
+		echo "${!2} is not a number! Override with --${1}" >&2
+		print_help
+	fi
+}
+
+parse_argument_with_value() {
+	argument_name="$(echo "${1}" | tr '_' '-')"
+	for i in ${!cli_args[@]}; do
+		if test "${cli_args[i]}" = "--${argument_name}"; then
+			export "${1}"="${cli_args[i+1]}"
+			unset cli_args[i]
+			unset cli_args[i+1]
+			cli_args=("${cli_args[@]}")
+			break
+		fi
+	done
+	if test_string_ends_with "${1}" "_dir"; then
+		if test_string_ends_with "${1}" "_ac_dir"; then
+			validate_not_zero_length "${argument_name}" "${1}"
+			mkdir -p "${!1}" || print_help
+		fi
+		validate_directory "${argument_name}" "${1}"
+	elif test_string_ends_with "${1}" "_file"; then
+		validate_file "${argument_name}" "${1}"
+	elif test_string_ends_with "${1}" "_executable"; then
+		validate_executable "${argument_name}" "${1}"
+	elif test_string_ends_with "${1}" "_socket"; then
+		validate_socket "${argument_name}" "${1}"
+	elif test_string_ends_with "${1}" "_uri"; then
+		validate_uri "${argument_name}" "${1}"
+	elif test_string_ends_with "${1}" "_name"; then
+		validate_not_zero_length "${argument_name}" "${1}"
+	elif test_string_ends_with "${1}" "_number"; then
+		validate_number "${argument_name}" "${1}"
+	else
+		validate_not_zero_length "${argument_name}" "${1}"
+	fi
+}
+
+parse_argument_with_multi_value() {
+	argument_name="$(echo "${1}" | tr '_' '-')"
+	multi_variable_name="${1}s"
+	while echo "${cli_args[@]}" | grep -Fq -- "--${argument_name}" || ! validate_not_zero_length "${argument_name}" "${multi_variable_name}"; do
+		old_value="${!multi_variable_name:-}"
+		parse_argument_with_value "${@}"
+		export "${multi_variable_name}"="${old_value} ${!1}"
+		unset "${1}"
+	done
+}
+
+parse_argument_without_value() {
+	export "${1}"=false
+	argument_name="$(echo "${1}" | tr '_' '-')"
+	for i in ${!cli_args[@]}; do
+		if test "${cli_args[i]}" = "--${argument_name}"; then
+			export "${1}"=true
+			unset cli_args[i]
+			cli_args=("${cli_args[@]}")
+			break
+		fi
+	done
+}
+
+validate_remaining_cli_arguments() {
+	if test "${#cli_args[@]}" -gt 0; then
+		if test ! "${cli_args[0]}" = "--"; then
+			echo "Unknown argument: ${cli_args[0]}" >&2
+			print_help
+		else
+			unset cli_args[0]
+		fi
+	fi
+}
+
+function implode { local d="${1}"; shift; echo -n "${1:-}"; shift; printf "%s" "${@/#/$d}"; }

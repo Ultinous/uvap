@@ -5,14 +5,16 @@
    1. [Configuring UVAP](#configUVAP)
    1. [How to run the components of UVAP](#startUVAP)
    1. [Setting the Retention Period](#setRetention)
+   1. [Reconfiguring UVAP](#reConfigUVAP)
 1. [Demo usage](#demoUsage)
    1. [Environment](#environment)
    1. [Helper Scripts](#helperScripts)
+   1. [Web Display](#webDisplay)
+      1. [Starting the Topic Writer Demo](#topicWriterDemoStarting)
+      1. [Viewing in a Browser](#playInTheBrowser)
    1. [Demos (Base Mode)](#basicDemos)
-   1. [Demos (Skeleton Mode)](#advancedDemos)
-1. [Web Display](#webDisplay)
-   1. [Starting the Topic Writer Demo](#topicWriterDemoStarting)
-   1. [Viewing in a Browser](#playInTheBowser)
+   1. [Demos (Feature Vector Mode)](#fveDemos)
+   1. [Demos (Skeleton Mode)](#skeletonDemos)
 1. [Use Cases for Practising](#useCases)
 
 <a name="introduction"></a>
@@ -39,21 +41,38 @@ In order to configure UVAP, the following script template needs to be edited as 
 and then executed:
 <a name="uvapConfigSh"></a>
 ```
-$ ~/uvap/scripts/config.sh --models-directory "$HOME/uvap/models" --stream-url [RTSP_URL] \
-  --demo-mode [DEMO_MODE] --keep-rate [KEEP_RATE]
+$ "${UVAP_HOME}"/scripts/config.sh --stream-uri [STREAM_URI] \
+  --demo-mode [DEMO_MODE] --keep-rate-number [KEEP_RATE]
 ```
 
-The `[RTSP_URL]` (including square brackets) should be replaced with a URL
-which refers to a valid RTSP stream, for example an IP camera.
-This should look like this: `rtsp://192.168.0.1/`. This URL
-can also contain username and password if the stream is protected, e.g. `rtsp://username:password@192.168.0.1/`.
-The stream url can be changed later by running this install script again.
+The `[STREAM_URI]` (including square brackets) should be replaced with a
+URI which refers to a valid video file or stream, for example an IP
+camera.
+This should look like this: `rtsp://192.168.0.1/`. This URI
+can also contain username and password if the stream is protected, e.g.
+`rtsp://username:password@192.168.0.1/`.
+The URI can also be the device name of a camera plugged into a USB port,
+e.g. `/dev/video0`, or simply a filename of a pre-recorded video.
+The stream URI(s) can be changed later by running this configurator
+script again.
+
+<a name="multipleInput"></a>
+Multiple streams to be analyzed may be configured by using more
+`--stream-uri [STREAM_URI]` parameter pairs, for example:
+```
+$ "${UVAP_HOME}"/scripts/config.sh \
+  --stream-uri "rtsp://192.168.0.1/" \
+  --stream-uri "rtsp://username:password@192.168.0.2/" \
+  --stream-uri "rtsp://192.168.0.3/" \
+  --demo-mode [DEMO_MODE] --keep-rate-number [KEEP_RATE]
+```
 
 We use different configuration for base detections to save GPU resources.
 The `[DEMO_MODE]` (including the square brackets) should be replaced with
-a string. Valid values of `[DEMO_MODE]` are `base` or `skeleton`.
+a string. Valid values of `[DEMO_MODE]` are `base`, `skeleton` or `fve`.
 
-The 'base' demos:
+<a name="baseMode"></a>
+The `base` demos:
 - Demography
 - Head detection
 - Head pose
@@ -61,7 +80,12 @@ The 'base' demos:
 - Tracker
 - Pass detection
 
-The 'skeleton' demo(s):
+<a name="fveMode"></a>
+The `fve` demo(s):
+- Basic reidentification
+
+<a name="skeletonMode"></a>
+The `skeleton` demo(s):
 - Human skeleton
 
 The `[KEEP_RATE]` is an optional parameter for changing the frequency of
@@ -71,24 +95,15 @@ will use every 3rd frame for analysis, so it will be faster.
 Replace `[KEEP_RATE]` (including square
 brackets) with the desired keep rate.
 
-MGR restart with an other configuration:
-1. Stop the running docker container of microservice
-   ```
-   $ docker stop uvap_mgr
-   ```
-1. Reconfigure the microservice with config.sh (Details:[Configuring UVAP section](#uvapConfigSh))
-1. Start the running docker container of microservice
-   ```
-   $ docker start uvap_mgr
-   ```
+There are more optional parameters for the `config.sh` script to
+override defaults. Use the `--help` parameter to get more details.
 
 <a name="startUVAP"></a>
 ### How to run the components of UVAP  
 #### [Multi Graph Runner (MGR) microservice](quick_start/mgr_microservice.md)
-<a name="startTracker"></a>
 #### [Kafka Tracker microservice](quick_start/kafka_tracker_microservice.md)
-<a name="startPassDetector"></a>
 #### [Kafka Pass Detection microservice](quick_start/kafka_pass_detection_microservice.md)
+#### [Basic Reidentification microservice](quick_start/basic_reidentification_microservice.md)
 
 <a name="setRetention"></a>
 ### Setting the Retention Period
@@ -96,33 +111,55 @@ MGR restart with an other configuration:
 Kafka has a default retention period set to 168 hours. The `*.Image.jpg`
 topics will require a large amount of storage space
 because they contain all frames in JPG image format.
-We can change the lifetime of topics with the `set_retention.sh` script.  
+We can change the lifetime of JPG topics with the `set_retention.sh`
+script.
 
 Usage:
 ```
-$  ~/uvap/scripts/set_retention.sh
-usage: ./set_retention.sh (--retention-ms|--retention-minute|--retention-second|--retention-hour|--retention-day) number
+$ "${UVAP_HOME}"/scripts/set_retention.sh --retention-unit [UNIT] \
+  --retention-number [NUMBER]
 ```
-For example, set the retention to 15 minutes:
+The `[UNIT]` (including the square brackets) should be replaced with one
+of the following time units: `ms`, `second`, `minute`, `hour` and `day`.
+The `[NUMBER]` (including the square brackets) should be replaced with
+a number, that (together with the retention unit) defines the retention
+time to set.
+
+For example, to set the retention time to 15 minutes:
 ```
-$  ~/uvap/scripts/set_retention.sh --retention-minute 15
+$ "${UVAP_HOME}"/scripts/set_retention.sh --retention-unit minute \
+  --retention-number 15
 ```
 :exclamation: **Warning** :exclamation: Without these settings the
-`*.Image.jpg` topics use a lot of storage space!
+`*.Image.jpg` topics will use a lot of storage space!
 
 You can see something like this:
 ```
-These topics will change:
-base.cam.0.anonymized_lowres.Image.jpg
-base.cam.0.lowres.Image.jpg
-Completed Updating config for entity: topic 'base.cam.0.anonymized_lowres.Image.jpg'.
-Topic:base.cam.0.anonymized_lowres.Image.jpg	PartitionCount:1	ReplicationFactor:1	Configs:retention.ms=900000
-	Topic: base.cam.0.anonymized_lowres.Image.jpg	Partition: 0	Leader: 1001	Replicas: 1001	Isr: 1001
-Completed Updating config for entity: topic 'base.cam.0.lowres.Image.jpg'.
-Topic:base.cam.0.lowres.Image.jpg	PartitionCount:1	ReplicationFactor:1	Configs:retention.ms=900000
-	Topic: base.cam.0.lowres.Image.jpg	Partition: 0	Leader: 1001	Replicas: 1001	Isr: 1001
+INFO: These topics will change:
+base.cam.0.anonymized_original.Image.jpg
+base.cam.0.original.Image.jpg
+Completed Updating config for entity: topic 'base.cam.0.anonymized_original.Image.jpg'.
+Topic:base.cam.0.anonymized_original.Image.jpg	PartitionCount:1	ReplicationFactor:1	Configs:retention.ms=900000
+	Topic: base.cam.0.anonymized_original.Image.jpg	Partition: 0	Leader: 1001	Replicas: 1001	Isr: 1001
+Completed Updating config for entity: topic 'base.cam.0.original.Image.jpg'.
+Topic:base.cam.0.original.Image.jpg	PartitionCount:1	ReplicationFactor:1	Configs:retention.ms=900000
+	Topic: base.cam.0.original.Image.jpg	Partition: 0	Leader: 1001	Replicas: 1001	Isr: 1001
 
 ```
+<a name="reConfigUVAP"></a>
+### Reconfiguring UVAP
+If UVAP has already been successfully started, but you want to modify
+the configuration of it (e.g. switch to a different demo mode), the
+easiest way to do it is:
+1. Stop and remove the running Docker containers of UVAP microservices
+   ```
+   $ docker container stop $(docker container ls -a -f 'name=uvap_*' -q)
+   $ docker container rm $(docker container ls -a -f 'name=uvap_*' -q)
+   ```
+1. Reconfigure UVAP with the `config.sh` script (see details:
+   [Configuring UVAP](#uvapConfigSh))
+1. Run the UVAP microservices by starting the demo of your choice. See
+   more details in the following sections.
 <a name="demoUsage"></a>
 ## Demo Usage
 Tree view of demo package:
@@ -136,6 +173,7 @@ demo_applications/
 │       ├── list_messages.py
 │       ├── list_topics.py
 │       ├── pass_detection_DEMO.py
+│       ├── basic_reidentification_DEMO.py
 │       ├── show_image_DEMO.py
 │       ├── skeleton_DEMO.py
 │       └── tracker_DEMO.py
@@ -145,27 +183,31 @@ demo_applications/
 └── utils
     ├── kafka
     │   └── time_ordered_generator_with_timeout.py
-    └── uvap
-        ├── graphics.py
-        └── uvap.py
+    ├── uvap
+    │   ├── graphics.py
+    │   └── uvap.py
+    ├── generator_interface.py
+    ├── heartbeat.py
+    └── jinja_template_filler.py
 ```
 
 <a name="environment"></a>
 ### Environment
 <a name="interactiveDockerMode"></a>  
-All dependencies are packed in a docker image. (ultinous/uvap:uvap_demo_applications_latest)
-Run the docker container in interactive mode:
+All dependencies are packed in a Docker image
+(`ultinous/uvap:uvap_demo_applications_latest`).
+Run the Docker container in interactive mode:
 ```
 $ xhost +
 $ docker run -it --rm --name "python_env" \
--v "/tmp/.X11-unix":"/tmp/.X11-unix" \
--v "$HOME/uvap/demo_applications":"/ultinous_app" \
--e DISPLAY=$DISPLAY \
---net=uvap \
---env="QT_X11_NO_MITSHM=1" \
-ultinous/uvap:uvap_demo_applications_latest /bin/bash
+  -v "/tmp/.X11-unix":"/tmp/.X11-unix" \
+  -v "${UVAP_HOME}/demo_applications":"/ultinous_app" \
+  -e DISPLAY=$DISPLAY \
+  --net=uvap \
+  --env="QT_X11_NO_MITSHM=1" \
+  ultinous/uvap:uvap_demo_applications_latest /bin/bash
 ```
-The following scripts can be run in the docker image.
+The following scripts can be run in the Docker container.
 All scripts in `/apps/uvap` directory have help function. For example:
 
 ```
@@ -204,11 +246,11 @@ List topics from Kafka.
 Expected output:
 ```
 base.cam.0.ages.AgeRecord.json
-base.cam.0.anonymized_lowres.Image.jpg
+base.cam.0.anonymized_original.Image.jpg
 base.cam.0.dets.ObjectDetectionRecord.json
 base.cam.0.frameinfo.FrameInfoRecord.json
 base.cam.0.genders.GenderRecord.json
-base.cam.0.lowres.Image.jpg
+base.cam.0.original.Image.jpg
 base.cam.0.poses.HeadPose3DRecord.json
 base.cam.0.tracks.TrackChangeRecord.json
 base.cam.0.passdet.PassDetectionRecord.json
@@ -227,55 +269,68 @@ Expected output:
 1561360391336 <bound method NoKeyErrorDict.asdict of {'base': {'0': {'head_detection': {'1561360391336_0': {'gender': {'gender': 'MALE', 'confidence': 0.919374943, 'end_of_frame': False}}}}}}>
 ```
 
-<a name="basicDemos"></a>
-### Demos (Base Mode)
-The `[DEMO_MODE]` should be 'base' during the [configuration](#configUVAP).
-
-#### [Viewing Images](quick_start/show_image.md)
-#### [Head Detection](quick_start/head_detection.md)
-#### [Head Pose](quick_start/head_pose.md)
-#### [Demography](quick_start/demography.md)
-#### [Tracking](quick_start/tracking.md)
-#### [Pass Detection](quick_start/pass_detection.md)
-
-
-<a name="advancedDemos"></a>
-### Demos (Skeleton Mode)
-The `[DEMO_MODE]` should be 'skeleton' during the [configuration](#configUVAP).
-
-#### [Human Skeleton](quick_start/human_skeleton.md)
-
 <a name="webDisplay"></a>
-## Web Display
+### Web Display
 There is an alternative way for demo presentation compared to python scripts
-displaying in a window. The following demos run in docker and write
+displaying in a window. The following demos run in Docker and write
 their results into Kafka topics (`*[name_of_demo].Image.jpg`) instead of
 the display. From these topics, it is possible to play image streams using the **web display** application.
 
 <a name="topicWriterDemoStarting"></a>
-### Starting the Topic Writer Demo
+#### Starting the Topic Writer Demo
 The following script template can be used to start the demos. `[NAME_OF_DEMO]` (including the square brackets)
-should be replaced with a string from this set {`demography`, `head_detection`, `head_pose`, `show_image`, `skeleton`, `tracker`, `pass_detection`}.   
+should be replaced with a string from this set
+{`demography`, `head_detection`, `head_pose`, `basic_reidentification`, `show_image`, `skeleton`, `tracker`, `pass_detection`}.   
 As earlier, `[DEMO_MODE]` (including the square brackets) should be replaced
-with a string from this set {`base`, `skeleton`}.  
+with a string from this set {`base`, `skeleton`, `fve`}.  
 ```
-$ ~/uvap/scripts/run_demo.sh \
-  --name-of-demo [NAME_OF_DEMO] \
-  --demo-mode [DEMO_MODE]
+$ "${UVAP_HOME}"/scripts/run_demo.sh \
+  --demo-name [NAME_OF_DEMO] \
+  --demo-mode [DEMO_MODE] \
+  -- --net uvap
 ```
-:exclamation: **Warning** :exclamation: After the first run of these scripts [set_retention.sh](#setRetention) script should be executed manually because new (`*.Image.jpg`) topics are created.
+The output of the above command should be:
+* some information about pulling the required Docker image
+* the ID of the Docker container created
+* the name of the Docker container created: `uvap_demo`
 
-The available parametrization can be found in the [basic](#basicDemos) or [advanced](#advancedDemos) demo descriptions.
+:exclamation: Warning :exclamation: before starting this
+microservice, the above command will silently stop and remove the
+Docker container named `uvap_demo`, if such already exists.
 
-<a name="playInTheBowser"></a>
-### Viewing in a Browser
+:exclamation: **Warning** :exclamation: Each time this script is run in
+a demo mode, that wasn't in use before, the demo application is creating
+a new (`*.Image.jpg`) topic in Kafka. Similarly to the other JPG topics,
+these demo-writed-topics will consume a lot of storage space, unless the
+retention time of them is decreased with the
+[set_retention.sh](#setRetention) script.
+
+The available parametrization can be found in the [basic](#basicDemos), [fve](#fveDemos) or [skeleton](#skeletonDemos) demo descriptions.
+
+There are more optional parameters for the `run_demo.sh` script to
+override defaults. Use the `--help` parameter to get more details.
+
+<a name="playInTheBrowser"></a>
+#### Viewing in a Browser
 
 1. Starting
     ```
-    $ ~/uvap/scripts/run_web_player.sh --config-directory  "$HOME/uvap/models/uvap-web_player"
+    $ "${UVAP_HOME}"/scripts/run_web_player.sh -- --net uvap
     ```
+    The output of the above command should be:
+    * some information about pulling the required Docker image
+    * the ID of the Docker container created
+    * the name of the Docker container created: `uvap_web_player`
+
+    :exclamation: Warning :exclamation: before starting this
+    microservice, the above command will silently stop and remove the
+    Docker container named `uvap_web_player`, if such already exists.
+
+    There are more optional parameters for the `run_web_player.sh`
+    script to override defaults. Use the `--help` parameter to get more
+    details.
 1. Testing (optional)  
-    a.) checking the log of the docker container
+    a.) checking the log of the Docker container
     ```
     $ docker logs uvap_web_player
     ```
@@ -300,26 +355,55 @@ The available parametrization can be found in the [basic](#basicDemos) or [advan
 
     b.) checking service
     ```
-    $ telnet localhost 9999
+    $ wget --save-headers --content-on-error --output-document=- \
+      --show-progress=no --quiet 'http://localhost:9999/' | head -n1
     ```
-    <a name="inTheBowser"></a>
+    You should see the following output:
+    ```
+    HTTP/1.1 200 OK
+    ```
+    <a name="inTheBrowser"></a>
 1. In the browser  
     On browser use following URL template:
     ```
     http://localhost:9999#[KAFKA_IMAGE_TOPIC_NAME]
     ```
-    The available `[KAFKA_IMAGE_TOPIC_NAME]` values can be found in the [basic](#basicDemos) or [advanced](#advancedDemos) demo descriptions.
-        
+    The available `[KAFKA_IMAGE_TOPIC_NAME]` values can be found in the [basic](#basicDemos), [fve](#fveDemos) or [skeleton](#skeletonDemos) demo descriptions.
+
     Web display required a refresh (press 'F5' button) after it got a new topic name!
-    
+
     Full screen mode:
     - Activate: Click on the video to activate the full screen mode.
     - Exit: Press 'Esc' button to exit the full screen mode.
-    
+
     :exclamation: **Warning** :exclamation:  
     **This tool is for demo/debug purposes only!**
     It only has real time playing capability and it has no authorization or authentication.  
     It should only be used in a private network, because it provides a direct access for Kafka (`*.Image.jpg`) topics.   
+
+<a name="basicDemos"></a>
+### Demos (Base Mode)
+The `[DEMO_MODE]` should be 'base' during the [configuration](#configUVAP).
+
+#### [Viewing Images](quick_start/show_image.md)
+#### [Head Detection](quick_start/head_detection.md)
+#### [Head Pose](quick_start/head_pose.md)
+#### [Demography](quick_start/demography.md)
+#### [Tracking](quick_start/tracking.md)
+#### [Pass Detection](quick_start/pass_detection.md)
+
+
+<a name="fveDemos"></a>
+### Demos (Feature Vector Mode)
+The `[DEMO_MODE]` should be 'fve' during the [configuration](#configUVAP).
+
+#### [Basic Reidentification](quick_start/basic_reidentification.md)
+
+<a name="skeletonDemos"></a>
+### Demos (Skeleton Mode)
+The `[DEMO_MODE]` should be 'skeleton' during the [configuration](#configUVAP).
+
+#### [Human Skeleton](quick_start/human_skeleton.md)
 
 <a name="useCases"></a>
 ## Use Cases for Practising

@@ -11,11 +11,12 @@ digraph {
     Age [shape=box];
     Gender [shape=box];
     Face_Feature_Vectors [shape=box];
+    Reidentification_Events [shape=box];
     Skeletons [shape=box];
     {
         edge[style=invis]
         rank = same;
-        Head_Detections -> Track_Changes -> Pass_Detections -> Head_Poses -> Age -> Gender -> Face_Feature_Vectors -> Skeletons
+        Head_Detections -> Track_Changes -> Pass_Detections -> Head_Poses -> Age -> Gender -> Face_Feature_Vectors -> Reidentification_Events -> Skeletons
     }
   }
   RTSP_Stream [shape=box];
@@ -34,4 +35,7 @@ digraph {
 
   // Pass det
   Track_Changes -> Pass_Detector -> Pass_Detections;
+
+  // Reidentification
+  Face_Feature_Vectors -> Reidentification -> Reidentification_Events;
 }

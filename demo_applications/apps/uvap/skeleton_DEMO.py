@@ -16,7 +16,7 @@ def main():
            Displays the result on screen ('-d') or stores in a kafka topic with '-o' parameter.
                       
            Required topics:
-           - <prefix>.cam.0.lowres.Image.jpg
+           - <prefix>.cam.0.original.Image.jpg
            - <prefix>.cam.0.skeletons.SkeletonRecord.json
            """
         , formatter_class=argparse.RawTextHelpFormatter
@@ -36,7 +36,7 @@ def main():
 
     overlay = cv2.imread('resources/powered_by_white.png', cv2.IMREAD_UNCHANGED)
 
-    img_topic = f"{args.prefix}.cam.0.lowres.Image.jpg"
+    img_topic = f"{args.prefix}.cam.0.original.Image.jpg"
     skeleton_topic = f"{args.prefix}.cam.0.skeletons.SkeletonRecord.json"
     output_topic_name = f"{args.prefix}.cam.0.skeleton.Image.jpg"
 

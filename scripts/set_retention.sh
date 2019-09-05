@@ -1,58 +1,48 @@
-#!/bin/sh
+#!/bin/bash
 
 set -eu
+source "$(dirname "$(realpath "$0")")/uvap_bash_functions"
 
-usage() {
-	echo "usage: $0 (--retention-ms|--retention-minute|--retention-second|--retention-hour|--retention-day) number"
-	exit 1
-}
+current_directory="${current_directory}" # the above source declares it - this just clears IDE warnings
 
-if ! [ -z  ${1:-} ]; then
-	    if ! [ ${2?"parameter 2 is not defined"} -eq ${2} ];then
-	      echo "${2} is not a number"
-	      usage
-	    fi
-fi
-while test "${#}" -gt 0 ; do
-    case "${1}" in
-	--retention-ms)
-	    shift
-	    retention_ms="${1}"
+parse_all_arguments "${@}"
+parse_argument_with_value "retention_unit" "<ms|second|minute|hour|day>"
+parse_argument_with_value "retention_number" "a number that (together with the retention unit) defines the retention time to set"
+validate_remaining_cli_arguments
+
+test_executable "docker"
+
+retention_unit="${retention_unit}" # parse_argument_with_value declares it - this just clears IDE warnings
+retention_number="${retention_number}" # parse_argument_with_value declares it - this just clears IDE warnings
+
+case "${retention_unit}" in
+	"ms")
+		retention_ms=$((retention_number))
 	;;
-	--retention-second)
-	    shift
-	    retention_ms=$(( ${1} * 1000 ))
+	"second")
+		retention_ms=$((retention_number * 1000))
 	;;
-	--retention-minute)
-	    shift
-	    retention_ms=$(( ${1} * 60000 ))
+	"minute")
+		retention_ms=$((retention_number * 1000 * 60))
 	;;
-	--retention-hour)
-	    shift
-	    retention_ms=$(( ${1} * 60000 * 60 ))
+	"hour")
+		retention_ms=$((retention_number * 1000 * 3600))
 	;;
-	--retention-day)
-	    shift
-	    retention_ms=$(( ${1} * 60000 * 60 * 24 ))
+	"day")
+		retention_ms=$((retention_number * 1000 * 3600 * 24))
 	;;
 	*)
-	    echo "ERROR: unrecognized option: ${1}"
-	    usage
+		echo 'ERROR: invalid retention unit' >&2
+		print_help
 	;;
-    esac
-    shift
-done
-
-if test -z "${retention_ms:-}"; then
-    echo "The retention time is unset!"
-    usage
-fi
-
+esac
 
 topics="$(docker exec kafka kafka-topics --list --zookeeper zookeeper:2181 | grep -F Image.jpg)"
-echo "These topics will be changed: \n${topics}"
+echo "INFO: These topics will be changed:
+${topics}"
+
 for topic in ${topics}; do
-    topic=$(echo -n "${topic}" | sed -r "s/\r//g")
-    docker exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --entity-type topics --entity-name "${topic}" --add-config retention.ms=${retention_ms}
-    docker exec kafka kafka-topics --describe --zookeeper zookeeper:2181 --topic "${topic}"
+	topic=$(echo -n "${topic}" | sed -r "s/\r//g")
+	docker exec kafka kafka-configs --zookeeper zookeeper:2181 --alter --entity-type topics --entity-name "${topic}" --add-config retention.ms=${retention_ms}
+	docker exec kafka kafka-topics --describe --zookeeper zookeeper:2181 --topic "${topic}"
 done

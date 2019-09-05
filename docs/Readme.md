@@ -19,6 +19,7 @@ UVAP provides a rich set of **deep learning based advanced video analysis** mode
 - Gender
 - Human body pose
 - Tracking
+- Basic reidentification
 - Pass detection, counting
 
 ###  Example use cases

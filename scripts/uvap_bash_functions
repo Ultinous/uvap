@@ -1,0 +1,106 @@
+#@IgnoreInspection BashAddShebang
+
+source "$(dirname "$(realpath "$0")")/bash_functions"
+
+current_directory="${current_directory}"
+uvap_components_list_path="${current_directory}/uvap_components_list.txt"
+script_name="$(basename "${0}")"
+script_name_without_extension="${script_name%".sh"}"
+service_name="${script_name_without_extension#"run_"}"
+
+get_uvap_components_list() {
+	set -o pipefail
+	if test "${1:-}" = "AND"; then
+		shift
+		cat "${uvap_components_list_path}" | grep $(implode '.*' ${*:-}) | cut -f1 -d:
+	else
+		if test "${1:-}" = "OR"; then
+			shift
+		fi
+		expression="$(implode ' -e ' ${*:-})"
+		cat "${uvap_components_list_path}" | grep -F ${expression:-''} | cut -f1 -d:
+	fi
+	set +o pipefail
+}
+
+force_uvap_prefix() {
+	sed -E -e 's/^([^uvap_])(.*)$/uvap_\1\2/'
+}
+
+has_uvap_component_attribute() {
+	grep -F "${1:-'foo'}" "${uvap_components_list_path}" | grep -Fq "${2:-'bar'}"
+}
+
+container_name="$(echo "${service_name}" | force_uvap_prefix)"
+
+get_current_release_git_tag() {
+	test_executable git
+	git_tag="$(git -C "${current_directory}" tag --list --sort=-creatordate --merged HEAD 'release/*' | head -n1 | cut -f2 -d/)"
+	if test -z "${git_tag:-}"; then
+		echo "ERROR: finding git release tag on HEAD failed" >&2
+		exit 1
+	fi
+	echo "${git_tag}"
+}
+
+get_docker_image_tag_for_component() {
+	if test -z "${1:-}"; then
+		echo "ERROR: a component name given as an argument is required" >&2
+		exit 1
+	fi
+	git_tag="$(get_current_release_git_tag)"; test ${?} -ne 0 && exit 1
+	echo "ultinous/uvap:${1}_${git_tag}"
+}
+
+docker_container_run() {
+	script_name="$(basename "${0}")"
+	script_name_without_extension="${script_name%".sh"}"
+	service_name="${script_name_without_extension#"run_"}"
+	container_name="$(echo "${service_name}" | force_uvap_prefix)"
+	docker_executable="$(has_uvap_component_attribute "${service_name}" 'nvidia' && echo "nvidia-docker" || echo "docker")"
+	test_executable "${docker_executable}"
+	user_spec="$(id -u):$(id -g)"
+	if test "${image_name:-}" = "_auto_detected_"; then
+		image_name="$(get_docker_image_tag_for_component "${service_name}")"
+	fi
+
+	container_dynamic_options=()
+	test ! -z "${models_dir:-}" && container_dynamic_options+=("--mount" "type=bind,readonly,source=${models_dir},destination=/ultinous_app/models/")
+	if test ! -z "${config_dir:-}"; then
+		container_properties_file_path="${config_dir}/${container_name}.properties"
+		test -e "${container_properties_file_path}" || echo "${error?"ERROR: properties file ${container_properties_file_path} does not exist"}"
+		test -r "${container_properties_file_path}" || echo "${error?"ERROR: properties file ${container_properties_file_path} is not readable"}"
+		test -f "${container_properties_file_path}" || echo "${error?"ERROR: properties file ${container_properties_file_path} is not a regular file"}"
+		container_dynamic_options+=(\
+			"--mount" "type=bind,readonly,source=${config_dir},destination=/ultinous_app/config/${container_name}" \
+			"--env" "${service_name^^}_PROPERTY_FILE_PATHS=/ultinous_app/config/${container_name}/${container_name}.properties" \
+			"--env" "${service_name^^}_MS_PROPERTY_FILE_PATHS=/ultinous_app/config/${container_name}/${container_name}.properties" \
+			"--env" "${service_name^^}_FILE_PATHS=/ultinous_app/config/${container_name}/${container_name}.properties" \
+		)
+		for port in $(grep -Fi ".port=" "${container_properties_file_path}" | cut -f2 -d'=' | tr -d "'" | tr -d '"'); do
+			container_dynamic_options+=("--publish" "${port}:${port}")
+		done
+	fi
+
+	test ! -z "${license_data_file:-}" && container_dynamic_options+=("--mount" "type=bind,readonly,source=${license_data_file},destination=/ultinous_app/license_data.txt")
+	test ! -z "${license_key_file:-}" && container_dynamic_options+=("--mount" "type=bind,readonly,source=${license_key_file},destination=/ultinous_app/licence.key")
+	if has_uvap_component_attribute "${service_name}" 'video' && ls /dev/video* >/dev/null 2>&1; then
+		for video_device in $(ls /dev/video*); do
+			container_dynamic_options+=("--device" "${video_device}:${video_device}:rw")
+		done
+		container_dynamic_options+=("--group-add" "video")
+	fi
+
+	test "$(docker container ls --filter name="${container_name}" --all --quiet | wc -l)" -eq 1 \
+		&& docker container stop "${container_name}" > /dev/null \
+		&& docker container rm "${container_name}" > /dev/null
+	docker pull "${image_name}"
+	${docker_executable} container create \
+		--name "${container_name}" \
+		--user "${user_spec}" \
+		"${container_dynamic_options[@]}" \
+		"${not_our_args[@]/#/}" \
+		"${image_name}"
+
+	docker container start "${container_name}"
+}

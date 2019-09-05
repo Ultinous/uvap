@@ -35,7 +35,7 @@ def main():
            Displays the result on screen ('-d') or stores result in kafka ('-o').
            
            Required topics:
-           - <prefix>.cam.0.lowres.Image.jpg
+           - <prefix>.cam.0.original.Image.jpg
            - <prefix>.cam.0.dets.ObjectDetectionRecord.json
            - <prefix>.cam.0.tracks.TrackChangeRecord.json
            """
@@ -56,7 +56,7 @@ def main():
 
     overlay = cv2.imread('resources/powered_by_white.png', cv2.IMREAD_UNCHANGED)
 
-    image_topic = f"{args.prefix}.cam.0.lowres.Image.jpg"
+    image_topic = f"{args.prefix}.cam.0.original.Image.jpg"
     detection_topic = f"{args.prefix}.cam.0.dets.ObjectDetectionRecord.json"
     track_topic = f"{args.prefix}.cam.0.tracks.TrackChangeRecord.json"
     output_topic_name = f"{args.prefix}.cam.0.tracks.Image.jpg"

@@ -6,19 +6,19 @@ Plays video from a jpeg topic and draws the main points of a human skeleton
 linked with colorful lines.  
 
 Required topics:
-- `<prefix>.cam.0.lowres.Image.jpg`
-- `<prefix>.cam.0.skeletons.SkeletonRecord.json`
+- `skeleton.cam.0.original.Image.jpg`
+- `skeleton.cam.0.skeletons.SkeletonRecord.json`
 
 The results can be displayed with opencv-python or in browser.
 
 ## Display with opencv-python
 
-1. Run the docker container in interactive mode (detailed description can be found [here](../quick_start_guide.md#interactiveDockerMode)):
+1. Run the Docker container in interactive mode (detailed description can be found [here](../quick_start_guide.md#interactiveDockerMode)):
    ```
    $ xhost +
    $ docker run -it --rm --name "python_env" \
    -v "/tmp/.X11-unix":"/tmp/.X11-unix" \
-   -v "$HOME/uvap/demo_applications":"/ultinous_app" \
+   -v "${UVAP_HOME}/demo_applications":"/ultinous_app" \
    -e DISPLAY=$DISPLAY \
    --net=uvap \
    --env="QT_X11_NO_MITSHM=1" \
@@ -35,7 +35,7 @@ The results can be displayed with opencv-python or in browser.
       <DOCKER># cd /ultinous_app
       <DOCKER># /usr/bin/python3.6 apps/uvap/skeleton_DEMO.py kafka:9092 skeleton -f -d
       ```
-   1. Write output to `<prefix>.cam.0.skeletons.Image.jpg`:
+   1. Write output to `skeleton.cam.0.skeletons.Image.jpg`:
       ```
       <DOCKER># cd /ultinous_app
       <DOCKER># /usr/bin/python3.6 apps/uvap/skeleton_DEMO.py -d kafka:9092 skeleton -o
@@ -46,15 +46,16 @@ The generally web display demo description can be found [here](../quick_start_gu
 
 1. Use case of the `run_demo.sh` (from the [Topic Writer Demo](../quick_start_guide.md#topicWriterDemoStarting) chapter):
    ```
-   $ ~/uvap/scripts/run_demo.sh --name-of-demo skeleton --demo-mode skeleton
+   $ "${UVAP_HOME}"/scripts/run_demo.sh --demo-name skeleton \
+     --demo-mode skeleton -- --net uvap
    ```
    :exclamation: **Warning** :exclamation: After the first run of these scripts
-    [set_retention.sh](../quick_start_guide.md#setRetention) script should be executed 
+    [set_retention.sh](../quick_start_guide.md#setRetention) script should be executed
     manually because new (`*.Image.jpg`) topics are created.
 
 1. Starting UVAP wep player (detailed description can be found [here](../quick_start_guide.md#playInTheBowser)):
    ```
-   $ ~/uvap/scripts/run_web_player.sh --config-directory  "$HOME/uvap/models/uvap-web_player"
+   $ "${UVAP_HOME}"/scripts/run_web_player.sh -- --net uvap
    ```
 
 1. Display in web browser

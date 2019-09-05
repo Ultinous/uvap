@@ -14,32 +14,37 @@
 <a name="architecture"></a>
 # Architecture
 
-UVAP implements a **dataflow programming model** where the data is processed by multiple simple processors (potentially running on different hosts) connected by channels. This model is widely used in the video processing domain for example in [ffmpeg](https://ffmpeg.org) or [gstreamer](https://gstreamer.freedesktop.org). UVAP uses [Apache Kafka](https://kafka.apache.org) for data channels and [Docker](https://www.docker.com) to run the processors. These technologies provides a generic and flexible framework to build stream processing applications.
+UVAP implements a **dataflow programming model** where the data is processed by multiple simple processors (potentially running on different hosts) connected by channels. This model is widely used in the video processing domain for example in [ffmpeg](https://ffmpeg.org) or [gstreamer](https://gstreamer.freedesktop.org). UVAP uses [Apache Kafka](https://kafka.apache.org) for data channels and [Docker](https://www.docker.com) to run the processors. These technologies provide a generic and flexible framework to build stream processing applications.
 
-The **microservice** term is used in the rest of the document for processors. The main use case of UVAP is real-time video analysis where all processors run continuously processing potentially never ending data. A microservice can take zero or more kafka topics as input and produce zero or more kafka topics as output. In kafka terminology they are consumers, producers or stream processors. Microservices are packaged and run as docker containers. Microservices typically process data in real-time, however it is possible to run them on historical data.
+The **microservice** term is used in the rest of the document for processors. The main use case of UVAP is real-time video analysis where all processors run continuously processing potentially never ending data. A microservice can take zero or more kafka topics as input and produce zero or more kafka topics as output. In kafka terminology they are consumers, producers or stream processors. Microservices are packaged and run in Docker containers. Microservices typically process data in real-time, however it is possible to run them on historical data.
 
 The data channels between microservices are **Kafka topics**. Head of the topics are kept in persistent storage for configurable time or size. For example the user can configure to keep the last two weeks of video data and keep all object detentions for a year.
 
 ![](uvap_architecture.gif)
 *Figure 1. Data flow architecture of UVAP. Rectangles are data channels, ellipses are processing units.*
->**Note:** Node labels in this figure are not technical names. Actual topic names can be listed with 
+>**Note:** Node labels in this figure are not technical names. Actual topic names can be listed with
 UVAP [helper scripts](../quick_start_guide.md#helperScripts).
 
 
-[Multi graph runner (MGR)](microservices/mgr/mgr.md) takes the video streams and runs all deep learning based image 
-processing models (eg.: head detection, face recognition). [MGR](microservices/mgr/mgr.md) outputs only lightweight 
-data such as head detection streams or face recognition feature vectors. **It is very important the uncompressed video 
-data never transfered over kafka, all low level image processing is done inside [MGR](microservices/mgr/mgr.md).** 
+[Multi graph runner (MGR)](microservices/mgr/mgr.md) takes the video streams and runs all deep learning based image
+processing models (eg.: head detection, face recognition). [MGR](microservices/mgr/mgr.md) outputs only lightweight
+data such as head detection streams or face recognition feature vectors. **It is very important the uncompressed video
+data never transfered over kafka, all low level image processing is done inside [MGR](microservices/mgr/mgr.md).**
 Kafka is only used to exchange lightweight data.
 
-[Kafka Tracker microservice](microservices/tracker.md) uses *Head Detections* kafka topic produced by 
-[MGR](microservices/mgr/mgr.md) and produces *Track Changes* topic. A track is a sequence of head detections of an 
-individual on a video stream from the first detection to the disappearance. Besides the path of movement, a track can 
+[Kafka Tracker microservice](microservices/tracker.md) uses *Head Detections* kafka topic produced by
+[MGR](microservices/mgr/mgr.md) and produces *Track Changes* topic. A track is a sequence of head detections of an
+individual on a video stream from the first detection to the disappearance. Besides the path of movement, a track can
 help to calculate how long an individual stayed in an area of interest.
 
-[Kafka Pass Detection microservice](microservices/kafka_pass_detection.md) uses *Track Changes* 
-kafka topic produced by [Kafka Tracker microservice](microservices/tracker.md) and produces *Pass Detections* topic. 
-If one or more directed polylines (pass lines) are specified in the microservice's configuration, 
+[Basic Reidentification microservice](microservices/reidentification/basic_reidentification.md) uses Face_Feature_Vectors 
+kafka topics produced by [MGR](microservices/mgr/mgr.md) and produces Reidentification_Events topic. 
+An individual can be registered at the first appearance on a camera stream and can be reidentified later, even on a 
+different camera stream. This can be very helpful at waiting time estimation.
+
+[Kafka Pass Detection microservice](microservices/kafka_pass_detection.md) uses *Track Changes*
+kafka topic produced by [Kafka Tracker microservice](microservices/tracker.md) and produces *Pass Detections* topic.
+If one or more directed polylines (pass lines) are specified in the microservice's configuration,
 the service detects and produces records whenever a track intersects a pass line. Pass Detection helps to
 detect whenever an individual enters or leaves an area of interest.
 <a name="dataModel"></a>
@@ -64,14 +69,13 @@ demo.cam.117.dets.ObjectDetectionRecord.json
 
 This topic is produced by MGR, `dets` here refers to the MGR data node. `ObjectDetectionRecord` refers to the schema of the data, it is described in the [data model](../../proto_files/ultinous/proto/common/kafka_data.proto).
 
-
 `json` describes the serialization format. Currently only json is supported for structured data. It is recommended to turn lz4 compression on in the kafka broker to spare storage and bandwidth as uncompressed json can be prohibitive.
 
 ## Topic schemas
 
 As mentioned above the data model is **normalized**. The schema of all the structured topics are described [here](../../proto_files/ultinous/proto/common/kafka_data.proto) with comments embedded for explanation. The schema of the value part of the kafka records are defined in proto messages ending with ```Record```. The comment before the definition describes the key as well.
 
-####Example
+### Example
 
 ```
 // Detection record.
@@ -103,7 +107,7 @@ $ kafkacat -C -b localhost -t demo.dets.ObjectDetectionRecord.json -o-1 -f "%k,%
 ```
 ### Technical progress records
 
-Note that in the detection topic example there are timestamps (eg.:`1561981650803`) with no detections, only a record with `end_of_frame` set to `true`. Different topics have different technical progress record properties eg. records produced by the [Kafka Tracker microservice](microservices/tracker.md) contain `end_of_track` property.   
+Note that in the detection topic example there are timestamps (eg.:`1561981650803`) with no detections, only a record with `end_of_frame` set to `true`. Different topics have different technical progress record properties e.g. records produced by the [Kafka Tracker microservice](microservices/tracker/tracker.md) contain `end_of_track` property.   
 In general all microservices emit progress (or heartbeat) records to make joining these topics easier in real-time.
  Therefore when processing detections, if the `end_of_frame` is *true*, the microservice can emit all the information for the particular frame.
 
@@ -116,14 +120,14 @@ Records in topics produced by a [microservice](#microservices) often contain ref
 #### Example
 
 The **detection_key** property of 
-[this TrackChangeRecord](microservices/tracker.md#trackChangeRecord) produced by [Kafka Tracker microservice](microservices/tracker.md) refers to an 
+[this TrackChangeRecord](microservices/tracker/tracker.md#trackChangeRecord) produced by [Kafka Tracker microservice](microservices/tracker/tracker.md) refers to an 
 [ObjectDetectionRecord](../../proto_files/ultinous/proto/common/kafka_data.proto) **key** 
 and an [AgeRecord](../../proto_files/ultinous/proto/common/kafka_data.proto) **key** 
 in two other topics produced by [MGR](microservices/mgr/mgr.md). 
 
-> Note: **key** in [TrackChangeRecord](microservices/tracker.md#trackChangeRecord) 
+> Note: **key** in [TrackChangeRecord](microservices/tracker/tracker.md#trackChangeRecord) 
 is usually not equal to its **detection_key**, 
-for its **key** refers to the detection of the *first* record of the track. ([Learn more...](microservices/tracker.md#trackChangeRecord))
+for its **key** refers to the detection of the *first* record of the track. ([Learn more...](microservices/tracker/tracker.md#trackChangeRecord))
 
 This simple example is only a sneak peek of UVAP's capabilities. For example with [Kafka Pass Detection microservice](microservices/kafka_pass_detection.md) even more information can
 be received about a [TrackChangeRecord](microservices/tracker.md#trackChangeRecord) (which can be associated with [AgeRecord](../../proto_files/ultinous/proto/common/kafka_data.proto)s).
@@ -136,31 +140,33 @@ As the data model is normalized it is common to read and join multiple topics. J
 
 ## [Multi graph runner (MGR)](microservices/mgr/mgr.md)
 
-## [Kafka Tracker](microservices/tracker.md)
+## [Kafka Tracker](microservices/tracker/tracker.md)
 
 ## [Kafka Pass Detection](microservices/kafka_pass_detection.md)
 
-Future versions of UVAP will contain many more microservices such as reidentification.
+## [Basic Reidentification](microservices/reidentification/basic_reidentification.md)
+
+Future versions of UVAP are going to contain many more microservices such as pass detection, pass counting and ROI filter.
 
 <a name="tutorial"></a>
 # Tutorial
-Comming soon...
+Coming soon...
 
 <a name="extendingUVAP"></a>
 # Extending UVAP
 ## Environment for Python Developers
-Our demos run in the docker because this solution is quick and easy. For more information please visit [Quick start guide](quick_start_guide.md).  
+UVAP demos run in Docker environment because this solution is quick and easy. For more information see [Quick start guide](quick_start_guide.md).  
 The developers require a local environment to solve real world problems instead of starting a few pre-written demos.
-In this chapter you will find:
-- The same installation package like in the **uvap_demo_applications** docker container, and
-- How to install a useful editor for python programming language.
+This chapter contains the following parts:
+- Installation package of the **uvap_demo_applications** Docker container
+- How to install a useful editor for python programming language
 
 ### Requirements
 - Ubuntu 18.04 Bionic Beaver
 - Privileged access to your Ubuntu System as root or via sudo command is required.
 
-### Python3.6
-If you would like to create the same environment like **uvap_demo_applications** docker container need to run the following group of commands:
+### Installation package
+In order to create the same environment like **uvap_demo_applications** Docker container, the following group of commands are required to execute:
 ```
 sudo apt-get update \
 && sudo apt-get -y install \
@@ -178,6 +184,8 @@ sudo apt-get update \
 && pip3 install \
     confluent-kafka \
     numpy \
+    jinja2 \
+    pyyaml \
     scipy \
     pandas \
     protobuf \
@@ -188,6 +196,7 @@ sudo apt-get update \
     xlrd \
     opencv-python \
     gevent \
+    javaproperties \
     sortedcontainers
 ```
 ### PyCharm

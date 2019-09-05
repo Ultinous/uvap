@@ -1,0 +1,120 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This proto describes the overall configuration schemes of UVAP microservices
+//
+
+syntax = "proto3";
+
+package ultinous.proto.kafka;
+
+option java_package = "com.ultinous.proto.kafka";
+option java_multiple_files = true;
+
+import "ultinous/proto/common/kafka_config.proto";
+
+/**
+ * Referencable username - password combination.
+ */
+message AuthDef
+{
+  string id = 1;
+  string user_name = 2; ///< SASL Authentication user name. Can be empty.
+  string password = 3; ///< SASL Authentication password. Can be empty.
+}
+
+/**
+ * Multiple AuthDef instances
+ */
+message AuthDefs
+{
+  repeated AuthDef auth_defs = 1; ///< I haven't found any other way.
+}
+
+/**
+ * Basic connection parameters for a topic
+ */
+message Topic
+{
+  string broker_list = 1;
+  string name = 2;
+  string user_name = 3; ///< SASL Authentication user name. Can be empty.
+  string password = 4; ///< SASL Authentication password. Can be empty.
+  string auth_ref = 5; ///< References to an AuthDef by its id. Must not be set if user_name or password is non-empty.
+}
+
+/**
+ * Opening and reading options for a source topic.
+ */
+message SourceTopicOptions
+{
+  enum Start
+  {
+    START_BEGIN = 0;
+    START_DATETIME = 1;
+    START_NOW = 2;
+    START_END = 3;
+  }
+  enum End
+  {
+    END_NEVER = 0;
+    END_DATETIME = 1;
+    END_END = 2;
+  }
+
+  string consumer_group = 1; ///< Kafka consumer group. If left empty an UUID will be generated.
+
+  Start start = 2;
+  /**
+   * Start time for when start == DATETIME.
+   * ISO-8601: Complete representation Extended format (opt. millisec and tz; opt. [T] time designator; opt. [:] time separator in tz).
+   *   Examples:
+   *   "2019-04-08T10:10:24.123"
+   *   "2019-04-08 10:10:24.123 +01"
+   *   "2019-04-08 10:10:24.123 +01:00"
+   *   "2019-04-08 10:10:24.123 +0100"
+   * Note: Maximum year to set is 2037 (known limitation)
+   */
+  string start_date_time = 3;
+
+  End end = 4;
+  /**
+   * End time for when end == DATETIME.
+   * ISO-8601: Complete representation Extended format (opt. millisec and tz; opt. [T] time designator; opt. [:] time separator in tz).
+   *   Examples:
+   *   "2019-04-08T10:10:24.123"
+   *   "2019-04-08 10:10:24.123 +01"
+   *   "2019-04-08 10:10:24.123 +01:00"
+   *   "2019-04-08 10:10:24.123 +0100"
+   * Note: Maximum year to set is 2037 (known limitation)
+   */
+  string end_date_time = 5;
+}
+
+/**
+ * Opening and writing options for a target topic.
+ */
+message TargetTopicOptions
+{
+  enum Handling
+  {
+    INVALID = 0;
+    REPLACE = 1; // Delete target topic.
+    CHECK_TS = 2; // Raise error if topic exists with newer latest timestamp.
+    SKIP_TS = 3; // Skip events up to the latest timestamp in target topic.
+  }
+  Handling handling = 1;
+}
+
+/**
+ * Reidentification Microservice Configuration
+ */
+message ReidMSConfig
+{
+  SourceTopicOptions source_options = 1; ///< Optional. Options for opening source topics.
+  repeated Topic sources = 2; ///< Source topics
+
+  TargetTopicOptions target_options = 3; ///< Options for opening target topic.
+  Topic target = 4; ///< Target topic
+
+  ReidConfigRecord config_data = 5; ///< Reidentification algorithm configuration.
+}

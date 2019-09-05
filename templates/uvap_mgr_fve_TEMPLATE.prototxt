@@ -1,0 +1,107 @@
+engines_file: "{{ ENGINES_FILE }}"
+environment {
+  debug_level: 2
+  analysis_thread_count: 2
+  drop_on: {}
+  kafka_broker_list: "{{ KAFKA_BROKER_LIST }}"
+  kafka_topic_prefix: "{{ KAFKA_TOPIC_PREFIX }}."
+}
+
+{% for INPUT_STREAM in INPUT_STREAMS %}
+data_run {
+  input {
+    file_name: "{{ INPUT_STREAM }}"
+    drop_rate: {{ DROP_RATE }}
+  }
+  data_flow {
+    data_node {type: FRAME name: "input"}
+    data_node {type: DETECTIONS name: "dets_raw"}
+    data_node {type: DETECTIONS name: "dets"}
+    data_node {type: HEAD_POSE_3DS name: "poses"}
+    data_node {type: DETECTIONS name: "dets_filtered"}
+    data_node {type: FEATURE_VECTORS name: "fvecs"}
+
+    process_node {
+      type: OBJ_DETECTOR
+      name: "obj_det"
+      logging: true
+      obj_det_config {
+        type: HEAD
+        input: "input"
+        bounding_boxes: "dets_raw"
+        min_height_in_pixels: 50
+        max_height_in_pixels: 512
+        confidence_threshold: 0.4
+        image_scale_factor: 1.0
+      }
+    }
+    process_node {
+      type: OBJ_FILTER
+      name: "det_filter"
+      obj_filter_config {
+        output_bounding_boxes: "dets"
+        input_bounding_boxes: "dets_raw"
+        filter_detection_confidence_threshold: 0.7
+      }
+    }
+    process_node {
+      type: HEAD_POSE_CALC
+      name: "headposecalc"
+      head_pose_calc_config {
+        input_frame: "input"
+        input_bounding_boxes: "dets"
+        output_poses: "poses"
+        valid_box_min_size: 72
+      }
+    }
+    process_node {
+      type: HEAD_POSE_FILTER
+      name: "headposefilter"
+      head_pose_filter_config {
+        input_bounding_boxes: "dets"
+        input_poses: "poses"
+        output_bounding_boxes: "dets_filtered"
+        head_pose_3d_threshold {
+          minPitch: -10.0
+          maxPitch: 10.0
+          minJaw: -20.0
+          maxJaw: 20.0
+          minRoll: -20.0
+          maxRoll: 20.0
+        }
+      }
+    }
+    process_node {
+      type: FACE_FEATURE_CALC
+      name: "facerec"
+      face_feature_calc_config {
+        input_frame: "input"
+        input_dets: "dets_filtered"
+        output_features: "fvecs"
+      }
+    }
+    process_node {
+      type: KAFKA_OUTPUT
+      name: "fvecs_out"
+      kafka_output_config {
+        topic_name: "cam.{{loop.index - 1}}.fvecs.FeatureVectorRecord.json"
+        input_node: "fvecs"
+      }
+    }
+    process_node {
+      type: KAFKA_OUTPUT name: "vid_out"
+      kafka_output_config: {
+        topic_name: "cam.{{loop.index - 1}}.original.Image.jpg"
+        input_node: "input"
+      }
+    }
+    process_node {
+      type: KAFKA_OUTPUT name: "det_out"
+      kafka_output_config {
+        topic_name: "cam.{{loop.index - 1}}.dets.ObjectDetectionRecord.json"
+        input_node: "dets"
+      }
+     }
+  }
+}
+{% endfor %}

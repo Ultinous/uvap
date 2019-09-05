@@ -94,13 +94,13 @@ should be in JSON format as defined in [this proto3 message](../../../proto_file
     }
    ```
 - `ultinous.service.kafka.passdet.monitoring.port`: Monitoring server port
-  - Required 
+  - Required
   - Value type: `uint16`
 - `ultinous.service.kafka.passdet.monitoring.threads`: Monitoring server thread pool size
   - Default: `1`
   - Value type: `uint16`
 
-Template properties file can be found [here](../../../templates/uvap_kafka_passdet_TEMPLATE.properties).
+Template properties file can be found [here](../../../templates/uvap_kafka_passdet_base_TEMPLATE.properties).
 
 <a name="passDetectionRecord"></a>
 ## Record schemas
@@ -108,37 +108,82 @@ The schema definition of `TrackChangeRecord` and `PassDetectionRecord` can be fo
 
 Example of a `PassDetectionRecord` from Kafka:
 ```
+PASS_CANDIDATE:
 {
   "timestamp": 1564493689341,
   "key": "pass_01",
   "value": {
-    "pass_id":"pass_01",
-    "cross_dir":"RL",
-    "section_idx":0,
-    "cross_point":{
-      "x":511,
-      "y":500
-     },
-     "track_key":"1564493689041_50187",
-     "is_extrapolated":false,
-     "end_of_track_passes":false
-   }
+    "type": "PASS_CANDIDATE",
+    "pass_candidate": {
+      "pass": {
+        "id": {
+          "track_key": "1564493689041_50187",
+          "serial": 0
+        },
+        "pass_line_id": "pass_01",
+        "cross_dir": "RL",
+        "section_idx": 0,
+        "cross_point": {
+          "x": 511,
+          "y": 500
+        }
+      },
+      "is_extrapolated": false
+    }
+  },
+  "headers": "[('format', b'json'), ('type', b'PassDetectionRecord')]"
+}
+PASS_REALIZED:
+{
+  "timestamp": 1564493689341,
+  "key": null,
+  "value": {
+    "type": "PASS_REALIZED",
+    "pass_realized": {
+      "pass_event_ref": {
+        "track_key": "1564493689041_50187",
+        "serial": 0
+      }
+    }
+  },
+  "headers": "[('format', b'json'), ('type', b'PassDetectionRecord')]"
+},
+HEARTBEAT:
+{
+  "timestamp": 1564493689341,
+  "key": null,
+  "value": {
+    "type": "HEARTBEAT"
+  },
+  "headers": "[('format', b'json'), ('type', b'PassDetectionRecord')]"
+}
+END_OF_TRACK:
+{
+  "timestamp": 1564493689341,
+  "key": null,
+  "value": {
+    "type": "END_OF_TRACK",
+    "end_of_track": {
+      "track_key": "1564493689041_50187"
+    }
+  },
+  "headers": "[('format', b'json'), ('type', b'PassDetectionRecord')]"
 }
 ```
 **Note**:
 The key is empty:
 - when the record is only a heartbeat message
 - or when the record is an end-of-track signal
-- or if the record is a [Pass Confirmation](#passConfirmation). 
+- or if the record is a [Pass Realization](#passRealization).
 
-<a name="passConfirmation"></a>
-> **Pass Confirmation**: the indication of a "real" pass event.
+<a name="passRealization"></a>
+> **Pass Realization**: the indication of a "real" pass event.
 Sometimes a *[TrackChangeRecord](tracker.md#trackChangeRecord)* which triggers a Pass Detection is not derived from a 
 "real" detection, but the track change is only a [prediction of the next track position]((tracker.md#emptyDetectionKey)). 
-In this case the **key** of the *[PassDetectionRecord](#passDetectionRecord)* is the crossed pass line's id 
-(defined in [`ultinous.service.kafka.passdet.config`](#configuration)). After the prediction the track usually continues 
-with a "real" detection. This occurrence is a *Pass Confirmation*. In this case a new *[PassDetectionRecord](#passDetectionRecord)*
- is inserted to the *target* topic with an **empty *key*** but with the appropriate **non empty *pass_id***.  
+In this case the **is_extrapolated** field of the *[PassDetectionRecord](#passDetectionRecord)* is **true**. After the prediction the track usually continues
+with a "real" detection. This occurrence is a *Pass Realization*. In this case a new *[PassDetectionRecord](#passDetectionRecord)*
+ is inserted to the *target* topic with an **empty *key*** but with the appropriate **non empty *track_key***.  
+*[Example image](../../images/pass_detection_example.png#)*
 
 <a name="quickStartGuide"></a>
 ## [Quick Start Guide](../../quick_start_guide.md)

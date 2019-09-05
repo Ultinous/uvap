@@ -111,7 +111,6 @@ data_run:
       logging: false
       head_pose_filter_config:
       {
-        input_frame: "input"
         input_bounding_boxes: "dets"
         input_poses: "poses"
         output_bounding_boxes: "dets_filtered"
@@ -142,8 +141,8 @@ data_run:
     }
 
     # kafka output
-    process_node:{type: KAFKA_OUTPUT name: "vid_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.lowres.Image.jpg"                      input_node: "input"}}
-    process_node:{type: KAFKA_OUTPUT name: "anonymized_vid_out" kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.anonymized_lowres.Image.jpg"           input_node: "anonymized"}}
+    process_node:{type: KAFKA_OUTPUT name: "vid_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.original.Image.jpg"                      input_node: "input"}}
+    process_node:{type: KAFKA_OUTPUT name: "anonymized_vid_out" kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.anonymized_original.Image.jpg"           input_node: "anonymized"}}
     process_node:{type: KAFKA_OUTPUT name: "frameinfo_out"      kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.frameinfo.FrameInfoRecord.json"        input_node: "frameinfo"}}
     process_node:{type: KAFKA_OUTPUT name: "det_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.dets.ObjectDetectionRecord.json"       input_node: "dets"}}
     process_node:{type: KAFKA_OUTPUT name: "pose_out"           kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.poses.HeadPose3DRecord.json"           input_node: "poses"}}

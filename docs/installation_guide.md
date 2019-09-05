@@ -1,4 +1,4 @@
-<link href="style.css" rel="stylesheet"></link>
+<link href="style.css" rel="stylesheet"/>
 
 # UVAP Installation Guide
 ## Table of contents
@@ -7,6 +7,7 @@
    1. [Camera](#camera)
    1. [Server](#server)
 1. [Software requirements](#software_req)
+   1. [Required packages](#packages)
    1. [Create New user for UVAP](#newUser)
    1. [Download Helper Script](#downloadHelperScripts)
    1. [Install NVIDIA video driver](#NVIDIA_driver)
@@ -77,6 +78,22 @@ https://tutorials.ubuntu.com/tutorial/tutorial-install-ubuntu-desktop
 
 The following components should be applied to be able to install the UVAP on the node.
 
+<a name="packages"></a>
+### Required packages
+
+Some Ubuntu (Debian) packages are needed to be installed in order to steps of UVAP guides work. These packages can be installed with the following command:
+```
+$ sudo apt install coreutils adduser git software-properties-common curl wget tar gettext-base
+```
+Please, make sure, that _bash_ is installed with a version number at least 4.0 with the following command:
+```
+$ dpkg-query --show bash
+```
+Expected output showing that _bash_ is installed with version _4.4.18-2ubuntu1.2_:
+```
+bash	4.4.18-2ubuntu1.2
+```
+
 <a name="newUser"></a>
 ### Create New user for UVAP
 
@@ -95,9 +112,10 @@ The following components should be applied to be able to install the UVAP on the
 
 You have to download a few helper scripts which makes it easier to download and configure the UVAP related data files.
 ```
-$ sudo apt install git
 $ cd ~
 $ git clone https://github.com/Ultinous/uvap.git uvap
+$ export UVAP_HOME=~/uvap
+$ echo "export UVAP_HOME=${UVAP_HOME}" >> "${HOME}/.bashrc"
 ```
 You may check the README.md file for a brief overview of this repository.
 
@@ -120,23 +138,21 @@ The UVAP requires a specific GPU driver installed to run properly.
 ### Docker
 The UVAP uses a containerized solution provided by Docker. This also has to be extended with an NVIDIA driver related add-on.
 
-1. Install curl to be able to download files from command line
+1. Add Docker source to the apt repositories
    ```
-   $ sudo apt install curl
-   ```
-1. Add docker source to the apt repositories
-   ```
-   $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+   $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+     sudo apt-key add -
    $ sudo add-apt-repository "deb [arch=amd64] \
      https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
    $ sudo apt-get install docker-ce
    ```
-1. Add your unix user to the docker unix group
+1. Add your unix user to the `docker` unix group
    ```
    $ sudo adduser ultinous docker
    ```
-1. Reboot the node to use the previous step will take effect (and log in with _ultinous_ user).
-1. Enable nvidia-persistenced to prevent the sleep state of the GPU (only on Server machine)
+1. Log out from the graphical environment and log in again, so the
+   previous step will take effect.
+1. Enable nvidia-persistenced to prevent the sleep state of the GPU (this is necessary only on a server machine)
    ```
    $ cd /etc/systemd/system/
    $ sudo mkdir nvidia-persistenced.service.d
@@ -149,46 +165,31 @@ The UVAP uses a containerized solution provided by Docker. This also has to be e
    $ sudo systemctl daemon-reload
    $ sudo systemctl restart nvidia-persistenced.service
    ```
-1. Install NVIDIA docker
+1. Install NVIDIA Docker
    ```
-   $ curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
-   $ distribution=$(. /etc/os-release; echo $ID$VERSION_ID)
-   $ curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list \
+   $ curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | \
+     sudo apt-key add -
+   $ distribution=$(. /etc/os-release; echo ${ID}${VERSION_ID})
+   $ curl -s -L https://nvidia.github.io/nvidia-docker/${distribution}/nvidia-docker.list \
      | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
    $ sudo apt-get update
    $ sudo apt-get install nvidia-docker2
    $ sudo systemctl restart docker
    ```
-1. Test the docker environment
+1. Test the Docker environment
    ```
-   $ nvidia-docker run --rm nvidia/cuda:10.0-runtime-ubuntu18.04 nvidia-smi
+   $ nvidia-docker run --rm nvidia/cuda:10.0-runtime-ubuntu18.04 \
+     nvidia-smi --query-gpu="gpu_name" --format="csv,noheader"
    ```
-   You should see a similar output like the following:
+   You should see the list of the names of the GPU devices, for example:
    ```
-   +-----------------------------------------------------------------------------+
-   | NVIDIA-SMI 410.104      Driver Version: 410.104      CUDA Version: 10.0     |
-   |-------------------------------+----------------------+----------------------+
-   | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
-   | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
-   |===============================+======================+======================|
-   |   0  GeForce GTX 106...  On   | 00000000:01:00.0 Off |                  N/A |
-   | N/A   47C    P8     5W /  N/A |    250MiB /  6078MiB |      6%      Default |
-   +-------------------------------+----------------------+----------------------+
-
-   +-----------------------------------------------------------------------------+
-   | Processes:                                                       GPU Memory |
-   |  GPU       PID   Type   Process name                             Usage      |
-   |=============================================================================|
-   +-----------------------------------------------------------------------------+
+   GeForce GTX 1050 Ti
+   GeForce GTX 1060 Ti
    ```
-1. After the nvidia testing, the nvidia/cuda docker image is unnecessary.  
-   Find the [IMAGE_ID] of nvidia/cuda image from this list:
+1. After the nvidia testing, the nvidia/cuda Docker image is unnecessary.
+   Remove the Docker image:
    ```
-   $ docker images
-   ```
-   Remove docker image:
-   ```
-   $ docker rmi [IMAGE_ID]
+   $ docker image rm nvidia/cuda:10.0-runtime-ubuntu18.04
    ```
 
 <a name="additionalTools"></a>
@@ -205,11 +206,6 @@ There are some useful utilities which can be handy during the testing
    ```
    $ sudo apt-get install ffmpeg
    ```
-1. kafkacat  
-   This command line tool can be used to dump kafka streams
-   ```
-   $ sudo apt-get install kafkacat
-   ```
 
 <a name="startZookeeperAndKafka"></a>
 ### Starting Zookeeper and Kafka
@@ -219,26 +215,30 @@ implement some custom solutions based on the streams coming out. The way how Kaf
 is just an example, which can be easily and quickly carried out. The developer guide covers the
 necessary steps to permanently install and configure a Kafka environment that is suitable for
 production use cases. The following steps should be performed in a single boot up period of the
-node. After a reboot each step should be stared all over.
+node. After a reboot each step should be started all over.
 
-1. Edit your /etc/hosts file: add `zookeeper` and `kafka` as names for `127.0.0.1`.
-   ```
-   $ echo -e -n "\n127.0.0.1 kafka zookeeper\n" | sudo tee -a /etc/hosts
-   ```
-1. Create a separate internal network for the docker-containerized environment
+1. Create a separate internal Docker network:
    ```
    $ docker network create uvap
    ```
-1. Start / restart a Zookeeper container
+   Later, for each Docker container created in this network, Docker will
+   automatically create a DNS name - resolvable inside this network -,
+   which will be the name of the Docker container, and will have the
+   address of the Docker container.
+1. Start / restart a Zookeeper container:
    ```
    $ docker rm -f zookeeper # Not necessary if not running
-   $ docker run --net=uvap -d --name=zookeeper -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-zookeeper:4.1.0
+   $ docker run --net=uvap -d --name=zookeeper \
+     -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-zookeeper:4.1.0
    ```
-1. Start / restart a Kafka container
+1. Start / restart a Kafka container:
    ```
    $ docker rm -f kafka # Not necessary if not running
-   $ docker run --net=uvap -d -p 9092:9092 --name=kafka -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
-     -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+   $ docker run --net=uvap -d -p 9092:9092 --name=kafka \
+     -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+     -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 \
+     -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+     -e KAFKA_MESSAGE_MAX_BYTES=10485760 \
      -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-kafka:4.1.0
    ```
 1. Wait for 30 seconds, then check if the containers are still running:
@@ -251,24 +251,28 @@ node. After a reboot each step should be stared all over.
    running
    ```
 1. Test your kafka configuration
-   1. Create a kafka topic
+   1. Create a kafka topic:
       ```
-      $ docker exec -it kafka /bin/bash -c 'kafka-topics --create --zookeeper zookeeper:2181 \
-        --replication-factor 1 --partitions 1 --topic test'
+      $ docker exec kafka kafka-topics --create \
+        --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 \
+        --topic test
       ```
       It should display:  
       ```
       Created topic "test".
       ```
-   1. Test the stream
+   1. Test the stream:
       ```
-      $ docker exec -it kafka /bin/bash -c 'RND="${RANDOM}${RANDOM}${RANDOM}"; \
-          echo $RND | kafka-console-producer --broker-list localhost:9092 --topic test > /dev/null \
-          && kafka-console-consumer --bootstrap-server localhost:9092 --topic test \
-            --from-beginning --timeout-ms 1000 2> /dev/null \
-            | grep -Fq $RND; if [ $? -eq 0 ]; then echo OK; else echo ERROR; fi'
+      $ docker exec kafka /bin/bash -c \
+        'RND="${RANDOM}${RANDOM}${RANDOM}"; echo $RND | \
+        kafka-console-producer --broker-list localhost:9092 --topic test \
+        > /dev/null && kafka-console-consumer --bootstrap-server \
+        localhost:9092 --topic test --from-beginning --timeout-ms 1000 \
+        2> /dev/null | grep -Fq $RND; if [ $? -eq 0 ]; then echo OK; \
+        else echo ERROR; fi'
       ```
-      It should print `OK`
+      It should print `OK`. Running it the first time may also print a
+      warning, which is not a problem, and can be ignored.
 
 <a name="privateAccess"></a>
 ## Licensed access
@@ -279,18 +283,18 @@ granted.
 <a name="collectingInformationForLicensing"></a>
 ### Collecting information for licensing
 
-1. Collect the HW information for licence generation
+1. Collect the HW information for license generation
    ```
    $ mkdir -p /tmp/uvap && nvidia-docker run --rm -u $(id -u) \
-     ultinous/licence_data_collector > /tmp/uvap/data.txt
+   ultinous/licence_data_collector > /tmp/uvap/data.txt
    ```
 1. The file `/tmp/uvap/data.txt` will be needed in a later step to proceed with the installation, so
 please, save it to an appropriate place.
 1. On https://hub.docker.com/ please create an account for yourself. This will be required to have
-access to the docker images of UVAP. :exclamation: **Warning** :exclamation: The password of a
-docker account will be stored on your computer in a plain-text format, so please use an
+access to the Docker images of UVAP. :exclamation: **Warning** :exclamation: The password of a
+Docker account will be stored on your computer in a plain-text format, so please use an
 auto-generated password, which you are using nowhere else.
-1. Log in to your docker account
+1. Log in to your Docker account
    ```
    $ docker login
    ```
@@ -299,14 +303,16 @@ auto-generated password, which you are using nowhere else.
 ### Requesting access to licensed resources
 
 1. Please, send the following information to `support@ultinous.com`:
-   1. Subject of email: `UVAP - Requesting access to licenced resources`
-   1. Your docker hub account ID, which you have created in the previous step
+   1. Subject of email: `UVAP - Requesting access to licensed resources`
+   1. Your DockerHub account ID, which you have created in the previous step
    1. Your HW information, which can be found in the file `/tmp/uvap/data.txt`
 1. Based on the above information you will receive:
-   1. The licence text and key.  Save the licence text as `~/uvap/licence/licence.txt` and the key as `~/uvap/licence/licence.key`.
-   1. Access to the docker repository `ultinous/uvap`
+   1. The license text and key.  Save the license text as
+   `"${UVAP_HOME}/license/license.txt"` and the key as
+   `"${UVAP_HOME}/license/license.key"`.
+   1. Access to the Docker repository `ultinous/uvap`
    1. A download URL for AI resources (valid for only 72 hours)
-1. The licence is provided within 2 files:  
+1. The license is provided within 2 files:  
    E.g.: license.txt:
    ```
    Product Name    = UVAP Multi Graph Runner
@@ -314,7 +320,7 @@ auto-generated password, which you are using nowhere else.
    Expiration Date = 2018-01-01
    Customer        = Demo User
    ```
-   licence.key:
+   license.key:
    ```
    --- No human readable key data ---
    ```
@@ -323,8 +329,8 @@ auto-generated password, which you are using nowhere else.
 1. Download the AI resources  
    In the following command, please substitute `[DOWNLOAD_URL]` with the download URL received from `support@ultinous.com`
    ```
-   $ mkdir -p ~/uvap/models
-   $ cd ~/uvap/models
+   $ mkdir -p "${UVAP_HOME}/models"
+   $ cd "${UVAP_HOME}/models"
    $ wget -q -O - "[DOWNLOAD_URL]" | tar xzf -
    ```
 1. The above steps are not meant to be having yet a working environment, these only intended to
@@ -332,10 +338,10 @@ quickly check that you have been granted access to all the resources you need
 
 <a name="installUVAP"></a>
 ### Installing UVAP
-The following script collects all docker images for UVAP.
+The following script collects all Docker images for UVAP.
 Run the install script:
 ```
-$ ~/uvap/scripts/install.sh
+$ "${UVAP_HOME}/scripts/install.sh"
 ```
 Installation is complete. You can proceed with the [Quick start guide](quick_start_guide.md).
 
@@ -346,18 +352,18 @@ New versions of UVAP are released regularly. You can use the following set of co
     Make sure you are logged in as 'ultinous' (log out and log in with 'ultinous' user)
 1. Check license validity
     ```
-    grep "Expiration Date" ~/uvap/license/license.txt
+    $ grep "Expiration Date" "${UVAP_HOME}/license/license.txt"
     ```
     The received date must be in the future.
     If your license has expired, please contact `support@ultinous.com`.
 1. Update helper scripts from github  
     ```
-    cd ~/uvap
-    git pull
+    $ cd "${UVAP_HOME}"
+    $ git pull
     ```
-1. Update docker images  
-    Run the install script, it will collect all docker images for UVAP:
+1. Update Docker images  
+    Run the install script, it will collect all Docker images for UVAP:
     ```
-    $ ~/uvap/scripts/install.sh
+    $ "${UVAP_HOME}/scripts/install.sh"
     ```
 The update is complete. You can proceed with the [Quick start guide](quick_start_guide.md).

@@ -136,7 +136,7 @@ message RoiFiltersConfigRecord
    - delete the in-memory feature vector if the payload of the input message is empty
    - update the in-memory feature vector otherwise.
 
- Output: ReidentificationRecord
+ Output: ReidRecord
  */
 message ReidConfigRecord
 {
@@ -144,13 +144,6 @@ message ReidConfigRecord
   */
   message InputConfig
   {
-    enum RegistrationMethod
-    {
-      NONE = 0; ///< Should be used when doReg is false
-      USE_LAST = 1; ///< Stored feature vectors are updated with the latest observation of the same identity
-      SIMPLE_AVERAGE = 2; ///< Stored feature vectors are averages of all observations of the same identity
-    }
-
     string stream_id = 1; ///< Identifier of input stream.
     string fv_field = 2; ///< Name of the field of type FeatureVector in input records.
     string is_active_field = 3; ///< Optional name of a boolean field to filter input records. Only records with a 'true' value will be considered.
@@ -158,13 +151,12 @@ message ReidConfigRecord
     bool do_reid = 5; // Input stream can be used for reidentification.
     bool do_reg = 6; // Input stream can be used for registration.
 
-    /** The properties below are only valid when do_reg is 'true'.
+    /** The properties below are only valid when do_reg is 'true'. They should not be set when do_reg is 'false'.
     !Note that even reidentification parameters are associated with the stream where registration happens!
     */
 
     float reid_min_score = 7; ///< Minimum similarity score for reidentification, i.e. to be included in the list of top matching elements.
     uint32 reid_max_count = 8; ///< Length of the list of top matching elements from this registration stream.
-    RegistrationMethod reg_method = 9; ///< Method of storing feature vectors, see RegistrationMethod.
     float reg_max_score = 10; ///< Maximum similarity score (exclusive) to any stored feature vactor, in order for feature vector to be registered.
     int64 reg_retention_period = 11; ///< Registration memory window size [ms]. Also at startup we rewind input this much. 0 means infinite.
   }

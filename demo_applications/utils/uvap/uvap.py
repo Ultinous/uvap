@@ -56,6 +56,8 @@ def _get_message_type(message_topic):
         return 'track'
     elif '.PassDetectionRecord' in message_topic:
         return "passdet"
+    elif '.ReidRecord' in message_topic:
+        return 'reid'
     return 'unknown'
 
 
@@ -70,7 +72,7 @@ def _get_current_cam(message_topic):
         if 'cam' in part:
             return parts[idx + 1]
     else:
-        'default_cam'
+        return 'default_cam'
 
 
 def message_list_to_frame_structure(messages: List[Message]) -> dict:
@@ -98,7 +100,7 @@ def message_list_to_frame_structure(messages: List[Message]) -> dict:
         if type == 'image':
             frame_dict[ts][stream][cam][type] = value
         elif not value.get("end_of_frame", False):
-            if type in ('skeleton', 'track', 'passdet'):
+            if type in ('skeleton', 'track', 'passdet', 'reid'):
                 frame_dict[ts][stream][cam][type][detection] = value
             else:
                 frame_dict[ts][stream][cam]['head_detection'][detection][type] = value
