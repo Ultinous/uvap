@@ -1,7 +1,0 @@
-digraph {
-  input [shape=box];
-  detections [shape=box];
-  
-  input -> head_detector -> detections;
-  detections -> kafka_output_detections;
-}

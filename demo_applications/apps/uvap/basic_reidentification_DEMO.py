@@ -4,14 +4,17 @@ import numpy as np
 from confluent_kafka.cimpl import Producer
 
 from utils.kafka.time_ordered_generator_with_timeout import TimeOrderedGeneratorWithTimeout, TopicInfo
+from utils.kafka.time_ordered_generator_with_timeout import BeginFlag, EndFlag
 from utils.uvap.graphics import draw_nice_bounding_box, draw_overlay, Position, draw_nice_text
 from utils.uvap.uvap import message_list_to_frame_structure, encode_image_to_message
-
+import logging
+# logging.basicConfig(filename='app.log', filemode='w', level=logging.DEBUG)
 
 COLOR_ORANGE = (10, 95, 255)
 COLOR_GREY = (97, 97, 97)
 REID_TOPIC_ID = "99"
 TITLE = "DEMO: Reidentification"
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -21,7 +24,6 @@ def main():
            visualizes head detection with an orage bounding box around a head 
            and writes the IDs given by reid MS above the heads.
            Displays ('-d') or stores ('-o') the result of this demo in the kafka topic.
-
            Required topics:
            - <prefix>.cam.0.original.Image.jpg
            - <prefix>.cam.0.dets.ObjectDetectionRecord.json
@@ -33,6 +35,7 @@ def main():
     parser.add_argument("prefix", help="Prefix of topics (base|skeleton).", type=str)
     parser.add_argument('-f', "--full_screen", action='store_true')
     parser.add_argument('-d', "--display", action='store_true')
+    parser.add_argument('-v', "--video_file", action='store_true')
     parser.add_argument('-o', '--output', help='write output image into kafka topic', action='store_true')
     args = parser.parse_args()
 
@@ -42,12 +45,19 @@ def main():
     if args.output:
         producer = Producer({'bootstrap.servers': args.broker})
 
+    begin_flag = None
+    end_flag = None
+    if args.video_file:
+        begin_flag = BeginFlag.BEGINNING
+        end_flag = EndFlag.END_OF_PARTITION
+
     overlay = cv2.imread('resources/powered_by_white.png', cv2.IMREAD_UNCHANGED)
 
     image_topic = f"{args.prefix}.cam.0.original.Image.jpg"
     detection_topic = f"{args.prefix}.cam.0.dets.ObjectDetectionRecord.json"
     reid_topic = f"{args.prefix}.cam.{REID_TOPIC_ID}.reids.ReidRecord.json"
-    output_topic_name = f"{args.prefix}.cam.0.reids.Image.jpg"
+    output_topic_name = f"{args.prefix}.cam.0.basic_reidentification.Image.jpg"
+    frameinfo_topic = f"{args.prefix}.cam.0.frameinfo.FrameInfoRecord.json"
 
     # handle full screen
     window_name = TITLE
@@ -62,27 +72,37 @@ def main():
         [
             TopicInfo(image_topic),
             TopicInfo(detection_topic),
-            TopicInfo(reid_topic, drop=False),
+            TopicInfo(reid_topic),
+            TopicInfo(frameinfo_topic)
         ],
         500,
         None,
-        True
+        True,
+        begin_flag=begin_flag,
+        end_flag=end_flag,
     )
 
     i = 0
     stored_ids = {}
+    scaling = 1.0
     for msgs in consumer.getMessages():
         for time, v in message_list_to_frame_structure(msgs).items():
-
-            reid_records = v[args.prefix][REID_TOPIC_ID].get("reid", {})
-            img = v[args.prefix]["0"]["image"]
+            message = v.get(args.prefix, {})
+            reid_records = message[REID_TOPIC_ID].get("reid", {})
+            img = message["0"].get("image", {})
             if type(img) == np.ndarray:
+                head_detections = message["0"].get("head_detection", {})
+                # Set the image scale
+                shape_orig = head_detections.pop("image", {})
+                if shape_orig:
+                    scaling = img.shape[1] / shape_orig["frame_info"]["columns"]
 
-                for key in v[args.prefix]["0"]["head_detection"]:
-                    object_detection_record = v[args.prefix]["0"]["head_detection"][key]["bounding_box"]
+                # Processing detections
+                for detection_key, detection_record in head_detections.items():
+                    object_detection_record = detection_record["bounding_box"]
 
                     color = COLOR_GREY
-                    reid_record = reid_records.get(key)
+                    reid_record = reid_records.get(detection_key)
                     if reid_record:
                         color = COLOR_ORANGE
                         reid_key = reid_record["reg_refs"][0]["subject"]["key"]
@@ -97,18 +117,25 @@ def main():
                             canvas=img,
                             text=str(key_to_display),
                             bounding_box=object_detection_record["bounding_box"],
-                            color=color
+                            color=color,
+                            scale=scaling
                         )
 
                     # draw bounding_box
                     img = draw_nice_bounding_box(
                         canvas=img,
                         bounding_box=object_detection_record["bounding_box"],
-                        color=color
+                        color=color,
+                        scaling=scaling
                     )
 
                 # draw ultinous logo
-                img = draw_overlay(canvas=img, overlay=overlay, position=Position.BOTTOM_RIGHT)
+                img = draw_overlay(
+                    canvas=img,
+                    overlay=overlay,
+                    position=Position.BOTTOM_RIGHT,
+                    scale=scaling
+                )
 
                 # produce output topic
                 if args.output:
@@ -123,6 +150,8 @@ def main():
                     cv2.imshow(window_name, img)
         k = cv2.waitKey(33)
         if k == 113:  # The 'q' key to stop
+            if args.video_file:
+                exit(130)
             break
         elif k == -1:  # normally -1 returned,so don't print it
             continue

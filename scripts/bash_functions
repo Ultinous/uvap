@@ -58,6 +58,10 @@ test_string_ends_with() {
 	case "${1}" in *"${2}") true;; *) false;; esac;
 }
 
+test_string_starts_with() {
+	case "${1}" in "${2}"*) true;; *) false;; esac;
+}
+
 test_executable() {
 	EXE_NAME="${1}"
 	if ! echo "${EXE_NAME}" | grep -qF '/'; then
@@ -179,7 +183,7 @@ parse_argument_with_multi_value() {
 	while echo "${cli_args[@]}" | grep -Fq -- "--${argument_name}" || ! validate_not_zero_length "${argument_name}" "${multi_variable_name}"; do
 		old_value="${!multi_variable_name:-}"
 		parse_argument_with_value "${@}"
-		export "${multi_variable_name}"="${old_value} ${!1}"
+		export "${multi_variable_name}"="$(echo "${old_value} ${!1}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
 		unset "${1}"
 	done
 }
@@ -208,4 +212,4 @@ validate_remaining_cli_arguments() {
 	fi
 }
 
-function implode { local d="${1}"; shift; echo -n "${1:-}"; shift; printf "%s" "${@/#/$d}"; }
+implode() { local d="${1}"; shift; echo -n "${1:-}"; shift; printf "%s" "${@/#/$d}"; }

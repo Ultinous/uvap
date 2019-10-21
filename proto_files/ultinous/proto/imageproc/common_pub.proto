@@ -1,0 +1,53 @@
+syntax = "proto2";
+
+package ultinous.proto.imageproc;
+
+message RGB
+{
+  required int32 red = 1;
+  required int32 green = 2;
+  required int32 blue = 3;
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+// Head Pose 3D Estimator
+//
+message HeadPose3DThreshold
+{
+  optional float minPitch = 1 [default=-12.0];
+  optional float maxPitch = 2 [default= 12.0];
+  optional float minJaw = 3 [default=-25.0];
+  optional float maxJaw = 4 [default= 25.0];
+  optional float minRoll = 5 [default=-30.0];
+  optional float maxRoll = 6 [default= 30.0];
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+// Engine configuration
+//
+message EnginesConfig
+{
+  optional string root_dir = 1 [default = "."];
+  optional string person_heatmap_detector_cfg_file_rel_path = 2;
+  optional string face_detector_cfg_file_rel_path = 3;
+  optional string head_detector_cfg_file_rel_path = 4;
+  optional string person_presence_detector_cfg_file_real_path = 5;
+  optional string face_recognizer_cfg_file_rel_path = 6;
+  optional string facial_gender_classif_cfg_file_rel_path = 7;
+  optional string facial_age_classif_cfg_file_rel_path = 8;
+  optional string facial_expre_classif_cfg_file_rel_path = 9;
+  optional string imagenet_classif_cfg_file_rel_path = 10;
+  optional string demography_assigner_cfg_file_rel_path = 11;
+  optional string head_pose_classif_cfg_file_rel_path = 12;
+  optional string person_recognizer_cfg_file_rel_path = 13;
+  optional string head_pose_estimator_cfg_file_rel_path = 14;
+  optional string facial_age_cfg_file_rel_path = 15;
+  optional string face_rec_db_path = 16;
+  optional string head_pose_3d_estimator_cfg_file_rel_path = 17;
+  optional string facial_demography_estimator_cfg_file_rel_path = 18;
+  optional string facial_demography_estimator_64_cfg_file_rel_path = 19;
+  optional string facial_demography_estimator_128_cfg_file_rel_path = 20;
+  optional string skeleton_estimator_cfg_file_rel_path = 21;
+}

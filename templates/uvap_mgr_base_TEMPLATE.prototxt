@@ -4,9 +4,7 @@ environment:
 {
   debug_level: 2
   profile: false
-  analysis_thread_count: 2
-  gui: NO
-  drop_on: {}
+  drop_{{ DROP }}: {}
   kafka_broker_list: "{{ KAFKA_BROKER_LIST }}"
   kafka_topic_prefix: "{{ KAFKA_TOPIC_PREFIX }}."
 }
@@ -17,7 +15,8 @@ data_run:
   input:
   {
     file_name: "{{ INPUT_STREAM }}"
-    drop_rate: {{ DROP_RATE }}
+    keep_rate: 1
+    frame_period_ms: 125
   }
 
   data_flow:
@@ -139,7 +138,6 @@ data_run:
         use_multicrop: true
       }
     }
-
     # kafka output
     process_node:{type: KAFKA_OUTPUT name: "vid_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.original.Image.jpg"                      input_node: "input"}}
     process_node:{type: KAFKA_OUTPUT name: "anonymized_vid_out" kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.anonymized_original.Image.jpg"           input_node: "anonymized"}}

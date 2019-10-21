@@ -4,6 +4,8 @@
 
 syntax = "proto2";
 
+import "ultinous/proto/imageproc/common_pub.proto";
+
 package ultinous.proto.dataflow;
 
 enum Chunking {
@@ -12,18 +14,40 @@ enum Chunking {
   HOUR = 3;
 }
 
+message Rect2D {
+  required int32 x = 1;
+  required int32 y = 2;
+  required int32 w = 3;
+  required int32 h = 4;
+}
+
+message DropOffMode
+{
+  optional uint64 packet_queue_size = 1 [default = 8, jstype=JS_STRING]; // max packet queue size, cannot be 0
+  optional uint64 gpu_task_queue_size = 2 [default = 8, jstype=JS_STRING]; // max gpu task queue size, cannot be 0
+}
+
+message DropOnMode
+{
+  optional uint32 packet_time_drop_threshold = 1 [default = 9000]; // max packet age in ms, cannot be 0
+  optional uint32 gpu_task_time_drop_threshold = 2 [default = 9000]; // max gpu task age in ms, cannot be 0
+  optional uint64 gpu_task_queue_max_memory = 3 [default = 2147483648, jstype=JS_STRING]; // max memory used by gpu task queue, cannot be 0
+}
+
 message EnvironmentConfig {
-  enum GUIType {
-    NO = 0;       // No user interface is displayed
-    NORMAL = 1;   // Normal UI
-    OPENGL = 2;   // Open GL accelerated UI
+  optional bool profile = 3 [default = false];
+  optional int32 debug_level = 4 [default = 2];
+  optional uint32 analysis_hangup_timeout_ms = 19 [default = 4000]; // 0 means no timeout
+  optional bool abort_on_long_hangup = 20 [default = true];
+
+  oneof drop_mode {
+    DropOffMode drop_off = 12;
+    DropOnMode drop_on = 13;
   }
 
-  optional GUIType gui = 2 [default = NO];
-  optional bool profile = 3 [default = false];
-  optional uint32 analysis_thread_count = 8 [default = 1];   // Use 2 if there are multiple data runs (multiple streams)
-  optional string kafka_broker_list = 15 [ default = "" ];   // Example "localhost:1234,example.com:4321"
-  optional string kafka_topic_prefix = 16 [ default = "" ];  // Example "account.1337."
+  optional bool rtp_ntp_time = 14 [default = false];
+  optional string kafka_broker_list = 15 [ default = "" ]; // Example "localhost:1234,example.com:4321"
+  optional string kafka_topic_prefix = 16 [ default = "" ]; // Example "account.1337."
   optional string kafka_sasl_username = 17 [ default = "" ]; // Enables SASL authentication when set.
   optional string kafka_sasl_password = 18 [ default = "" ];
 }
@@ -31,23 +55,25 @@ message EnvironmentConfig {
 message Input {
   // Input stream/device name. Can be one of the following:
   //  - rtsp url (eg.: "rtsp://user:pwd@10.99.99.99:554/live1.sdp")
-  //  - device id (eg.: "/dev/video0")
+  //  - device id (eg.: 0 [which refers to "/dev/video0"])
   required string file_name = 1;
-  optional uint32 drop_rate = 4 [default = 1];       // Keep every n-th frame
-  optional uint32 capture_width = 9 [default = 0];   // Expected image width for capture device
-  optional uint32 capture_height = 10 [default = 0]; // Expected image height for capture device
+  optional uint32 frame_period_ms = 3; // Forces to ignore excess frames (overload protection)
+  optional uint32 keep_rate = 16 [default = 1]; // Keep every n-th frame
+
+  optional uint32 capture_width = 13 [default = 0]; // Expected image width for capture device
+  optional uint32 capture_height = 14 [default = 0]; // Expected image height for capture device
 }
 
 message DataNodeConfig {
   enum Type {
-    FRAME = 0;            // A video frame represented as an uncompressed RGB image
-    FEATURE_VECTORS = 6;  // List of feature vectors. One feature vector is typically 1024 float numbers and represent the features of an object (e.g.: human face)
-    GENDERS = 7;          // List of gender predictions. Can be male or female.
-    AGES = 8;             // List of age predictions.
-    HEAD_POSE_3DS = 9;    // List of 3D head positions. One head position is 3 angles: yaw, pitch, roll in degrees giving the exact 3D orientation of a human head.
-    DETECTIONS = 11;      // List of object detections for a frame. Object detections are represented as a rectangular bounding box.
-    FRAME_INFO = 13;      // Frame attributes (eg.: dimensions)
-    SKELETONS = 14;       // List of human body poses.
+    FRAME = 0; // A video frame represented as an uncompressed RGB image
+    FEATURE_VECTORS = 6; // List of feature vectors. One feature vector is typically 1024 float numbers and represent the features of an object (e.g.: human face). Kafka output is supported.
+    GENDERS = 7; // List of gender predictions. Can be male or female. Kafka output is supported.
+    AGES = 8; // List of age predictions. Kafka output is supported.
+    HEAD_POSE_3DS = 9; // List of 3D head positions. One head position is 3 angles: yaw, pitch, roll in degrees giving the exact 3D orientation of a human head. Kafka output is supported.
+    DETECTIONS = 11; // List of object detections for a frame. Object detections are represented as a rectangular bounding box. Kafka output is supported.
+    FRAME_INFO = 13; // Frame attributes (eg.: dimensions) Kafka output is supported.
+    SKELETONS = 14; // List of human body poses. Kafka output is supported.
   }
   required Type type = 1;
   required string name = 2;
@@ -61,6 +87,7 @@ message ProcessNodeConfig {
     DRAW_RECTS = 4;
     RESIZE = 8;
     WRITE_VIDEO = 9;
+    OBJ_FILTER = 30;
     HEAD_POSE_FILTER = 38;
     KAFKA_OUTPUT = 44;
     HEAD_POSE_CALC = 51;
@@ -82,6 +109,7 @@ message ProcessNodeConfig {
   optional DrawRectsConfig draw_rects_config = 8;
   optional ResizeConfig resize_config = 12;
   optional WriteVideoConfig writevideo_config = 13;
+  optional ObjFilterNodeConfig obj_filter_config = 37;
   optional HeadPoseFilterConfig head_pose_filter_config = 45;
   optional KafkaOutputConfig kafka_output_config = 51;
   optional HeadPoseCalcConfig head_pose_calc_config = 60;
@@ -106,32 +134,32 @@ message DisplayConfig {
 // Cut a region of interest (ROI) from a frame.
 //
 message ROIConfig {
-  required string input = 1;  // type: FRAME
+  required string input = 1; // type: FRAME
   required string output = 2; // type: FRAME
 
-  required int32 x = 3;       // x coordinate of the top left corner in pixels
-  required int32 y = 4;       // y coordinate of the top left corner in pixels
-  required int32 width = 5;   // in pixels
-  required int32 height = 6;  // in pixels
+  required int32 x = 3; // x coordinate of the top left corner in pixels
+  required int32 y = 4; // y coordinate of the top left corner in pixels
+  required int32 width = 5; // in pixels
+  required int32 height = 6; // in pixels
 }
 
 //
-// Object detector. Find objects on a frame. Objects are returend as bounding boxes.
+// Object detector. Find objects on a frame. Objects are returned as bounding boxes.
 //
 message ObjDetectorConfig {
   enum Type {
-    FACE = 1;   // Requires face detection engine.
-    HEAD = 2;   // Requires head detection engine.
+    FACE = 1; // Requires face detection engine.
+    HEAD = 2; // Requires head detection engine.
   }
 
-  required Type type = 1;             // Detector type, see above.
-  required string input = 2;          // input frame (type: FRAME)
+  required Type type = 1; // Detector type, see above.
+  required string input = 2; // input frame (type: FRAME)
   required string bounding_boxes = 4; // output detections (type: DETECTIONS)
 
   // Size of the smallest square that fully contains the object. Detection performance and accuracy drops as the size gets smaller.
   // Size below 30-40 pixels are not suggested in real-world applications.
-  optional int32 min_height_in_pixels = 5 [default = 160];
-  optional int32 max_height_in_pixels = 6 [default = 160];
+  optional int32 min_height_in_pixels = 5 [default = 160]; // Please specify because it will be required in the future
+  optional int32 max_height_in_pixels = 6 [default = 160]; // Please specify because it will be required in the future
 
   optional float confidence_threshold = 7 [default = 0.95]; // Confidence is a real value from 0-1.
   optional float image_scale_factor = 11 [default = 1.0]; // This parameter explicitly resize the input frame.
@@ -142,23 +170,26 @@ message ObjDetectorConfig {
 //
 message DrawRectsConfig {
   enum DrawBoundingBoxType {
-    FRAME = 1;    // Bounding box around the object
-    FILL = 2;     // Fill the bounding box
+    FRAME = 1; // Bounding box around the object
+    FILL = 2; // Fill the bounding box
   }
 
-  required string input_frame = 1;          // type: FRAME
-  required string output_frame = 2;         // type: FRAME
+  required string input_frame = 1; // type: FRAME
+  required string output_frame = 2; // type: FRAME
   required string input_bounding_boxes = 3; // type: DETECTIONS
 
-  required imageproc.RGB det_color = 5;     // rgb color for the rectangles and fill if there is detection
-  optional imageproc.RGB no_det_color = 6;  // rgb color for fill if no detection
+  required imageproc.RGB det_color = 5; // rgb color for the rectangles and fill if there is detection
+  optional imageproc.RGB no_det_color = 6; // rgb color for fill if no detection
 
   optional bool blur = 7 [default = false]; // if set blurring applied to all detection with blur_kernel_size and blur_sigma parameters
   optional int32 blur_kernel_size = 8 [default = 31];
   optional float blur_sigma = 9 [default = 20];
 
   optional bool draw_rect = 10 [default = true]; // if set bounding boxes are drawn
-  optional float draw_rect_threshold = 11 [default = 0.0];  // threshold filter for bounding boxes
+  optional float draw_rect_threshold = 11 [default = 0.0]; // threshold filter for bounding boxes
+  optional bool draw_properties = 12 [ default = true ]; // write out explicitly added properties, like confidence, gender, name etc
+  optional bool draw_score = 21; // write out score, defaults to draw_properties.
+  optional double draw_properties_scale = 22 [ default = 0.7 ]; // Scaling factor for rendering font
 
   optional bool fill_if_det = 13 [default = false]; // if set the full image is filled with det_color if there is at least one detection
   optional bool fill_if_no_det = 14 [default = false ]; // if set the full image is filled with no_det_color if there no detection
@@ -203,10 +234,10 @@ message ResizeConfig {
 //
 message WriteVideoConfig {
   required string file_name = 2; // filename without extension
-  required string file_ext = 3;  // Extension that defines the video container format. Supported formats: mp4, avi
-  required string input = 4;     // type: FRAME
+  required string file_ext = 3; // Extension that defines the video container format. Supported formats: mp4, avi
+  required string input = 4; // type: FRAME
 
-  optional uint32 fps = 5;       // force output fps
+  optional uint32 fps = 5; // force output fps
 
   // Video codec. Supported codecs depend on OS environment. A portable example: "FMP4"
   required string codec = 6;
@@ -216,8 +247,100 @@ message WriteVideoConfig {
   optional uint32 max_queue_size = 8 [default = 1024];
 }
 
+message DataFlowGraphConfig {
+  repeated DataNodeConfig data_node = 2; // the data nodes
+  repeated ProcessNodeConfig process_node = 3; // the process nodes
+}
+
+message DataFlowGraphRunConfig {
+  required Input input = 1; // specifies the input (frame source) for the graph
+  optional DataFlowGraphConfig data_flow = 2; // specifies the data flow graph
+  optional string data_flow_file = 3; // specifies the data flow graph file if data flow graph is not present
+}
+
+message DataFlowGraphRunnerConfig {
+  optional imageproc.EnginesConfig engines = 1; // specifies the engine set usable by the graph
+  optional string engines_file = 2; // specifies the engines file if engines is not present
+  optional EnvironmentConfig environment = 3; // specifies the environment of the runner
+  optional string environment_file = 4; // specifies the environment file if the environment is not present
+  repeated DataFlowGraphRunConfig data_run = 5; // specifies the graph and input pairs
+  repeated string data_run_file = 6; // specifies the file names for graph -- input pairs
+}
+
+message FaceDemographyCalcConfig
+{
+  required string input_frame = 1;
+  required string input_detections = 2;
+  required string output_genders = 3;
+  required string output_ages = 4;
+  optional bool use_multicrop = 5 [default = false];
+}
+
+message SkeletonEstimatorNodeConfig
+{
+  required string input_frame = 1; // type: FRAME
+  required string skeletons = 2; // type: SKELETONS
+}
+
+message ObjFilterNodeConfig {
+
+  enum Strategy
+  {
+    NONE = 1;
+    HEIGHT = 2;
+    CONF = 5;
+    RANDOM = 6;
+  }
+
+  required string output_bounding_boxes = 1;
+  optional string input_frame = 2;
+  optional string output_frame = 3;
+
+  optional string input_bounding_boxes = 5;
+
+  optional int32 filter_roi_x = 6; // x coordinate of the top left corner in pixels
+  optional int32 filter_roi_y = 7; // y coordinate of the top left corner in pixels
+  optional int32 filter_roi_width = 8; // in pixels
+  optional int32 filter_roi_height = 9; // in pixels
+
+  optional int32 filter_detection_min_height_in_pixels = 10 [default = 160];
+  optional int32 filter_detection_max_height_in_pixels = 11 [default = 160];
+
+  optional float filter_detection_confidence_threshold = 12 [default = 0.95]; // Confidence is a real value from 0-1.
+
+  optional string conditional_and_input_bounding_boxes = 13; // If specified and there is no detection on this channel all detection get discarded (cashier/queue problem).
+
+  repeated Rect2D excluded_roi = 14; // excluded area(s) from the frame
+
+  optional uint32 max_det_num = 30;
+  optional Strategy selection_strategy = 31 [default = NONE];
+  optional bool descending  = 32 [default = true];
+
+}
+
+message HeadPoseFilterConfig {
+  enum EngineType {
+    HEADPOSE = 1; // HeadPose Engine provides a single scalar output
+    HEADPOSE3D = 2; // HeadPose3D Engine outputs 3d rotation matrix
+  }
+
+  optional string input_frame = 1;
+
+  required string input_bounding_boxes = 2;
+  required string output_bounding_boxes = 3;
+
+  optional uint32 valid_box_min_size = 4 [default = 128];
+
+  optional EngineType engine_type = 5 [default = HEADPOSE];
+
+  optional float head_pose_threshold = 6 [default = 0.8];
+  optional imageproc.HeadPose3DThreshold head_pose_3d_threshold = 7;
+
+  optional string input_poses = 8;
+}
+
 //
-// Type agnostic kafka output stream. Connect to any data node to dump it to a kafka topic.
+// Type sensitive kafka output stream. Please refer to data node types for availability.
 //
 message KafkaOutputConfig {
   required string topic_name = 1;
@@ -240,41 +363,4 @@ message FaceFeatureCalcConfig {
 message FrameInfoExtractorConfig {
   required string input_frame = 1;
   required string output_info = 2; // type: FRAME_INFO
-}
-
-message SkeletonEstimatorNodeConfig
-{
-  required string input_frame = 1; // type: FRAME
-  required string skeletons = 2;   // type: SKELETONS
-}
-
-message FaceDemographyCalcConfig
-{
-  required string input_frame = 1;
-  required string input_detections = 2;
-  required string output_genders = 3;
-  required string output_ages = 4;
-  optional bool use_multicrop = 5 [default = false];
-}
-
-message HeadPoseFilterConfig {
-  enum EngineType {
-    HEADPOSE = 1;  // HeadPose Engine provides a single scalar output
-    HEADPOSE3D = 2; // HeadPose3D Engine outputs 3d rotation matrix
-  }
-
-  optional string input_frame = 1;
-
-  required string input_bounding_boxes = 2;
-  required string output_bounding_boxes = 3;
-
-
-  optional uint32 valid_box_min_size = 4 [default = 128];
-
-  optional EngineType engine_type = 5 [default = HEADPOSE];
-
-  optional float head_pose_threshold = 6 [default = 0.8];
-  optional imageproc.HeadPose3DThreshold head_pose_3d_threshold = 7;
-
-  optional string input_poses = 8;
 }

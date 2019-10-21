@@ -1,8 +1,7 @@
 engines_file: "{{ ENGINES_FILE }}"
 environment {
   debug_level: 2
-  analysis_thread_count: 2
-  drop_on: {}
+  drop_{{ DROP }}: {}
   kafka_broker_list: "{{ KAFKA_BROKER_LIST }}"
   kafka_topic_prefix: "{{ KAFKA_TOPIC_PREFIX }}."
 }
@@ -11,7 +10,8 @@ environment {
 data_run {
   input {
     file_name: "{{ INPUT_STREAM }}"
-    drop_rate: {{ DROP_RATE }}
+    keep_rate: 1
+    frame_period_ms: 125
   }
   data_flow {
     data_node {type: FRAME name: "input"}
@@ -20,7 +20,19 @@ data_run {
     data_node {type: HEAD_POSE_3DS name: "poses"}
     data_node {type: DETECTIONS name: "dets_filtered"}
     data_node {type: FEATURE_VECTORS name: "fvecs"}
+    data_node {type: FRAME_INFO name: "frameinfo"}
 
+    process_node:
+    {
+      type: FRAME_INFO_EXTRACTOR
+      name: "frameinfocalc"
+      logging: false
+      frame_info_extractor_config
+      {
+        input_frame: "input"
+        output_info: "frameinfo"
+      }
+    }
     process_node {
       type: OBJ_DETECTOR
       name: "obj_det"
@@ -102,6 +114,13 @@ data_run {
         input_node: "dets"
       }
      }
+    process_node {
+      type: KAFKA_OUTPUT name: "frameinfo_out"
+      kafka_output_config {
+        topic_name: "cam.{{loop.index - 1}}.frameinfo.FrameInfoRecord.json"
+        input_node: "frameinfo"
+      }
+    }
   }
 }
 {% endfor %}

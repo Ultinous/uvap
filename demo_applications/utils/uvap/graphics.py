@@ -530,7 +530,8 @@ def draw_polyline(
         points: List[Tuple[int, int]],
         color: Tuple[int, int, int],
         thickness: int = 3,
-        is_closed: bool = False
+        is_closed: bool = False,
+        scaling=1.0
 ) -> np.array:
     """
     Draw a polyline on the input image
@@ -539,11 +540,17 @@ def draw_polyline(
     :param color: BRG color of the line
     :param thickness: thickness of the line.
     :param is_closed: If true, the line will be closed.
+    :param scaling: scaling factor, default 1080p
     :return: image with polyline
     """
+    #
+    pts = []
+    for p in points:
+        pts.append((p[0]*scaling, p[1]*scaling))
+
     return cv2.polylines(
         img=canvas,
-        pts=[np.array(points, np.int32)],
+        pts=[np.array(pts, np.int32)],
         isClosed=is_closed,
         color=color,
         thickness=thickness

@@ -58,6 +58,8 @@ def _get_message_type(message_topic):
         return "passdet"
     elif '.ReidRecord' in message_topic:
         return 'reid'
+    elif '.FrameInfoRecord' in message_topic:
+        return 'frame_info'
     return 'unknown'
 
 

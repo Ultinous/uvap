@@ -6,7 +6,7 @@ environment:
   profile: false
   analysis_thread_count: 2
   gui: NO
-  drop_on: {}
+  drop_{{ DROP }}: {}
   kafka_broker_list: "{{ KAFKA_BROKER_LIST }}"
   kafka_topic_prefix: "{{ KAFKA_TOPIC_PREFIX }}."
 }
@@ -17,7 +17,8 @@ data_run:
   input:
   {
     file_name: "{{ INPUT_STREAM }}"
-    drop_rate: {{ DROP_RATE }}
+    keep_rate: 1
+    frame_period_ms: 125
   }
 
   data_flow:

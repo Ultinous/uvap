@@ -65,6 +65,8 @@ def main():
     image_reid_topic = f"{args.prefix}.cam.{REID_CAMERA_ID}.original.Image.jpg"
     detection_reg_topic = f"{args.prefix}.cam.{REG_CAMERA_ID}.dets.ObjectDetectionRecord.json"
     detection_reid_topic = f"{args.prefix}.cam.{REID_CAMERA_ID}.dets.ObjectDetectionRecord.json"
+    frameinfo_reg_topic = f"{args.prefix}.cam.{REG_CAMERA_ID}.frameinfo.FrameInfoRecord.json"
+    frameinfo_reid_topic = f"{args.prefix}.cam.{REID_CAMERA_ID}.frameinfo.FrameInfoRecord.json"
     reid_topic = f"{args.prefix}.cam.{REID_TOPIC_ID}.reids.ReidRecord.json"
     output_reg_topic_name = f"{args.prefix}.cam.{REG_CAMERA_ID}.reids.Image.jpg"
     output_reid_topic_name = f"{args.prefix}.cam.{REID_CAMERA_ID}.reids.Image.jpg"
@@ -84,6 +86,8 @@ def main():
             TopicInfo(image_reid_topic),
             TopicInfo(detection_reg_topic),
             TopicInfo(detection_reid_topic),
+            TopicInfo(frameinfo_reg_topic),
+            TopicInfo(frameinfo_reid_topic),
             TopicInfo(reid_topic, drop=False),
         ],
         latency_ms=500,
@@ -94,10 +98,10 @@ def main():
     registrations: Dict[str, int] = {}
     i = 0
     inner_id = 0
+    scaling = 1.0
     for msgs in consumer.getMessages():
         for time, v in message_list_to_frame_structure(msgs).items():
             message = v.get(args.prefix, {})
-
             # Register the recognized faces
             reid_records = message[REID_TOPIC_ID].get("reid", {})
             for reid_key, reid_record in reid_records.items():
@@ -113,12 +117,18 @@ def main():
                 if not isinstance(img, np.ndarray):
                     continue
 
-                # Process detections
                 head_detections = topic_message.get("head_detection", {})
+                # Set the image scale
+                shape_orig = head_detections.pop("image", {})
+                if shape_orig:
+                    scaling = img.shape[1] / shape_orig["frame_info"]["columns"]
+
+                # Processing the detections
                 for detection_key, detection_record in head_detections.items():
                     object_detection_record = detection_record["bounding_box"]
                     color = COLOR_GREY
                     key_to_display = ""
+
                     # Reidentification received
                     reid_record = reid_records.get(detection_key)
                     if reid_record and reid_record["type"] == "REID":
@@ -128,24 +138,30 @@ def main():
                             color = COLOR_ORANGE
                             dwell_time = time - int(reid_key.split('_')[0])
                             key_to_display = f"id: {registered_id}; dwell time: {dwell_time}ms"
-
                     # draw text above bounding box
                     img = draw_nice_text(
                         canvas=img,
                         text=key_to_display,
                         bounding_box=object_detection_record["bounding_box"],
-                        color=color
+                        color=color,
+                        scale=scaling
                     )
 
                     # draw bounding_box
                     img = draw_nice_bounding_box(
                         canvas=img,
                         bounding_box=object_detection_record["bounding_box"],
-                        color=color
+                        color=color,
+                        scaling=scaling
                     )
 
                 # draw ultinous logo
-                img = draw_overlay(canvas=img, overlay=overlay, position=Position.BOTTOM_RIGHT)
+                img = draw_overlay(
+                    canvas=img,
+                    overlay=overlay,
+                    position=Position.BOTTOM_RIGHT,
+                    scale=scaling
+                )
 
                 # produce output topic
                 if args.output:

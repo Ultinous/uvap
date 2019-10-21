@@ -8,7 +8,6 @@ set -a
 demo_applications_dir="${current_directory}/../demo_applications"
 templates_dir="${current_directory}/../templates"
 config_ac_dir="${current_directory}/../config"
-keep_rate_number=1
 image_name="_auto_detected_"
 set +a
 
@@ -18,7 +17,6 @@ parse_argument_with_multi_value "stream_uri" "file name / device name / RTSP URL
 parse_argument_with_value "demo_applications_dir" "directory path of demo applications scripts - default: ${demo_applications_dir}"
 parse_argument_with_value "templates_dir" "directory path of configuration templates - default: ${templates_dir}"
 parse_argument_with_value "config_ac_dir" "directory path of configuration files - will be created if not existent - default: ${config_ac_dir}"
-parse_argument_with_value "keep_rate_number" "frequency of analysis on frames - default: ${keep_rate_number}"
 parse_argument_with_value "image_name" "tag of docker image to use - default: will be determined by git tags"
 validate_remaining_cli_arguments
 
@@ -38,20 +36,41 @@ if test "${image_name:-}" = "_auto_detected_"; then
 	image_name="$(get_docker_image_tag_for_component uvap_demo_applications)"
 fi
 
-docker pull "${image_name}" > /dev/null
-
 jinja_yaml_param_file_path="${config_ac_dir}/params.yaml"
 trap "rm -f ${jinja_yaml_param_file_path}" TERM INT EXIT
 
 echo "ENGINES_FILE: /ultinous_app/models/engines/basic_detections.prototxt
 KAFKA_BROKER_LIST: kafka
 KAFKA_TOPIC_PREFIX: ${demo_mode}
-DROP_RATE: ${keep_rate_number}
 INPUT_STREAMS:" > "${jinja_yaml_param_file_path}"
 
+found_realtime_stream="false"
+found_recorded_stream="false"
 for stream_url in ${stream_uris}; do
 	echo "  - ${stream_url}" >> "${jinja_yaml_param_file_path}"
+	if test_string_starts_with "${stream_url}" "/"; then
+		if test_string_starts_with "${stream_url}" "/dev/video"; then
+			found_realtime_stream="true"
+		else
+			found_recorded_stream="true"
+		fi
+	else
+		if echo "${stream_url}" | grep -qE '^[a-z]+://.*$'; then
+			found_realtime_stream="true"
+		else
+			found_recorded_stream="true"
+		fi
+	fi
 done
+if test "true" = "${found_realtime_stream}" -a "true" = "${found_recorded_stream}"; then
+	echo "ERROR: UVAP is not able to work with real-time video streams and with pre-recorded video files at the same time" >&2
+	exit 1
+fi
+if test "true" = "${found_recorded_stream}"; then
+	echo 'DROP: "off"' >> "${jinja_yaml_param_file_path}"
+else
+	echo 'DROP: "on"' >> "${jinja_yaml_param_file_path}"
+fi
 
 mounted_config_dir="/config"
 mounted_templates_dir="/templates"
@@ -75,6 +94,7 @@ for uvap_component in $(get_uvap_components_list AND "data_flow" "${demo_mode}" 
 	echo "${jinja_run} ${mounted_templates_dir}/${uvap_component}_${demo_mode}_TEMPLATE.prototxt ${mounted_config_dir}/${uvap_component}/${uvap_component}.prototxt" >> "${jinja_run_script_path}"
 done
 
+docker pull "${image_name}" > /dev/null
 container_name="uvap_config"
 test "$(docker container ls --filter name="${container_name}" --all --quiet | wc -l)" -eq 1 \
 	&& docker container stop "${container_name}" > /dev/null \

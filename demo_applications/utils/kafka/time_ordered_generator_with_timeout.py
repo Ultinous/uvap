@@ -1,11 +1,15 @@
-import time
 import logging
+import sys
+import time
 from collections import deque
-from typing import List, Deque
 from enum import Enum
-from confluent_kafka import Consumer, TopicPartition, OFFSET_END, OFFSET_BEGINNING, OFFSET_STORED, KafkaError
-from utils.generator_interface import GeneratorInterface
-from utils.heartbeat import HeartBeat
+from typing import List, Deque
+
+from confluent_kafka.cimpl import Consumer, TopicPartition, OFFSET_END, OFFSET_BEGINNING, OFFSET_STORED, KafkaError
+
+from utils.generator.generator_interface import GeneratorInterface
+from utils.generator.heartbeat import HeartBeat
+
 
 class BeginFlag(Enum):
     """ Start consuming messages from the beginnig of the steams."""
@@ -14,6 +18,10 @@ class BeginFlag(Enum):
     CONTINUE = 1
     """ It will start reading from the end of the streams."""
     LIVE = 2
+    """ Continue from the last committed offset. If there is no committed it will run from the beginning of the stream."""
+    CONTINUE_OR_BEGINNING = 3
+
+
 
 class EndFlag(Enum):
     """ The generator will never stop. Will work on live streams. """
@@ -21,38 +29,40 @@ class EndFlag(Enum):
     """ The generator will stop at the end of the stream. """
     END_OF_PARTITION = 1
 
+
 def getSystemTimestamp():
     return int(time.time() * 1000)
+
 
 class MessageExtension:
     """
     Technical wrapper around kafka message. Stores the system timestamp for each kafka message when it was received.
     """
+
     def __init__(self, msg):
         self.message = msg
         self.ts = getSystemTimestamp()
         logging.debug(
             'New message added to queue {} at system time {} with event time: {} diff: {}'
-            .format(
-                self.message.topic()
-                , self.ts
-                , self.message.timestamp()[1]
-                , self.ts - self.message.timestamp()[1]
-            )
+                .format(self.message.topic(), self.ts, self.message.timestamp()[1],
+                        self.ts - self.message.timestamp()[1])
         )
 
+
+
 class TopicInfo:
-    def __init__(self, topic, partition = 0, drop = True):
-      """
+    def __init__(self, topic, partition=0, drop=True):
+        """
       :param topic: Name of the topic.
       :param partition: Partition number.
       :param drop: False: we do not drop any message. True: we drop messages arrived after the timestamp was served.
       """
-      if len(topic) > 200:
-          raise Exception('Kafka does not support topic names longer then 255 char.Topic provided: ' + topic)
-      self.topic = topic
-      self.partition = partition
-      self.drop = drop
+        if len(topic) > 200:
+            raise Exception('Kafka does not support topic names longer then 255 char.Topic provided: ' + topic)
+        self.topic = topic
+        self.partition = partition
+        self.drop = drop
+
 
 class Topic:
     """
@@ -66,16 +76,8 @@ class Topic:
                 self.last_message_ts stored the last emitted message timestamp.
                 self.end_of_partition is true if and only if the last message was EOF.
     """
-    def __init__(
-        self
-        , topic
-        , consumer
-        , partition
-        , end_offset = None
-        , drop = True
-        , min_limit = 1000
-        , max_limit = 100000
-    ):
+
+    def __init__(self, topic, consumer, partition, end_offset=None, drop=True, min_limit=100, max_limit=1000):
         self.paused = False
         self.partition = partition
         self.min_limit = min_limit
@@ -92,44 +94,40 @@ class Topic:
 
     def add_message(self, msg):
         if self.stopped:
-            logging.debug('Topic {} stopped.'.format(self.topic_name))
+            logging.info('Topic {} stopped. We will not add more messages.'.format(self.topic_name))
             return
         if self.last_message_ts is not None and self.drop and msg.timestamp()[1] <= self.last_message_ts:
             logging.info(
                 'Drop from topic {} at system time {} for the event time {}. Last timestamp for this topic was {}.'
                 'If you wish not to drop messages turn drop=False in the constructor.'
-                .format(
-                    self.topic_name
-                    , getSystemTimestamp()
-                    , msg.timestamp()[1]
-                    , self.last_message_ts
-                )
+                    .format(self.topic_name, getSystemTimestamp(), msg.timestamp()[1], self.last_message_ts)
             )
         else:
             self.queue.append(MessageExtension(msg))
         if self.end_offset is not None and msg.offset() == self.end_offset:
-            logging.debug('On topic {} we reached the end offset {}.'.format(self.topic_name, self.end_offset))
+            logging.info('On topic {} we reached the end offset {}.'.format(self.topic_name, self.end_offset))
             self.stop_topic()
         if len(self.queue) > self.max_limit and not self.paused:
             self.pause_topic()
 
     def pause_topic(self):
         if not self.paused:
-            logging.info('Topic {} paused.'.format(self.topic_name))
+            logging.info('Topic {} paused. Last event timestamp: {}'
+                         .format(self.topic_name, self.queue[-1].message.timestamp() if len(self.queue) > 0 else None))
             self.paused = True
-            self.consumer_ref.pause([TopicPartition(topic = self.topic_name, partition = self.partition)])
+            self.consumer_ref.pause([TopicPartition(topic=self.topic_name, partition=self.partition)])
 
     def stop_topic(self):
         self.stopped = True
         self.pause_topic()
-        logging.debug('Topic {} stopped.'.format(self.topic_name))
+        logging.info('Topic {} stopped.'.format(self.topic_name))
 
     def get_messages(self, timestamp):
         ret = []
         while len(self.queue) > 0 and self.queue[0].message.timestamp()[1] <= timestamp:
             ret.append(self.queue.popleft().message)
         if len(self.queue) < self.min_limit and self.paused and not self.stopped:
-            logging.debug('Resume reading on topic: {}'.format(self.topic_name))
+            logging.info('Resume reading on topic: {}'.format(self.topic_name))
             self.paused = False
             self.consumer_ref.resume([TopicPartition(topic=self.topic_name, partition=self.partition)])
         self.last_message_ts = timestamp
@@ -148,25 +146,27 @@ class Topic:
             # This shouldn't happen but who knows.
             return True
 
+
 class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
     """
     A general generator which can read multiple topics and merge their messages in time order.
     A message must be emitted at (arrival_system_time + latency_ms).
     In batch mode (until reaching the first EOP on each stream) the generator will not discard any messages.
     """
+
     def __init__(
-        self
-        , broker
-        , groupid
-        , topics_infos: List[TopicInfo]
-        , latency_ms
-        , commit_interval_sec = None
-        , group_by_time = False
-        , begin_timestamp = None
-        , begin_flag = None
-        , end_timestamp = None
-        , end_flag = None
-        , heartbeat_interval_ms = -1
+            self
+            , broker
+            , groupid
+            , topics_infos: List[TopicInfo]
+            , latency_ms
+            , commit_interval_sec=None
+            , group_by_time=False
+            , begin_timestamp=None
+            , begin_flag=None
+            , end_timestamp=None
+            , end_flag=None
+            , heartbeat_interval_ms=-1
     ):
         """
         :param broker: Broker to connect to.
@@ -191,7 +191,7 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
         if begin_timestamp is not None and end_timestamp is not None and begin_timestamp >= end_timestamp:
             raise Exception('The begin timestamp is larger then the end timestamp.')
         if begin_flag is not None and end_flag is not None and \
-              begin_flag == BeginFlag.LIVE and end_flag == EndFlag.END_OF_PARTITION:
+                begin_flag == BeginFlag.LIVE and end_flag == EndFlag.END_OF_PARTITION:
             raise Exception('You can not start in live and process until the end of the streams.')
         if end_flag is not None and not (end_flag == EndFlag.END_OF_PARTITION or end_flag == EndFlag.NEVER):
             raise Exception('Unknow end flag: {} . Please use the given enum to use proper end flag.'.format(end_flag))
@@ -200,16 +200,17 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
         self.commit_interval_sec = commit_interval_sec
         self.latency_ms = latency_ms
         self.group_by_time = group_by_time
+        self.max_poll_interval_ms = 5 * 60 * 1000
         self.consumer = Consumer(
-            {
-                'bootstrap.servers': broker
-                , 'group.id': groupid
-                , 'enable.auto.commit': False
-                , 'auto.offset.reset': 'latest'
-                , 'enable.partition.eof': True
-                , 'fetch.wait.max.ms': 50
-            }
-        )
+            {'bootstrap.servers': broker,
+             'group.id': groupid,
+             'enable.auto.commit': False,
+             'auto.offset.reset': 'earliest' if begin_flag == BeginFlag.CONTINUE_OR_BEGINNING else 'latest',
+             'fetch.wait.max.ms': 20,
+             'max.poll.interval.ms': self.max_poll_interval_ms,
+             'enable.partition.eof': True})
+        self.last_poll = None
+
         self.tps = []
         self.queues = {}
         self.messages_to_be_committed = {}
@@ -218,11 +219,12 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
             topic_name = ti.topic
             self.messages_to_be_committed[topic_name] = {'last_msg': None, 'committed': True}
             if begin_timestamp is not None:
-                self.tps.extend(self.consumer.offsets_for_times([TopicPartition(topic_name, partition = ti.partition, offset = begin_timestamp)]))
+                self.tps.extend(self.consumer.offsets_for_times(
+                    [TopicPartition(topic_name, partition=ti.partition, offset=begin_timestamp)]))
             elif begin_flag is not None:
                 if begin_flag == BeginFlag.BEGINNING:
                     self.tps.append(TopicPartition(topic_name, partition=ti.partition, offset=OFFSET_BEGINNING))
-                elif begin_flag == BeginFlag.CONTINUE:
+                elif begin_flag in (BeginFlag.CONTINUE, BeginFlag.CONTINUE_OR_BEGINNING):
                     self.tps.append(TopicPartition(topic_name, partition=ti.partition, offset=OFFSET_STORED))
                 elif begin_flag == BeginFlag.LIVE:
                     self.tps.append(TopicPartition(topic_name, partition=ti.partition, offset=OFFSET_END))
@@ -237,9 +239,9 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
                 self.queues[topic_name] = Topic(
                     topic_name
                     , self.consumer
-                    , end_offset = end_offset
-                    , partition = ti.partition
-                    , drop = ti.drop
+                    , end_offset=end_offset
+                    , partition=ti.partition
+                    , drop=ti.drop
                 )
         self.consumer.assign(self.tps)
         self.last_commit = time.time()
@@ -270,7 +272,7 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
         # commit messages when they were delivered
         current_time = time.time()
         if self.commit_interval_sec is not None and (
-            current_time - self.last_commit) > self.commit_interval_sec:
+                current_time - self.last_commit) > self.commit_interval_sec:
             for k in self.messages_to_be_committed.keys():
                 if not self.messages_to_be_committed[k]['committed']:
                     self.consumer.commit(self.messages_to_be_committed[k]['last_msg'])
@@ -288,13 +290,13 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
             self.next_hb += self.heartbeat_interval_ms
 
     def _can_serve(self):
-        min_ets = min([q.queue[0].message.timestamp()[1] for q in self.queues.values() if len(q.queue) > 0], default = -1)
+        min_ets = min([q.queue[0].message.timestamp()[1] for q in self.queues.values() if len(q.queue) > 0], default=-1)
         if min_ets == -1:
             return None
         deadline = getSystemTimestamp() - self.latency_ms
         if all([q.can_be_emitted(min_ets) for q in self.queues.values()]) and \
-              any([q.queue[0].ts < deadline for q in self.queues.values()
-                if len(q.queue) > 0 and q.queue[0].message.timestamp()[1] == min_ets]):
+                any([q.queue[0].ts < deadline for q in self.queues.values()
+                     if len(q.queue) > 0 and q.queue[0].message.timestamp()[1] == min_ets]):
             return min_ets
         else:
             return None
@@ -315,8 +317,9 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
                         if not self.heartbeat_interval_ms == -1:
                             yield from self._serve_heartbeat(ts)
                         yield from self._serve_messages(serve_it)
-                logging.debug('Exiting from generator.')
+                logging.info('Exiting from generator.')
                 break
+            self.last_poll = getSystemTimestamp()
             msg = self.consumer.poll(0.001)
             if msg is not None:
                 if msg.error():
@@ -335,12 +338,18 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
                         self.queues[msg.topic()].add_message(msg)
             while self.running:
                 event_ts_to_serve = self._can_serve()
-                if event_ts_to_serve is None:
+                if event_ts_to_serve is None or \
+                        self.max_poll_interval_ms - (getSystemTimestamp() - self.last_poll) < 30000:
                     if self.end_flag == EndFlag.NEVER and self.heartbeat_interval_ms != -1 \
-                      and any([q.end_of_partition for q in self.queues.values()]):
+                            and any([q.end_of_partition for q in self.queues.values()]):
                         if self.next_hb is None:
-                            self.next_hb = getSystemTimestamp()-self.latency_ms
-                        yield from self._serve_heartbeat(getSystemTimestamp() - self.latency_ms)
+                            self.next_hb = min(getSystemTimestamp() - self.latency_ms,
+                                               min([q.queue[0].message.timestamp()[1] for q in self.queues.values()
+                                                    if len(q.queue) > 0], default=sys.maxsize))
+                        if self.next_hb < min(getSystemTimestamp() - self.latency_ms,
+                                              min([q.queue[0].message.timestamp()[1] for q in self.queues.values()
+                                                   if len(q.queue) > 0], default=sys.maxsize)):
+                            yield from self._serve_heartbeat(self.next_hb)
                     break
                 if self.heartbeat_interval_ms != -1:
                     yield from self._serve_heartbeat(event_ts_to_serve)

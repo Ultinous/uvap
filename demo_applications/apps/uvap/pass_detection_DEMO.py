@@ -12,6 +12,7 @@ import numpy as np
 from confluent_kafka.cimpl import Producer
 
 from utils.kafka.time_ordered_generator_with_timeout import TimeOrderedGeneratorWithTimeout, TopicInfo
+from utils.kafka.time_ordered_generator_with_timeout import BeginFlag, EndFlag
 from utils.uvap.graphics import draw_nice_bounding_box, draw_overlay, Position, draw_polyline
 from utils.uvap.graphics import PASS_EVENT_CHARS, TYPE_TO_COLOR
 from utils.uvap.uvap import message_list_to_frame_structure, encode_image_to_message
@@ -32,8 +33,13 @@ class ColoredPolyLine:
         if len(self.points) > ColoredPolyLine.MAX_SIZE:
             self.points = self.points[-ColoredPolyLine.MAX_SIZE:]
 
-    def draw(self, img: np.array):
-        draw_polyline(img, self.points, self.color)
+    def draw(self, img: np.array, scaling):
+        draw_polyline(
+            canvas=img,
+            points=self.points,
+            color=self.color,
+            scaling=scaling
+        )
 
 
 class PassLine(ColoredPolyLine):
@@ -67,6 +73,7 @@ def main():
     parser.add_argument("config", help="Path to service config.", type=str)
     parser.add_argument('-f', "--full_screen", action='store_true')
     parser.add_argument('-d', "--display", action='store_true')
+    parser.add_argument('-v', "--video_file", action='store_true')
     parser.add_argument('-o', '--output', help='write output image into kafka topic', action='store_true')
     args = parser.parse_args()
 
@@ -80,6 +87,12 @@ def main():
 
     if args.output:
         producer = Producer({'bootstrap.servers': args.broker})
+
+    begin_flag = None
+    end_flag = None
+    if args.video_file:
+        begin_flag = BeginFlag.BEGINNING
+        end_flag = EndFlag.END_OF_PARTITION
 
     with config_file.open() as f:
         try:
@@ -100,6 +113,7 @@ def main():
     image_topic = f"{args.prefix}.cam.0.original.Image.jpg"
     detection_topic = f"{args.prefix}.cam.0.dets.ObjectDetectionRecord.json"
     track_topic = f"{args.prefix}.cam.0.tracks.TrackChangeRecord.json"
+    frameinfo_topic = f"{args.prefix}.cam.0.frameinfo.FrameInfoRecord.json"
     passdet_topic = f"{args.prefix}.cam.0.passdet.PassDetectionRecord.json"
     output_topic_name = f"{args.prefix}.cam.0.passdet.Image.jpg"
 
@@ -117,14 +131,17 @@ def main():
             TopicInfo(image_topic),
             TopicInfo(track_topic, drop=False),
             TopicInfo(passdet_topic, drop=False),
-            TopicInfo(detection_topic)
+            TopicInfo(detection_topic),
+            TopicInfo(frameinfo_topic)
         ],
         100,
         None,
-        True
+        True,
+        begin_flag=begin_flag,
+        end_flag=end_flag
     )
     i = 0
-
+    scaling = 1.0
     tracks: DefaultDict[Any, ColoredPolyLine] = defaultdict(lambda: ColoredPolyLine(next(track_colors)))
 
     for msgs in consumer.getMessages():
@@ -151,20 +168,34 @@ def main():
 
             img = v[args.prefix]["0"]["image"]
             if type(img) == np.ndarray:
+
+                # Set the image scale
+                shape_orig = v[args.prefix]["0"]["head_detection"].pop("image", {})
+                if shape_orig:
+                    scaling = img.shape[1] / shape_orig["frame_info"]["columns"]
+
                 # draw bounding_box
                 for head_detection in v[args.prefix]["0"]["head_detection"]:
                     object_detection_record = v[args.prefix]["0"]["head_detection"][head_detection]["bounding_box"]
                     if object_detection_record["type"] == "PERSON_HEAD":
-                        img = draw_nice_bounding_box(img, object_detection_record["bounding_box"], (10, 95, 255))
-
+                        img = draw_nice_bounding_box(
+                            canvas=img,
+                            bounding_box=object_detection_record["bounding_box"],
+                            color=(10, 95, 255),
+                            scaling=scaling
+                        )
                 for t in tracks.values():
-                    t.draw(img)
-
+                    t.draw(img, scaling)
                 for idx, l in enumerate(passlines.values()):
-                    l.draw(img)
+                    l.draw(img, scaling)
                     cv2.putText(img, "".join(l.events), (40, (idx + 1) * 50), cv2.FONT_HERSHEY_COMPLEX, 2, l.color, 5,
                                 bottomLeftOrigin=True)
-                img = draw_overlay(img, overlay, Position.BOTTOM_RIGHT)
+                img = draw_overlay(
+                    canvas=img,
+                    overlay=overlay,
+                    position=Position.BOTTOM_RIGHT,
+                    scale=scaling
+                )
 
                 # produce output topic
                 if args.output:
@@ -180,6 +211,8 @@ def main():
                     cv2.imshow(window_name, img)
         k = cv2.waitKey(33)
         if k == 113:  # The 'q' key to stop
+            if args.video_file:
+                exit(130)
             break
         elif k == -1:  # normally -1 returned,so don't print it
             continue

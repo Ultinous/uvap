@@ -237,7 +237,7 @@ message PassEvent
       Key is empty.
       Time is the time of the frame immediately after the passage, i.e. the one containing a prediction for this track.
   E3. End of Track event:
-    A track has ended.
+    A track has ended. It is sent out even if the track didn't generate passage event.
       Key is empty.
       Time is the time of the TrackChangeRecord with end_of_track=true.
   E4. Heartbeat event:
@@ -337,21 +337,4 @@ message ReidRecord
     E2 (registration): Exactly one ScoredSubjectRef (new or updated) that is stored after the registration.
   */
   repeated ScoredSubjectRef reg_refs = 3;
-}
-
-/** A record containing the waiting time.
-  time: Time of event used at the reid moment.
-  key: Serialized event reference that were used.
- */
-message WaitingTimeRecord 
-{
-  message SubjectRef
-  {
-    string stream_id = 1; ///< References input stream with the help of the service config.
-    string key = 2; ///< Corresponding message key in the input stream.
-  }
-  int32 waiting_time_ms = 1; ///< waiting time in milliseconds
-  SubjectRef enter = 2;
-  SubjectRef exit = 3;
-  float score = 4;
 }

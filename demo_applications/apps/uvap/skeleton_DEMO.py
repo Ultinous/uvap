@@ -5,6 +5,7 @@ from confluent_kafka.cimpl import Producer
 
 from utils.uvap.graphics import draw_overlay, Position, draw_skeleton_with_background
 from utils.kafka.time_ordered_generator_with_timeout import TopicInfo, TimeOrderedGeneratorWithTimeout
+from utils.kafka.time_ordered_generator_with_timeout import BeginFlag, EndFlag
 from utils.uvap.uvap import message_list_to_frame_structure, encode_image_to_message
 
 
@@ -25,6 +26,7 @@ def main():
     parser.add_argument("prefix", help="Prefix of topics (base|skeleton).", type=str)
     parser.add_argument('-f', "--full_screen", action='store_true')
     parser.add_argument('-d', "--display", action='store_true')
+    parser.add_argument('-v', "--video_file", action='store_true')
     parser.add_argument('-o', '--output', help='write output image into kafka topic', action='store_true')
     args = parser.parse_args()
 
@@ -33,6 +35,12 @@ def main():
 
     if args.output:
         producer = Producer({'bootstrap.servers': args.broker})
+
+    begin_flag = None
+    end_flag = None
+    if args.video_file:
+        begin_flag = BeginFlag.BEGINNING
+        end_flag = EndFlag.END_OF_PARTITION
 
     overlay = cv2.imread('resources/powered_by_white.png', cv2.IMREAD_UNCHANGED)
 
@@ -56,7 +64,9 @@ def main():
         ],
         100,
         None,
-        True
+        True,
+        begin_flag=begin_flag,
+        end_flag=end_flag
     )
     i = 0
     for msgs in consumer.getMessages():
@@ -83,6 +93,8 @@ def main():
                     cv2.imshow(window_name, img)
         k = cv2.waitKey(33)
         if k == 113:  # The 'q' key to stop
+            if args.video_file:
+                exit(130)
             break
         elif k == -1:  # normally -1 returned,so don't print it
             continue

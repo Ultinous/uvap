@@ -9,6 +9,8 @@ set -a
 config_file_name="_not_used_"
 image_name="_auto_detected_"
 demo_applications_dir="${current_directory}/../demo_applications"
+extra_demo_flags="-o"
+run_mode="background"
 set +a
 
 parse_all_arguments "${@}"
@@ -16,12 +18,15 @@ parse_argument_with_value "demo_name" "the name of the demo to run - see the Qui
 parse_argument_with_value "demo_mode" "<base|skeleton|fve>"
 parse_argument_with_value "demo_applications_dir" "path of the demo applications scripts - default: ${demo_applications_dir}"
 parse_argument_with_value "config_file_name" "path of configuration file - default:"
+parse_argument_with_value "extra_demo_flags" "extra demo flags (e.g.: -d, -o, -v) - default: -o"
 parse_argument_with_value "image_name" "tag of docker image to use - default: will be determined by git tags"
+parse_argument_with_value "run_mode" "<background|foreground> - default: ${run_mode}"
 validate_remaining_cli_arguments
 
 test_executable "docker"
 test_executable "tar"
 
+extra_demo_flags="${extra_demo_flags}" # parse_argument_with_value declares it - this just clears IDE warnings
 demo_name="${demo_name}" # parse_argument_with_value declares it - this just clears IDE warnings
 demo_mode="${demo_mode}" # parse_argument_with_value declares it - this just clears IDE warnings
 if ! [[ "${demo_mode}" =~ ^(base|skeleton|fve)$ ]]; then
@@ -45,14 +50,28 @@ test "$(docker container ls --filter name="${container_name}" --all --quiet | wc
 	&& docker container stop "${container_name}" > /dev/null \
 	&& docker container rm "${container_name}" > /dev/null
 
+x11_arguments=()
+if echo "${extra_demo_flags}" | tr '-' '_' | grep -qF -e '_o' -e '__output'; then
+	x11_arguments+=(\
+		"--mount" "type=bind,readonly,source=/tmp/.X11-unix,destination=/tmp/.X11-unix" \
+		"--env" "DISPLAY=${DISPLAY:-}" \
+		"--env" "QT_X11_NO_MITSHM=1"
+	)
+fi
+
 docker container create \
 	--name ${container_name} \
 	--user="$(id -u)" \
 	${mount_param:-} \
+	"${x11_arguments[@]}" \
 	"${not_our_args[@]/#/}" \
 	"${image_name}" \
-	/usr/bin/python3.6 "apps/uvap/${demo_name}_DEMO.py" --output kafka:9092 "${demo_mode}" ${config_file_in_container:-}
+	/usr/bin/python3.6 "apps/uvap/${demo_name}_DEMO.py" \
+		kafka:9092 \
+		"${demo_mode}" \
+		${extra_demo_flags} \
+		${config_file_in_container:-}
 
 tar -c -C "${demo_applications_dir}" -h -f - . | docker container cp --archive - "${container_name}:/ultinous_app/"
 
-docker container start ${container_name}
+docker container start $(test "${run_mode:-}" = "foreground" && echo "--attach") ${container_name}

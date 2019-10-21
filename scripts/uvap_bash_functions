@@ -84,8 +84,9 @@ docker_container_run() {
 
 	test ! -z "${license_data_file:-}" && container_dynamic_options+=("--mount" "type=bind,readonly,source=${license_data_file},destination=/ultinous_app/license_data.txt")
 	test ! -z "${license_key_file:-}" && container_dynamic_options+=("--mount" "type=bind,readonly,source=${license_key_file},destination=/ultinous_app/licence.key")
-	if has_uvap_component_attribute "${service_name}" 'video' && ls /dev/video* >/dev/null 2>&1; then
-		for video_device in $(ls /dev/video*); do
+	if has_uvap_component_attribute "${service_name}" 'video'; then
+		video_devices="$(v4l2-ctl --list-devices 2>/dev/null | sed -nE 's+^[[:space:]]*(/.*)$+\1+p')"
+		for video_device in ${video_devices}; do
 			container_dynamic_options+=("--device" "${video_device}:${video_device}:rw")
 		done
 		container_dynamic_options+=("--group-add" "video")
@@ -102,5 +103,5 @@ docker_container_run() {
 		"${not_our_args[@]/#/}" \
 		"${image_name}"
 
-	docker container start "${container_name}"
+	docker container start $(test "${run_mode:-}" = "foreground" && echo "--attach") "${container_name}"
 }

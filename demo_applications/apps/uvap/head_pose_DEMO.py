@@ -4,6 +4,7 @@ import cv2
 from confluent_kafka.cimpl import Producer
 
 from utils.kafka.time_ordered_generator_with_timeout import TimeOrderedGeneratorWithTimeout, TopicInfo
+from utils.kafka.time_ordered_generator_with_timeout import BeginFlag, EndFlag
 from utils.uvap.graphics import draw_overlay, Position, draw_head_pose
 from utils.uvap.uvap import message_list_to_frame_structure, encode_image_to_message
 
@@ -27,6 +28,7 @@ def main():
     parser.add_argument("prefix", help="Prefix of topics (base|skeleton).", type=str)
     parser.add_argument('-f', "--full_screen", action='store_true')
     parser.add_argument('-d', "--display", action='store_true')
+    parser.add_argument('-v', "--video_file", action='store_true')
     parser.add_argument('-o', '--output', help='write output image into kafka topic', action='store_true')
     args = parser.parse_args()
 
@@ -36,12 +38,19 @@ def main():
     if args.output:
         producer = Producer({'bootstrap.servers': args.broker})
 
+    begin_flag = None
+    end_flag = None
+    if args.video_file:
+        begin_flag = BeginFlag.BEGINNING
+        end_flag = EndFlag.END_OF_PARTITION
+
     overlay = cv2.imread('resources/powered_by_white.png', cv2.IMREAD_UNCHANGED)
 
     image_topic = f"{args.prefix}.cam.0.original.Image.jpg"
     detection_topic = f"{args.prefix}.cam.0.dets.ObjectDetectionRecord.json"
     pose_topic = f"{args.prefix}.cam.0.poses.HeadPose3DRecord.json"
     output_topic_name = f"{args.prefix}.cam.0.head_pose.Image.jpg"
+    frameinfo_topic = f"{args.prefix}.cam.0.frameinfo.FrameInfoRecord.json"
 
     # handle full screen
     window_name = "DEMO: Head pose"
@@ -57,16 +66,26 @@ def main():
             TopicInfo(image_topic),
             TopicInfo(detection_topic),
             TopicInfo(pose_topic),
+            TopicInfo(frameinfo_topic),
         ],
         100,
         None,
-        True
+        True,
+        begin_flag=begin_flag,
+        end_flag=end_flag
     )
     i = 0
+    scaling = 1.0
     for msgs in consumer.getMessages():
         for time, v in message_list_to_frame_structure(msgs).items():
             img = v[args.prefix]["0"]["image"]
             if type(img) == np.ndarray:
+
+                # Set the image scale
+                shape_orig = v[args.prefix]["0"]["head_detection"].pop("image", {})
+                if shape_orig:
+                    scaling = img.shape[1] / shape_orig["frame_info"]["columns"]
+
                 # draw bounding_box
                 for head_detection in v[args.prefix]["0"]["head_detection"]:
                     object_detection_record = v[args.prefix]["0"]["head_detection"][head_detection]["bounding_box"]
@@ -74,13 +93,19 @@ def main():
                         pose_record = v[args.prefix]["0"]["head_detection"][head_detection]["head_pose"]
                         if "pose" in pose_record:
                             img = draw_head_pose(
-                                img,
-                                pose_record["pose"],
-                                object_detection_record["bounding_box"],
+                                canvas=img,
+                                pose=pose_record["pose"],
+                                bounding_box=object_detection_record["bounding_box"],
+                                scaling=scaling
                             )
 
                 # draw ultinous logo
-                img = draw_overlay(img, overlay, Position.BOTTOM_RIGHT)
+                img = draw_overlay(
+                    canvas=img,
+                    overlay=overlay,
+                    position=Position.BOTTOM_RIGHT,
+                    scale=scaling
+                )
 
                 # produce output topic
                 if args.output:
@@ -95,6 +120,8 @@ def main():
                     cv2.imshow(window_name, img)
         k = cv2.waitKey(33)
         if k == 113:  # The 'q' key to stop
+            if args.video_file:
+                exit(130)
             break
         elif k == -1:  # normally -1 returned,so don't print it
             continue
