@@ -15,10 +15,10 @@ microservice stops after processing the last source record.
 
 ## Properties
 
->**Note:**  
+>**Attention!**  
 Setting `.data` and `.file` properties are exclusive to each other, meaning
 setting both `ultinous.service.kafka.reid.config.data` and
-`ultinous.service.kafka.reid.config.file` results an error.
+`ultinous.service.kafka.reid.config.file` results in an error.
 
 ### ultinous.service.kafka.reid.auth.defs.data
 
@@ -94,6 +94,7 @@ Configuration records are separated into the following three values:
 * `ReidRecord` specified in [Kafka data proto]
 
 ### Example of a ReidMSConfig from Kafka
+
 ```
 {
   "source_options":
@@ -130,135 +131,217 @@ stop reading them. Two feature vector sources are defined with broker list and
 name. The target stream is being replaced.
 
 ### Example of a ReidConfigRecord from Kafka
+
 ```
-{
-  "inputs":
-  [
-    {
-      "stream_id": "entranceCamera",
-      "fv_field": "features",
-      "to_be_ignored_field": "end_of_frame",
-      "do_reg": true,
-      "reid_min_score": 0.9,
-      "reid_max_count": 1,
-      "reg_method": "SIMPLE_AVERAGE",
-      "reg_max_score": 0.7,
-      "reg_retention_period": 86400000
-    },
-    {
-      "stream_id": "exitCamera",
-      "fv_field": "features",
-      "to_be_ignored_field": "end_of_frame",
-      "do_reid":true
-    }
-  ]
-}
+"config_data":
+  {
+   "clustering_config": {
+     "method": "USE_LAST"
+   },
+   "input_stream_configs": [
+     {
+       "stream_id": "entranceCamera",
+       "fv_field_selector": {
+         "fv_cluster_path": "reg_event.cluster"
+       },
+       "camera_stream_config": {
+         "reg_stream_config": {
+           "reg_threshold": 0.9,
+           "cluster_retention_period_ms": 3600000
+         }
+       }
+     },
+     {
+       "stream_id": "exitCamera",
+       "fv_field_selector": {
+         "fv_cluster_path": "reg_event.cluster"
+       },
+       "camera_stream_config": {
+         "reid_stream_config": {
+           "min_similarity": 0.8,
+           "max_num_matches": 1
+         }
+       }
+     }
+   ]
+  }
 ```
 
-The `inputs` field has to contain exactly as many records as many input streams
-are defined in `ReidMSConfig` (the i<sup>th</sup> input stream is assigned
-to the i<sup>th</sup> input config record).
+The `clustering_config` field contains information of clustering configuration.
+Here, `method` defines the clustering method. The only valid entry is
+`USE_LAST`, which means that if an observed feature vector is recognized to
+belong to a previously stored cluster, its representative feature vector is
+replaced by the new observation.
+
+The `input_stream_configs` field has to contain the exact same amount of records
+as the number of input streams defined in `ReidMSConfig` (the i<sup>th</sup>
+input stream is assigned to the i<sup>th</sup> configuration record).
 See the table below for the field descriptions:
 
-| Input | Description |
-|--|--|
-| `stream_id`           | An arbitrary but application-unique name for the input stream. This is later referenced in the results. |
-| `fv_field`            | The _name_ of a `FeatureVectorRecord` type field in the input topic schema. This field refers to the actual feature vector data.|
-| `is_active_field`     | Optional. The _name_ of a boolean type field in the input topic schema. If set and the field is present in the actual message, the message is not processed if the field has the value `false`. <br>Useful for "turning off" a feature vector in a manually maintained list.  |
-| `to_be_ignored_field` | Optional. The _name_ of a boolean type field in the input topic schema. If set and the field is present in the actual message, the message is not processed if the field has the value `true`.<br>This is necessary because not every `FeatureVectorRecord` message (see [Kafka data proto]) contains the `features` field. For technical reasons, sometimes it only contains the `end_of_frame` field which, in this case, is then set to `true`.|
-| `do_reid`             | If set to `true`, the stream is used for reidentification. Default is `false`.|
-| `do_reg`              | If set to `true`, the stream is used for registration. Default is `false`.|
-| `reid_min_score`      | Must be set if and only if `do_reg` is set to `true`. A score that reaches or exceeds this value is necessary to result a reidentification event, however, match count can still be limited. <br> Must be in the `[0.0..1.0]` interval, default is `0.0`.|
-| `reid_max_count`      | Must be set if and only if `do_reg` is set to `true`. Defines the maximum number of the returned matching feature vectors (those which result a score good enough) per registration stream. The actual reidentification result can be as long as the sum of these values defined in the registration streams.<br>Must be positive or `0`, default is `0`.|
-| `reg_method`          | Must not be set to `NONE` if and only if `do_reg` is set to `true`.<br>Defines what happens to the already registered feature vector of an individual if a new feature vector is recognized (can be either updated to the new one or contribute to a weighted average).|
-| `reg_max_score`       | Must be set if and only if `do_reg` is set to `true`. A new feature vector is registered if there is no feature vector stored with a score reaching or exceeding this value, otherwise the feature vector with the highest the score is updated.<br>Must be in the `[0.0..1.0]` interval, default is `0.0`. The value `1.0` is an exception because in this case, every feature vector is stored.|
-| `reg_retention_period`| Time interval in milliseconds. Must be set if and only if `do_reg` is set to `true`. Feature vectors stored for longer time than this period are deleted from the registration database. `0` means nothing is deleted.<br>Default is `0`.|
+| Input                         | Description |
+| ----------------------------- | ----------- |
+| `stream_id`                   | An arbitrary but application-unique name for the input stream. This is later referenced in the results. |
+| `fv_field_selector`           | Selects a feature vector or cluster field in the input record. See `feature_vector_path` and `fv_cluster_path` child parameters. |
+| `feature_vector_path`         | Child parameter of `fv_field_selector`. Specifies the path to a field of type `FeatureVector` within the input record. |
+| `fv_cluster_path`             | Child parameter of `fv_field_selector`. Specifies the path to a field of type `FVCluster` within the input record. |
+| `camera_stream_config`        | Indicates that the input is a camera stream. |
+| `reg_stream_config`           | Child parameter of `camera_stream_config`. Indicates that the stream is used for registration.|
+| `reg_threshold`               | Child parameter of `reg_stream_config`. If the similarity between the input feature vector and any stored cluster is less than this value, a new cluster is registered. Otherwise, the cluster with the highest similarity score is updated. <br>Must be in the `[0.0..1.0]` interval, default is `0.0`. The value `1.0` means that every feature vector is stored.|
+| `cluster_retention_period_ms` | Child parameter of `reg_stream_config`. Time interval in milliseconds; clusters stored for longer time than this period are deleted from the registration database. `0` means nothing is deleted.<br>Default is `0`.|
+| `reid_stream_config`          | Child parameter of `camera_stream_config`. Indicates that the stream is used for reidentification.|
+| `min_similarity`              | Child parameter of `reid_stream_config`. Similarity value. If the similarity score (see `score` under [`ReidRecord`]) between the input and a stored cluster reaches this value, a reidentification event takes place. <br> Must be in the `[0.0..1.0]` interval, default is `0.0`. <br> Match count can still be limited, see `max_num_matches`. |
+| `max_num_matches`             | Child parameter of `reid_stream_config`. Defines the maximum number of the returned matching clusters (with a score above `min_similarity`). <br>Must be positive.|
 
-In this exameple, the `"entranceCamera"` stream has a minimum
-reidentification score of `0.9`, which means the result produced from this
-stream contains hits that have at least this score value. Other streams may
-define other minimums. The `reid_max_count` is set to `1`, meaning one
+In this example, the `exitCamera` stream has a minimum
+reidentification score of `0.8` set by `min_similarity`,
+which means the result produced from this
+stream contains hits that have at least this score value.
+
+The `max_num_matches` is set to `1`, meaning one
 reidentification result is produced from this stream at the most. This means that
 the stream corresponds to the final reidentification result with its most
-similar feature vector (if the similarity score reaches `0.9`).
+similar feature vector (if the similarity score reaches `0.8`).
 
-Also, the `"entranceCamera"` stream `reg_max_score` is set to `0.7`, meaning
-only those new feature vectors are stored, which come from this stream and there
-does not exist a stored feature vector with the similarity score reaching `0.7`.
+The `reg_threshold` of `entranceCamera` stream is set to `0.9`. This means that
+— from this stream — only those feature vectors are stored that reach the similarity
+score of `0.9`.
 
->**Note:**  
-`[0..reg_max_score]` does not contain its upper boundary but `[reid_min_score..1]`
-does contain its lower boundary. These two values can be the same
-(in which case a feature vector is certainly stored or reidentified). If
-`reid_min_score` is greater than `reg_max_score`, there is an interval
-of scores that are too similar to be remembered but not too similar to be recognized.
-
-The `reg_retention_period` of the example stream is 24 hours in milliseconds.
-That means that a newly stored feature vector is forgotten after a day.
+The `cluster_retention_period_ms` of the example stream is 1 hour in milliseconds.
+That means that a newly stored cluster is forgotten after one hour. The
+retention period is counted from the last update of a cluster — either it
+is a newly set or an updated one.
 
 ### Examples of a ReidRecord from Kafka
 
-An example of a `ReidRecord` from Kafka:
+`ReidRecord` can have the following events indicated by the `type` field:
+
+* `REG_EVENT`: the event is a registration or a cluster update
+* `REID_EVENT`: the event is a reidentification
+* `DELETE_EVENT`: the event is a cluster removal
+* `HEARTBEAT`: the input is processed and there are no more messages:
+   
+   ```
+   {"type":"HEARTBEAT"}
+   ```
+
+#### Registration ReidRecord Example
 
 ```
-{
-  "type":"REG",
-  "event":
+{"type":"REG_EVENT",
+ "reg_event":
   {
-    "stream_id":"entranceCamera",
-    "key":"1564038630680_1"
-  },
-  "reg_refs":
-  [
-    {
-      "subject":
+    "cluster_id":
       {
-        "stream_id":"entranceCamera",
-        "key":"1564038630680_1"
+        "first_detection_time":"1571138183912",
+        "first_detection_key":"1571138183912_0",
+        "first_detection_stream_id":"entranceCamera"
       },
-      "score":0
-    }
-  ]
-}
-{
-  "type":"REID",
-  "event":
-  {
-    "stream_id":"exitCamera",
-    "key":"1564038631000_1"
-  },
-  "reg_refs":
-  [
-    {
-      "subject":
+    "cluster":
       {
-        "stream_id":"entranceCamera",
-        "key":"1564038630680_1"
+        "representative_fv":
+          {
+            "model_id":"face_rec_v6",
+            "feature":[-0.884964168,-0.394254386, ... ,0.100110188,0.529844344],
+            "type":"PERSON_FACE"
+          },
+        "num_observations":1
       },
-      "score":0.970905602
-    }
-  ]
+    "input_stream_id":"entranceCamera",
+    "is_realized":true
+  }
 }
 ```
 
-In this example, there are two records.
 
-The first record `type` is set to `REG`, which means that the event-trigger
-feature vector is not found in the database but became stored. The event
-describes that the feature vector comes from the source which has the ID
-`entranceCamera`. The unique key of the particular feature vector is
-`1564038630680_1`. The `reg_refs` field contains the added or updated
-feature vector key and stream ID with a score of `0`. In case of an update,
-the original key is preserved so it can be used as a key for identifying
-individuals.
+This example shows a `reg_event` event, which refers to one of the following
+cases:
 
-The second record `type` is set to `REID`, which means that the event-trigger
-feature vector is similar to an already stored one. The event describes that the
-event-trigger feature vector comes from the `exitCamera` stream with a unique
-ID. The `reg_refs` field contains a list of the remembered feature vectors
-that are similar to the event-trigger feature vector. The key is one of the
-earlier registered feature vector keys. `score` measures the similarity
-between the two feature vectors (`0.0 ≤ score ≤ 1.0`).
+* The recognized feature vector or cluster is not found in the database, so a
+  new cluster is created.
+
+* The recognized feature vector or cluster is found in the database,
+  so an already stored cluster is updated.
+
+The record shows the same information in both cases.
+
+
+The `input_stream_id` field of event shows that the feature vector comes from
+the source which has the ID `entranceCamera`.
+
+The `cluster_id` field contains the time, key and stream information of the
+detection.
+
+The `cluster` field contains information about the stored cluster.
+
+The `representative_fv` field is a representation of all feature vectors in
+this cluster. It is not necessarily equal to any input feature vector.
+
+`num_observations` shows the number of input feature vectors belonging
+to this cluster.
+
+`is_realized` shows if a cluster is ready to be used for further processing
+(see `ClusterRealizationConfig` in the [Kafka configuration proto].)
+If it has the value `false`, outputs are only saved to keep track of input
+keys and their clusters.
+
+#### Reidentification ReidRecord Example
+
+```
+{"type":"REID_EVENT",
+ "reid_event":
+  {
+    "match_list":
+      [
+        {
+          "id":
+            {
+              "first_detection_time":"1571138183912",
+              "first_detection_key":"1571138183912_0",
+              "first_detection_stream_id":"entranceCamera"
+            },
+          "score":0.988238931
+        }
+      ],
+    "input_stream_id":"exitCamera"
+  }
+}
+```
+
+This example shows a `reid_event` event, meaning that the recognized feature
+vector is similar to a stored cluster, so it is reidentified.
+
+The `match_list` field contains a list of the stored culsters
+that are similar to the input feature vector. The `id` field contains the time,
+key, and stream information of the first detection of a feature vector belonging
+to the matching cluster; while `score` measures the similarity between the input
+feature vector and the matching cluster (`0.0 ≤ score ≤ 1.0`). The higher the
+score, the greater the similarity.
+
+The `input_stream_id` of the event shows that the feature vector comes from
+the source which has the ID `exitCamera`.
+
+#### Deletion ReidRecord Example
+
+```
+{"type":"DELETE_EVENT",
+  "delete_event":
+    {
+      "deleted_cluster":
+        {
+          "first_detection_time":"1571138183912",
+          "first_detection_key":"1571138183912_0",
+          "first_detection_stream_id":"entranceCamera"
+        }
+      }
+}
+```
+
+This example shows a `delete_event` event, meaning that a cluster is deleted
+because its retention period expired. For information on cluster retention
+period, see `cluster_retention_period` in [`ReidConfigRecord`].
+
+The `deleted_cluster` field contains the first detection time, key and stream
+information of the deleted cluster.
 
 ## Feature Demo
 
@@ -272,5 +355,7 @@ For the basic reidentification feature demos, see
 [Kafka superconfiguration proto]: ../../proto_files/ultinous/proto/common/kafka_superconfig.proto
 [Kafka configuration proto]: ../../proto_files/ultinous/proto/common/kafka_config.proto
 [Kafka data proto]: ../../proto_files/ultinous/proto/common/kafka_data.proto
+[`ReidRecord`]: #reidentification-reidrecord-example
+[`ReidConfigRecord`]: #example-of-a-reidconfigrecord-from-kafka
 [Superconfig Authentication Definitions]: conf_superconfig.md#authentication-definition
 [Superconfig Topic Definitions]: conf_superconfig.md#topic-definitions

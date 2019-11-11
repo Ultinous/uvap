@@ -78,7 +78,7 @@ echo "Starting to configure..."
 	--demo-applications-dir "${demo_applications_dir}" \
 	--templates-dir "${templates_dir}" \
 	--config-ac-dir "${config_ac_dir}" \
-	--image-name "${uvap_demo_applications_docker_image_name}" \
+	--demo-image-name "${uvap_demo_applications_docker_image_name}" \
 	> "${ms_log_output}"
 echo "Finished configuring."
 
@@ -150,6 +150,9 @@ fi
 
 video_writer_container_name="uvap_video_writer"
 echo "Starting to write video..."
+
+# TODO: if no symlinks found in demo_applications_dir, mount it.
+
 docker container create \
 	--name "${video_writer_container_name}" \
 	--rm \
@@ -157,7 +160,7 @@ docker container create \
 	--mount "type=bind,src=${video_dir},dst=/videos" \
 	--net=uvap \
 	"${uvap_demo_applications_docker_image_name}" \
-	/usr/bin/python3.6 "apps/uvap/write_video.py" \
+	python3.7 "apps/uvap/write_video.py" \
 		kafka:9092 \
 		"${demo_mode}.cam.0.${demo_name}.Image.jpg" \
 		-fps "${fps_number}" \

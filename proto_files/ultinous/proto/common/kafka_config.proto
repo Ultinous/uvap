@@ -109,57 +109,179 @@ message RoiFiltersConfigRecord
 }
 
 /**
+Configuration of feature vector clustering algorithms.
+Clustering is based on a similarity measure between feature vectors and clusters.
+Currently supports trivial algorithms only where a single feature vector represents a cluster.
+The representative feature vector can be the last one belonging to this cluster, or an average of all previous ones.
+
+*/
+message FVClusteringConfig
+{
+  /** Conditions for clusters to be realized. */
+  message ClusterRealizationConfig
+  {
+    int32 min_num_samples = 1; ///< Minimum number of observations required for a cluster to be realized.
+    int64 time_limit_ms = 2; ///< Time limit for realization even when the number of observations is too small.
+  }
+
+  /** Configuration for Cluster Merging.
+  Merge attempts are triggered by the first input arriving after time_interval_ms since the last attempt.
+  Clusters that are more similar to each other than the current similarity threshold will be merged.
+
+  current_threshold = max(min_threshold, initial_threshold * threshold_discount_rate^num_inputs)
+  where num_inputs is the sum of the two potentially mergeable clusters.
+  */
+  message ClusterMergingConfig
+  {
+    float initial_threshold = 1; ///< Initial similarity threshold value. See formula above.
+    float threshold_discount_rate = 2; ///< Rate of descreasing the similarity threshold. See formula above.
+    float min_threshold = 3; ///< Minimal value of the similarity threshold. See formula above.
+    int64 time_interval_ms = 4; ///< Minimum time between subsequent merge attempts. Note that merge calculation is expensive.
+  }
+
+  /**
+  Type of clustering algorithm.
+  Has no effect on person streams, they always use USE_LAST.
+  */
+  enum ClusteringMethod
+  {
+    INVALID = 0;
+    USE_LAST = 1; ///< The representative feature vector of the matching cluster is always replaced by the new observation.
+    SIMPLE_AVERAGE = 2; ///< The representative feature vector of each cluster is a simple average of the matching observations.
+  }
+
+  ClusteringMethod method = 1;
+  ClusterMergingConfig cluster_merging = 2; ///< Optional, must be null for method=USE_LAST.
+  ClusterRealizationConfig cluster_realization = 3; ///< Optional, must be null for method=USE_LAST.
+  bool save_internal_state = 4; ///< When true, internal states are saved to a Kafka topic.
+  bool start_from_internal_state = 5; ///< When true, the saved internal states are used to rebuild the DB, instead of the input topics.
+}
+
+/**
+  Description of how to extract a specific field from a message.
+  The path to reach the field is denoted by a '.'-separated list of tokens:
+  - find the first token as a top-level field name
+  - find the next token as an embedded field in the previous field
+  - repeat until end of list; the last token is the required field name
+  Messages in which the specified field is not present will be ignored.
+*/
+message FVFieldSelector
+{
+  oneof fv_path
+  {
+    string feature_vector_path = 1; ///< Path to a FeatureVector field.
+    string fv_cluster_path = 2; ///< Path to a FVCluster field.
+  }
+}
+
+/** Configuration for a registration-type input stream originating from a camera*/
+message FVRegStreamConfig
+{
+  float reg_threshold = 1; ///< Similarity threshold for registration: decides whether to create a new cluster or to update an existing one.
+  int64 cluster_retention_period_ms = 2; ///< Cluster memory window size [ms]. Also at startup we rewind input this much. 0 means infinite.
+}
+
+/**
+ Configuration for kafka_feature_vector_clustering.
+ Also applies to the registration part of the kafka_reid microservice below.
+
+ Inputs: Inputs are streams of feature vectors or clusters that may be extracted from
+ - video camera streams
+ - a previous feature vector clustering algorithm.
+ Inputs can be any record type that contains either a FeatureVector or a FVCluster field.
+
+ A new cluster is created when the input feature vector is less similar to any stored cluster than a threshold.
+ The most similar cluster (above the threshold) is modified by adding the new input feature vector.
+ New clusters and modifications are only emitted to the output topic when the cluster meets the requirements to be realized.
+
+ Outputs: FVClusterUpdateRecord, and optionally an undocumented internal state topic
+*/
+message FVClusteringConfigRecord
+{
+  /** Configuration for a single input stream */
+  message InputStreamConfig
+  {
+    string stream_id = 1; ///< Identifier of input stream.
+    FVFieldSelector fv_field_selector = 2;
+    FVRegStreamConfig reg_stream_config = 3;
+  }
+
+  FVClusteringConfig clustering_config = 1;
+  repeated InputStreamConfig input_stream_configs = 2; ///< Exactly as many configurations as input streams configured for the service.
+}
+
+/**
  Configuration for kafka_reid.
 
- Concept:
-   Inputs are feature vector streams that may be extracted from video camera images or from manually managed images.
-   Feature vectors are registered, i.e. stored as a new identity when they are dissimilar to any other stored feature vector.
-   Feature vectors are reidentified as an existing identity when they are similar enough to a registered feature vector.
-   Each input stream can be used for registration, reidentification, or both.
-   Examples:
-   - Registering manually managed data: Loading staff database for entrance system.
-   - Reidentification from  manually managed data: Searching for people similar to a given photo.
-   - Registering data from camera: Dwell time measurement, first camera.
-   - Reidentification from data from camera: Dwell time measurement, second camera.
+ Input:
+   Inputs are streams of feature vectors or clusters that may be extracted from
+   - video camera streams, via feature vector extraction and optionally pre-clustering
+   - person databases containing images
+   Inputs can be any record type that contains either a FeatureVector or a FVCluster field.
+   Camera input streams can be used for registration, reidentification, or both.
 
-   On reidentification, each stream that is used for registration will provide a top list of matches,
-   the final result will be the concatenation of these top lists.
-   Each top list has a maximum size configured for that registration stream (reid_max_count).
-   A top list can be shorter if there are not enough matches reaching the minimum required score (reid_min_score).
+ Reidentification:
+   Feature vectors are reidentified as an existing identity when they are similar enough to
+   a registered feature vector cluster.
+   Each stream that is used for registration will provide a top list of matches, the final result will be
+   the concatenation of these top lists.
+   Each top list has a maximum size configured for that reidentification stream (max_num_matches).
+   A top list can be shorter if there are not enough matches reaching the minimum required score (min_similarity).
 
-   Registration only happens if the score of the closest match is less than reg_max_score.
-   For manually managed streams we recommend this settinng to be 1 (one).
-   Registrations are kept in memory for reg_retention_period milliseconds.
+ Registration:
+   The configuration for the clustering algorithm is the same as ClusteringConfig above.
+   Feature vectors from camera streams are registered, i.e. stored as a new identity (cluster) when they are dissimilar
+   to any other stored cluster.
+   Feature vectors from a person database are registered by their kafka message key,
+   which can be e.g. the name of the person.
 
- Input: Can be any record type that contains feature vectors and associated model ids.
-   For streams that are used for registration, input messages with an already existing key in memory will
-   - delete the in-memory feature vector if the payload of the input message is empty
-   - update the in-memory feature vector otherwise.
+ Outputs: ReidRecord and optionally an undocumented internal state topic
 
- Output: ReidRecord
  */
 message ReidConfigRecord
 {
-  /** Configuration for a single input stream
-  */
-  message InputConfig
+  /** Configuration for a single reid-type input stream */
+  message FVReidStreamConfig
   {
-    string stream_id = 1; ///< Identifier of input stream.
-    string fv_field = 2; ///< Name of the field of type FeatureVector in input records.
-    string is_active_field = 3; ///< Optional name of a boolean field to filter input records. Only records with a 'true' value will be considered.
-    string to_be_ignored_field = 4; ///< Optional name of a boolean field to filter input records. Records with a 'true' value will be ignored.
-    bool do_reid = 5; // Input stream can be used for reidentification.
-    bool do_reg = 6; // Input stream can be used for registration.
-
-    /** The properties below are only valid when do_reg is 'true'. They should not be set when do_reg is 'false'.
-    !Note that even reidentification parameters are associated with the stream where registration happens!
-    */
-
-    float reid_min_score = 7; ///< Minimum similarity score for reidentification, i.e. to be included in the list of top matching elements.
-    uint32 reid_max_count = 8; ///< Length of the list of top matching elements from this registration stream.
-    float reg_max_score = 10; ///< Maximum similarity score (exclusive) to any stored feature vactor, in order for feature vector to be registered.
-    int64 reg_retention_period = 11; ///< Registration memory window size [ms]. Also at startup we rewind input this much. 0 means infinite.
+    float min_similarity = 1; ///< Minimum similarity score for reidentification, i.e. to be included in the list of top matching elements.
+    uint32 max_num_matches = 2; ///< Maximal length of the list of top matching elements from this registration stream.
   }
 
-  repeated InputConfig inputs = 1; ///< Exactly as many configurations as input streams configured for the service.
+  /** The type of each camera stream can be 'reg', 'reid', or both. */
+  message CameraStreamConfig
+  {
+    FVRegStreamConfig reg_stream_config = 1; ///< Only for registration streams.
+    FVReidStreamConfig reid_stream_config = 2; ///< Only for reid streams.
+  }
+
+  /**
+  Configuration for a person input stream used to add/update/delete/activate/inactivate feature vector clusters.
+  Input message schema for this stream:
+  1. Empty payload: permanently delete cluster that has the same key as the input message key.
+  2. Message contains a non-null feature vector or cluster field (as specified in FVStreamConfig):
+    --> Add or update cluster with the same key as the key of the message.
+    --> Activate/inactivate cluster according to the value of the field at is_active_path
+  ClusteringMethod has no effect on person streams. Updating a cluster always means replacing the feature vector.
+  */
+  message PersonStreamConfig
+  {
+    string is_active_path = 1; ///< Optional path to a boolean field in the input messages. true means activate cluster, false means inactivate cluster.
+    int64 cluster_retention_period_ms = 2; ///< Cluster memory window size [ms]. Also at startup we rewind input this much. 0 means infinite.
+  }
+
+  /** Configuration for a single input stream */
+  message InputStreamConfig
+  {
+    string stream_id = 1; ///< Identifier of input stream.
+    FVFieldSelector fv_field_selector = 2;
+    oneof stream_config
+    {
+      CameraStreamConfig camera_stream_config = 3;
+      PersonStreamConfig person_stream_config = 4;
+    }
+  }
+
+  FVClusteringConfig clustering_config = 1;
+  repeated InputStreamConfig input_stream_configs = 2; ///< Exactly as many configurations as input streams configured for the service.
 }
+

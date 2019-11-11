@@ -70,7 +70,9 @@ These technical features are the following:
 
 - [Image Streams]
 - [Frame Info]
+- [Stream Configurator]
 - [Video Annotation]
+
 
 
 [3D Head Pose]: detect_person/feat_head_pose.md
@@ -88,4 +90,5 @@ These technical features are the following:
 [Pass Detection]: detect_movement/feat_pass_det.md
 [Reidentification (Basic)]: face_prop/feat_reid.md
 [Skeleton Detection]: detect_person/feat_skeleton.md
+[Stream Configurator]: other/feat_sc_ui.md
 [Video Annotation]: other/feat_video_annotation.md

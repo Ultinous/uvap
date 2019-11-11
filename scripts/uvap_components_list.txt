@@ -4,3 +4,4 @@ kafka_reid:ms:properties:fve
 mgr:ms:properties:data_flow:base:skeleton:fve:nvidia:video
 uvap_demo_applications
 uvap_web_player:properties:base:skeleton:fve
+stream_configurator_ui:ms:properties:base

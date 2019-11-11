@@ -102,11 +102,10 @@ def main():
                     object_detection_record = detection_record["bounding_box"]
 
                     color = COLOR_GREY
-                    reid_record = reid_records.get(detection_key)
-                    if reid_record:
+                    reid_records_for_det = reid_records.get(detection_key, ())
+                    for reid_record in filter(lambda r: "reid_event" in r, reid_records_for_det):
                         color = COLOR_ORANGE
-                        reid_key = reid_record["reg_refs"][0]["subject"]["key"]
-
+                        reid_key = reid_record["reid_event"]["match_list"][0]["id"]["first_detection_key"]
                         key_to_display = stored_ids.get(reid_key, None)
                         if key_to_display is None:
                             key_to_display = len(stored_ids) + 1

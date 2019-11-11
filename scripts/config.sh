@@ -8,7 +8,10 @@ set -a
 demo_applications_dir="${current_directory}/../demo_applications"
 templates_dir="${current_directory}/../templates"
 config_ac_dir="${current_directory}/../config"
-image_name="_auto_detected_"
+demo_image_name="_auto_detected_"
+configurator_image_name="_auto_detected_"
+host_name="localhost"
+web_player_port_number="9999"
 set +a
 
 parse_all_arguments "${@}"
@@ -17,7 +20,10 @@ parse_argument_with_multi_value "stream_uri" "file name / device name / RTSP URL
 parse_argument_with_value "demo_applications_dir" "directory path of demo applications scripts - default: ${demo_applications_dir}"
 parse_argument_with_value "templates_dir" "directory path of configuration templates - default: ${templates_dir}"
 parse_argument_with_value "config_ac_dir" "directory path of configuration files - will be created if not existent - default: ${config_ac_dir}"
-parse_argument_with_value "image_name" "tag of docker image to use - default: will be determined by git tags"
+parse_argument_with_value "demo_image_name" "tag of docker image to use - default: will be determined by git tags"
+parse_argument_with_value "configurator_image_name" "tag of docker image to use - default: will be determined by git tags"
+parse_argument_with_value "host_name" "the domain name of the host useful to access services remotely - default: localhost"
+parse_argument_with_value "web_player_port_number" "default port of the uvap web player ms - default: 9999"
 validate_remaining_cli_arguments
 
 test_executable "docker"
@@ -32,8 +38,8 @@ fi
 config_ac_dir="${config_ac_dir}" # parse_argument_with_value declares it - this just clears IDE warnings
 stream_uris="${stream_uris}" # parse_argument_with_value declares it - this just clears IDE warnings
 
-if test "${image_name:-}" = "_auto_detected_"; then
-	image_name="$(get_docker_image_tag_for_component uvap_demo_applications)"
+if test "${demo_image_name:-}" = "_auto_detected_"; then
+	demo_image_name="$(get_docker_image_tag_for_component uvap_demo_applications)"
 fi
 
 jinja_yaml_param_file_path="${config_ac_dir}/params.yaml"
@@ -42,6 +48,8 @@ trap "rm -f ${jinja_yaml_param_file_path}" TERM INT EXIT
 echo "ENGINES_FILE: /ultinous_app/models/engines/basic_detections.prototxt
 KAFKA_BROKER_LIST: kafka
 KAFKA_TOPIC_PREFIX: ${demo_mode}
+HOST_NAME: ${host_name}
+WEB_PLAYER_PORT: ${web_player_port_number}
 INPUT_STREAMS:" > "${jinja_yaml_param_file_path}"
 
 found_realtime_stream="false"
@@ -81,7 +89,7 @@ echo "#!/bin/sh" > "${jinja_run_script_path}"
 echo "set -eu" >> "${jinja_run_script_path}"
 chmod +x "${jinja_run_script_path}"
 
-jinja_run="/usr/bin/python3.6 utils/jinja_template_filler.py ${mounted_config_dir}/params.yaml"
+jinja_run="python3.7 utils/jinja_template_filler.py ${mounted_config_dir}/params.yaml"
 
 for uvap_component in $(get_uvap_components_list AND "properties" "${demo_mode}" | force_uvap_prefix); do
 	mkdir -p "${config_ac_dir}/${uvap_component}/"
@@ -94,11 +102,13 @@ for uvap_component in $(get_uvap_components_list AND "data_flow" "${demo_mode}" 
 	echo "${jinja_run} ${mounted_templates_dir}/${uvap_component}_${demo_mode}_TEMPLATE.prototxt ${mounted_config_dir}/${uvap_component}/${uvap_component}.prototxt" >> "${jinja_run_script_path}"
 done
 
-docker pull "${image_name}" > /dev/null
+docker pull "${demo_image_name}" > /dev/null
 container_name="uvap_config"
 test "$(docker container ls --filter name="${container_name}" --all --quiet | wc -l)" -eq 1 \
 	&& docker container stop "${container_name}" > /dev/null \
 	&& docker container rm "${container_name}" > /dev/null
+
+# TODO: if no symlinks found in demo_applications_dir, mount it.
 
 docker container create \
 	--rm \
@@ -107,10 +117,14 @@ docker container create \
 	--mount "type=bind,readonly,source=${templates_dir},destination=${mounted_templates_dir}" \
 	--mount "type=bind,source=${config_ac_dir},destination=${mounted_config_dir}" \
 	--net=none \
-	"${image_name}" \
+	"${demo_image_name}" \
 	"${mounted_config_dir}/run_jinja.sh" \
 	> /dev/null
 
 tar -c -C "${demo_applications_dir}" -h -f - . | docker container cp --archive - "${container_name}:/ultinous_app/"
 
 docker container start --attach "${container_name}" > /dev/null
+
+if test "base" = "${demo_mode}"; then
+	${current_directory}/generate_stream_configurator_ui.sh "--image-name" "${configurator_image_name}"
+fi

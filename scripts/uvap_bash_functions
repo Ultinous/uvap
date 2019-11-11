@@ -7,6 +7,7 @@ uvap_components_list_path="${current_directory}/uvap_components_list.txt"
 script_name="$(basename "${0}")"
 script_name_without_extension="${script_name%".sh"}"
 service_name="${script_name_without_extension#"run_"}"
+service_name="${service_name#"generate_"}"
 
 get_uvap_components_list() {
 	set -o pipefail
@@ -56,6 +57,7 @@ docker_container_run() {
 	script_name="$(basename "${0}")"
 	script_name_without_extension="${script_name%".sh"}"
 	service_name="${script_name_without_extension#"run_"}"
+	service_name="${service_name#"generate_"}"
 	container_name="$(echo "${service_name}" | force_uvap_prefix)"
 	docker_executable="$(has_uvap_component_attribute "${service_name}" 'nvidia' && echo "nvidia-docker" || echo "docker")"
 	test_executable "${docker_executable}"
@@ -101,7 +103,8 @@ docker_container_run() {
 		--user "${user_spec}" \
 		"${container_dynamic_options[@]}" \
 		"${not_our_args[@]/#/}" \
-		"${image_name}"
+		"${image_name}" \
+		"${@}"
 
 	docker container start $(test "${run_mode:-}" = "foreground" && echo "--attach") "${container_name}"
 }

@@ -132,14 +132,14 @@ started with the following shell commands:
       --volumes-from zookeeper-data confluentinc/cp-zookeeper:4.1.0
     ```
 	
-1. Increase the retention time of the topics (i.e. 30 days):
+1. Increase the retention time of the topics (i.e. infinite):
 
     ```
     $ for topic in $(docker exec zookeeper kafka-topics --list \
       --zookeeper zookeeper:2181) ; do docker exec zookeeper \
       kafka-configs --zookeeper zookeeper:2181 --alter --entity-type \
       topics --entity-name ${topic} --add-config \
-      retention.ms=2592000000 ; done
+      retention.ms=-1 ; done
     ```
 	
 1. Create the Docker container with the data of Kafka:
@@ -214,6 +214,8 @@ uvapdemo.cam.118.passes.PassDetectionRecord.json
 uvapdemo.cam.118.poses.HeadPose3DRecord.json
 uvapdemo.cam.118.skeletons.SkeletonRecord.json
 uvapdemo.cam.118.tracks.TrackRecord.json
+uvapdemo.person.FeatureVectorRecord.json
+uvapdemo.reids.ReidRecord.json
 ```
 
 ### List Messages from a Topic  
@@ -227,7 +229,7 @@ $ docker exec kafka kafka-console-consumer \
   --from-beginning
 ```
 
-## Cleaning up
+## Cleaning Up
 
 When you finished the work with these Kafka topics, you can remove them with the following commands:
 

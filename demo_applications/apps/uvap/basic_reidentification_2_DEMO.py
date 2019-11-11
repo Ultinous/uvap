@@ -1,5 +1,5 @@
 import argparse
-from typing import List, Dict
+from typing import Dict
 
 import cv2
 import numpy as np
@@ -9,10 +9,10 @@ from utils.kafka.time_ordered_generator_with_timeout import TimeOrderedGenerator
 from utils.uvap.graphics import draw_nice_bounding_box, draw_overlay, Position, draw_nice_text
 from utils.uvap.uvap import message_list_to_frame_structure, encode_image_to_message
 
-
 COLOR_ORANGE = (10, 95, 255)
 COLOR_GREY = (97, 97, 97)
-TITLE = "DEMO: Reidentification"
+TITLE_REG = "DEMO: Registration"
+TITLE_REID = "DEMO: Reidentification"
 REG_CAMERA_ID = "0"
 REID_CAMERA_ID = "1"
 REID_TOPIC_ID = "99"
@@ -48,7 +48,6 @@ def main():
     )
     parser.add_argument("broker", help="The name of the kafka broker.", type=str)
     parser.add_argument("prefix", help="Prefix of topics (base|skeleton).", type=str)
-    parser.add_argument('-f', "--full_screen", action='store_true')
     parser.add_argument('-d', "--display", action='store_true')
     parser.add_argument('-o', '--output', help='write output image into kafka topic', action='store_true')
     args = parser.parse_args()
@@ -70,12 +69,6 @@ def main():
     reid_topic = f"{args.prefix}.cam.{REID_TOPIC_ID}.reids.ReidRecord.json"
     output_reg_topic_name = f"{args.prefix}.cam.{REG_CAMERA_ID}.reids.Image.jpg"
     output_reid_topic_name = f"{args.prefix}.cam.{REID_CAMERA_ID}.reids.Image.jpg"
-
-    # handle full screen
-    window_name = TITLE
-    if args.full_screen:
-        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-        cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     # read message, draw and display them
     consumer = TimeOrderedGeneratorWithTimeout(
@@ -102,17 +95,9 @@ def main():
     for msgs in consumer.getMessages():
         for time, v in message_list_to_frame_structure(msgs).items():
             message = v.get(args.prefix, {})
-            # Register the recognized faces
             reid_records = message[REID_TOPIC_ID].get("reid", {})
-            for reid_key, reid_record in reid_records.items():
-                record_type = reid_record["type"]
-                # Get the stored registration key
-                registration_key = reid_record["reg_refs"][0]["subject"]["key"]
-                if record_type == "REG" and registration_key not in registrations:
-                    inner_id += 1
-                    registrations[registration_key] = inner_id
 
-            for topic_key, topic_message in message.items():
+            for topic_key, topic_message in filter(lambda t: t[0] != REID_TOPIC_ID, message.items()):
                 img = topic_message.get("image", {})
                 if not isinstance(img, np.ndarray):
                     continue
@@ -128,16 +113,23 @@ def main():
                     object_detection_record = detection_record["bounding_box"]
                     color = COLOR_GREY
                     key_to_display = ""
-
+                    
                     # Reidentification received
-                    reid_record = reid_records.get(detection_key)
-                    if reid_record and reid_record["type"] == "REID":
-                        reid_key = reid_record["reg_refs"][0]["subject"]["key"]  # We only use the first identified face now
-                        registered_id = registrations.get(reid_key)
-                        if registered_id:
-                            color = COLOR_ORANGE
-                            dwell_time = time - int(reid_key.split('_')[0])
-                            key_to_display = f"id: {registered_id}; dwell time: {dwell_time}ms"
+                    if topic_key == REID_CAMERA_ID:
+                        reid_records_for_det = reid_records.get(detection_key, ())
+                        for reid_record in filter(lambda r: "reid_event" in r, reid_records_for_det):
+                            # We only use the first identified face now
+                            reid_key = reid_record["reid_event"]["match_list"][0]["id"]["first_detection_key"]
+                            registered_id = registrations.get(reid_key, None)
+                            if registered_id:
+                                color = COLOR_ORANGE
+                                detection_time = reid_record["reid_event"]["match_list"][0]["id"]["first_detection_time"]
+                                dwell_time = time - int(detection_time)
+                                key_to_display = f"id: {registered_id}; dwell time: {dwell_time}ms"
+                            else:
+                                inner_id += 1
+                                registrations[reid_key] = inner_id
+
                     # draw text above bounding box
                     img = draw_nice_text(
                         canvas=img,
@@ -165,7 +157,7 @@ def main():
 
                 # produce output topic
                 if args.output:
-                    out_topic = output_reg_topic_name if topic_key is REG_CAMERA_ID else output_reid_topic_name
+                    out_topic = output_reg_topic_name if topic_key == REG_CAMERA_ID else output_reid_topic_name
                     producer.produce(out_topic, value=encode_image_to_message(img), timestamp=time)
                     producer.poll(0)
                     if i % 100 == 0:
@@ -174,7 +166,7 @@ def main():
 
                 # display #
                 if args.display:
-                    cv2.imshow(window_name, img)
+                    cv2.imshow(TITLE_REG if topic_key == REG_CAMERA_ID else TITLE_REID, img)
 
         k = cv2.waitKey(33)
         if k == 113:  # The 'q' key to stop

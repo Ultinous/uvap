@@ -210,14 +210,14 @@ message DrawRectsConfig {
 message ResizeConfig {
   enum Type {
     ABSOLUTE_SIZE = 1;
-    RELATIVE_SIZE = 2;
+    RELATIVE_SIZE = 2; // DEPRECATED
   }
   enum Interpolation {
     INTER_NEAREST = 1;
     INTER_LINEAR = 2;
     INTER_CUBIC = 3;
   }
-  required Type type = 1;
+  optional Type type = 1 [ default = ABSOLUTE_SIZE ];
   required string input = 2;
   required string output = 3;
   optional bool lock_ar = 4 [default = true];

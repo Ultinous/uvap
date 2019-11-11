@@ -19,32 +19,34 @@
     "name":"{{ KAFKA_TOPIC_PREFIX }}.cam.99.reids.ReidRecord.json"
   },
   "config_data":{
-    "inputs": [
+    "clustering_config": {
+      "method": "USE_LAST",
+      "save_internal_state": false,
+      "start_from_internal_state": false
+    },
+    "input_stream_configs": [
       {% for INPUT_STREAM in INPUT_STREAMS %}
+        {% set do_reg = not loop.last or INPUT_STREAMS|length == 1 %}
+        {% set do_reid = loop.last or INPUT_STREAMS|length == 1 %}
       {
         "stream_id":"uvap{{loop.index - 1}}",
-        "fv_field":"features",
-        "to_be_ignored_field":"end_of_frame",
-
-
-
-
-      {% if not loop.last or INPUT_STREAMS|length == 1 %}
-      "do_reg":"true",
-      "reid_min_score":0.8,
-      "reid_max_count":1,
-      "reg_max_score":0.9,
-      "reg_retention_period":35000,
-      {% else %}
-      "do_reg":"false",
-      {% endif %}
-
-      {% if loop.last or INPUT_STREAMS|length == 1 %}
-      "do_reid":"true"
-      {% else %}
-      "do_reid":"false"
-      {% endif %}
-
+        "fv_field_selector": {
+          "feature_vector_path": "features"
+        },
+        "camera_stream_config": {
+        {% if do_reg %}
+          "reg_stream_config": {
+            "reg_threshold": 0.9,
+            "cluster_retention_period_ms": 35000
+          }{{ "," if do_reid }}
+        {% endif %}
+        {% if do_reid %}
+          "reid_stream_config": {
+            "min_similarity": 0.8,
+            "max_num_matches": 1
+          }
+        {% endif %}
+        }
       }{{ "," if not loop.last }}
       {% endfor %}
     ]

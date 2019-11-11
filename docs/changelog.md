@@ -10,7 +10,13 @@ Types of changes:
 - ```Security``` in case of vulnerabilities.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
- 
+
+## 2019-11-11
+### Added
+- Added `Stream Configurator UI` function and documentation.
+### Changed
+- Modified configuration of the `Basic Reidentification`.
+
 ## 2019-10-19
 ### Added
 - Added new optional parameter of `Multi Graph Runner` miroservice: frame_period_ms.

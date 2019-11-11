@@ -105,6 +105,20 @@ message TargetTopicOptions
   Handling handling = 1;
 }
 
+/** Clustering Microservice Configuration */
+message ClusteringMSConfig
+{
+  SourceTopicOptions source_options = 1; ///< Optional. Options for opening source topics.
+  repeated Topic sources = 2; ///< Source topics
+
+  TargetTopicOptions target_options = 3; ///< Options for opening target topic.
+  Topic target = 4; ///< Target topic
+
+  Topic internal_state = 5; ///< Internal state topic
+
+  FVClusteringConfigRecord config_data = 6; ///< Functional configuration.
+}
+
 /**
  * Reidentification Microservice Configuration
  */
@@ -116,5 +130,7 @@ message ReidMSConfig
   TargetTopicOptions target_options = 3; ///< Options for opening target topic.
   Topic target = 4; ///< Target topic
 
-  ReidConfigRecord config_data = 5; ///< Reidentification algorithm configuration.
+  Topic internal_state = 5; ///< Internal state topic
+
+  ReidConfigRecord config_data = 6; ///< Functional configuration.
 }

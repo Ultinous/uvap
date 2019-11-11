@@ -17,7 +17,9 @@
 ### Additonal Features
   - [Image Streams](other/feat_show_image.md)
   - [Frame Info](other/feat_frame_info.md)
+  - [Stream Configurator](other/feat_sc_ui.md)
   - [Video Annotation](other/feat_video_annotation.md)
+
 
 ___
 

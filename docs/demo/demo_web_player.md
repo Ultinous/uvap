@@ -60,6 +60,51 @@
 	```
     HTTP/1.1 200 OK
     ```
+ 
+## General Web Player Functions
+
+### Live Image Display
+
+The web player can play the live image sequence video of a Kafka topic. 
+
+To play an image sequence, use the following link:
+
+```
+http://localhost:9999#[topic]
+```
+
+Where:
+* `localhost` is the value of `com.ultinous.uvap.web.player.advertised.host`
+* `9999` is the value of `com.ultinous.uvap.web.player.port`
+* `[topic]` is the name of target topic from the
+given Kafka broker (`com.ultinous.uvap.web.player.kafka.broker`)
+
+### Listing Topics
+
+A list of topics can be requested from the player server.
+
+To request the topics, call the HTTP method `GET` with the following URL:
+
+```
+http://localhost:9999/topics
+```
+    
+The content type of given response is `application/json`.
+The content of response contains the list of available `image.josn` topics. 
+
+### Display Historical Images
+
+Historical images can also be viewed in the web player.
+
+To request historical images, call the HTTP method `GET` with the following URL:
+    
+```
+http://localhost:9999/single?topic=base.cam.0.head_detection.Image.jpg&timestamp=1570183573000
+```
+
+Where:
+* `topic` is the name of target Kafka topic
+* `timestamp` is the UTC timestamp
 
 ## UVAP Web Player Access from Client Machine
 

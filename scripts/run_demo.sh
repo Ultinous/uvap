@@ -59,6 +59,8 @@ if echo "${extra_demo_flags}" | tr '-' '_' | grep -qF -e '_o' -e '__output'; the
 	)
 fi
 
+# TODO: if no symlinks found in demo_applications_dir, mount it.
+
 docker container create \
 	--name ${container_name} \
 	--user="$(id -u)" \
@@ -66,7 +68,7 @@ docker container create \
 	"${x11_arguments[@]}" \
 	"${not_our_args[@]/#/}" \
 	"${image_name}" \
-	/usr/bin/python3.6 "apps/uvap/${demo_name}_DEMO.py" \
+	python3.7 "apps/uvap/${demo_name}_DEMO.py" \
 		kafka:9092 \
 		"${demo_mode}" \
 		${extra_demo_flags} \

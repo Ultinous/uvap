@@ -290,51 +290,121 @@ message FilteredObjectDetectionRecord
   ObjectDetectionRecord detection = 2; ///< The detection that passed
 }
 
+/** Key to feature vector clusters. */
+message FVClusterId
+{
+  int64 first_detection_time = 1; ///< Time of the feature vector input record at first observation belonging to this cluster.
+  string first_detection_key = 2; ///< Key of the feature vector input record at first observation belonging to this cluster.
+  string first_detection_stream_id = 3; ///< Stream id of first observation belonging to this cluster.
+}
+
+/** Feature vector cluster representation */
+message FVCluster
+{
+  FeatureVector representative_fv = 1; ///< Feature vector representative to the cluster. May be different from any input feature vector.
+  int32 num_observations = 2; ///< Number of input feature vectors that are aggregated into representative_fv.
+}
+
+/** Event of adding a new feature vector to a cluster system.
+  Happens for each feature vector input of kafka_clustering.
+  Happens for each feature vector input from a registration stream of kafka_reid.
+    The feature vector input is either registered as a new cluster or updates the feature a stored cluster.
+*/
+message FVRegistrationEvent
+{
+  FVClusterId cluster_id = 1; ///< Stored id after registration. Can be new or updated.
+  FVCluster cluster = 2; ///< Stored cluster after registration.
+  string input_stream_id = 3; ///< Stream id of the current input record.
+  bool is_realized = 4; ///< Clusters are not meant to be used until is_realized is true. While false, outputs are only saved to keep track of input keys and their clusters.
+}
+
+/** Event of merging some clusters into one. */
+message FVClusterMergingEvent
+{
+  FVClusterId cluster_id = 1; ///< Stored id after merging.
+  FVCluster cluster = 2; ///< Stored cluster after merging.
+  repeated FVClusterId merged_clusters = 3; ///< List of merged clusters.
+}
+
+/** Event of deleting a cluster when its retention period expires. */
+message FVClusterDeletedEvent
+{
+  FVClusterId deleted_cluster = 1; ///< Id of deleted cluster.
+}
+
+/** Output of kafka_clustering.
+
+  One instance of this record is generated when any of the following happens:
+  1. reg_event: The feature vector input is either registered as a new cluster or updates a stored cluster.
+  2. merge_event: Some of the clusters are merged into one cluster.
+  3. delete_event: A cluster is deleted because its retention period expired.
+  4. heartbeat: There will be no more events for this input. This is denoted by an empty message.
+
+  time: Time of the current input record.
+  key: Key of the current input record.
+*/
+message FVClusterUpdateRecord
+{
+  enum Type
+  {
+    HEARTBEAT = 0;
+    REG_EVENT = 1;
+    MERGE_EVENT = 2;
+    DELETE_EVENT = 3;
+  }
+
+  Type type = 1;
+  oneof event
+  {
+    FVRegistrationEvent reg_event = 2; ///< Given when input is either registered as a new cluster or updates a stored cluster.
+    FVClusterMergingEvent merge_event = 3; ///< Given when some of the clusters are merged into one cluster.
+    FVClusterDeletedEvent delete_event = 4; ///< Given when a cluster is deleted because its retention period expired.
+  }
+}
+
 /** Output of kafka_reid.
 
-  One instance of this record is generated when any of the following events happens:
-  E1. Reidentification event:
-    The feature vector input matches at least one of the stored identities.
-    A list of matching identities are returned, together with their score of matching.
-  E2. Registration event:
-    The feature vector input is either registered as a new identity or updates the feature vector of a stored identity.
-  In both cases the returned identities are containing the timestamp of the (first) registration time which can be used for dwell time calculations.
+  kafka_reid has an internal database of feature vector clusters. Each cluster corresponds to a separate identity (person).
 
-  The input records can be of any record type that contains feature vectors and associated model ids.
+  One instance of this record is generated when any of the following happens:
+  1. reid_event: The input from a reidentification stream is matched by a list of stored clusters.
+  2. reg_event: The input from a registration stream is either registered as a new cluster or updates a stored cluster.
+  3. merge_event: Some of the clusters are merged into one cluster.
+  4. delete_event: A cluster is deleted because its retention period expired.
+  5. heartbeat: There will be no more events for this input. This is denoted by an empty message.
+
   time: Time of the current input record.
   key: Key of the current input record.
 */
 message ReidRecord
 {
-  /** Reference to a specific feature vector input on a specific input stream.
-  */
-  message SubjectRef
+  enum Type
   {
-    string stream_id = 1; ///< Same as the 'stream_id' in ReidConfigRecord
-    string key = 2; ///< Complex key that is unique for each input event
+    HEARTBEAT = 0;
+    REID_EVENT = 1;
+    REG_EVENT = 2;
+    MERGE_EVENT = 3;
+    DELETE_EVENT = 4;
   }
-  /** SubjectRef with a score of matching.
-  */
-  message ScoredSubjectRef
+
+  message ScoredFVClusterId
   {
-    SubjectRef subject = 1; ///< See SubjectRef
+    FVClusterId id = 1; ///< See FVClusterId
     float score = 2; ///< Score of matching. Range: [0..1]
   }
 
-  /** Event type.
-  */
-  enum Type
+  message ReidEvent
   {
-    REID = 0; ///< Reidentification event
-    REG = 1; ///< Registration event
-  };
+    repeated ScoredFVClusterId match_list = 1; ///< List of matching identities, in decreasing order of scores.
+    string input_stream_id = 2; ///< Stream id of the current input record.
+  }
 
-  Type type = 1; ///< Type of event.
-  SubjectRef event = 2; ///< New subject generated for the current input record.
-
-  /** A list of stored subject references.
-    E1 (reidentification): List of matching identities, in decreasing order of scores
-    E2 (registration): Exactly one ScoredSubjectRef (new or updated) that is stored after the registration.
-  */
-  repeated ScoredSubjectRef reg_refs = 3;
+  Type type = 1;
+  oneof event
+  {
+    ReidEvent reid_event = 2; ///< Given when input from a reidentification stream is matched by a list of stored clusters.
+    FVRegistrationEvent reg_event = 3; ///< Given when input from a registration stream is either registered as a new cluster or updates a stored cluster.
+    FVClusterMergingEvent merge_event = 4; ///< Given when some of the clusters are merged into one cluster.
+    FVClusterDeletedEvent delete_event = 5; ///< Given when a cluster is deleted because its retention period expired.
+  }
 }

@@ -157,6 +157,11 @@ Example:
     }
    ```
 
+>**Stream Configurator**  
+UVAP provides an easy-to-use tool for pass line management called
+**Stream Configurator**. For further information, see
+[Stream Configurator User Interface].
+
 ### ultinous.service.kafka.passdet.monitoring.port
 
 | Property         | `ultinous.service.kafka.passdet.monitoring.port`       |
@@ -279,6 +284,7 @@ For the pass detection feature demo, see [Pass Detection Demo].
 [Pass Detection Demo]: ../demo/demo_pass_det.md
 [Pass Detector Template Properties]: ../../templates/uvap_kafka_passdet_base_TEMPLATE.properties
 [prediction of the next track position]: conf_track.md#empty_detection_key
+[Stream Configurator User Interface]: sc_descr.md#stream-configurator-user-interface
 [Topic Naming Convention]: uvap_data_model.md#topic-naming-convention
 [Tracker]: conf_track.md
 [ultinous.service.kafka.passdet.config]: #ultinous.service.kafka.passdet.config

@@ -1,9 +1,8 @@
-import json
-from typing import List
-
 import cv2
+import json
 import numpy as np
 from confluent_kafka import Message
+from typing import List
 
 
 class NoKeyErrorDict(dict):
@@ -102,8 +101,13 @@ def message_list_to_frame_structure(messages: List[Message]) -> dict:
         if type == 'image':
             frame_dict[ts][stream][cam][type] = value
         elif not value.get("end_of_frame", False):
-            if type in ('skeleton', 'track', 'passdet', 'reid'):
+            if type in ('skeleton', 'track', 'passdet'):
                 frame_dict[ts][stream][cam][type][detection] = value
+            elif type == 'reid':
+                if not len(frame_dict[ts][stream][cam][type][detection]):
+                    frame_dict[ts][stream][cam][type][detection] = [value]
+                else:
+                    frame_dict[ts][stream][cam][type][detection].append(value)
             else:
                 frame_dict[ts][stream][cam]['head_detection'][detection][type] = value
     return frame_dict

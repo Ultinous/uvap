@@ -70,7 +70,7 @@ a snaps package manager. The following Linux command installs
 
 ```
 $ sudo snap install pycharm-community --classic
-pycharm-community 2019.1.3 from jetbrains✓ installed
+pycharm-community 2019.2.4 from jetbrains✓ installed
 ```
 
 #### Start PyCharm

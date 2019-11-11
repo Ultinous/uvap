@@ -314,9 +314,9 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
                     serve_it = []
                     while len(message_to_serve) > 0 and message_to_serve[0].timestamp()[1] == ts:
                         serve_it.append(message_to_serve.pop(0))
-                        if not self.heartbeat_interval_ms == -1:
-                            yield from self._serve_heartbeat(ts)
-                        yield from self._serve_messages(serve_it)
+                    if not self.heartbeat_interval_ms == -1:
+                        yield from self._serve_heartbeat(ts)
+                    yield from self._serve_messages(serve_it)
                 logging.info('Exiting from generator.')
                 break
             self.last_poll = getSystemTimestamp()
