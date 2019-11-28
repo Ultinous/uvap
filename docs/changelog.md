@@ -11,6 +11,15 @@ Types of changes:
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
+## 2019-11-28
+### Added
+- Added `Stream Configurator UI` feature to use uploaded image.
+- Added `Stream Configurator UI` feature to find image by timestamp.
+### Changed
+- Improved `dataflow_pub.proto` code documentation.
+### Fixed
+- Fixed `Tracker` not to lose the first detections at the beginning of tracks.
+
 ## 2019-11-11
 ### Added
 - Added `Stream Configurator UI` function and documentation.

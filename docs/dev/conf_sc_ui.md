@@ -38,6 +38,10 @@ are listed. These can be managed as described in [Managing Existing Passlines].
 and exporting passlines. For further information, see [Importing Passlines]
 and [Exporting Passlines].
 
+**Background** brings up the **Background**  window which can
+be used for uploading background images, adjusting opacity and togglinng
+gridlines. For further information, see [Adding Background Image].
+
 In a window, the pin button
 (<img src="../assets/sc_ui/button_pin_15.png" alt="pin" />)
 locks the window to the right sidebar. To unlock it again,
@@ -54,14 +58,18 @@ The **scroll wheel** zooms in and out of the canvas.
 >**Note:**  
 To set reset the zoom to default (100%), click on the zoom value in the header.
 
-**CTRL button + drag** moves the canvas. To reset to the center of the
+**Middle-mouse button + drag** moves the canvas. To reset to the center of the
 canvas, click the **Go to Origin** button.
 
 **Stream Configurator** has the following keyboard shortcuts:
 
 | Keyboard Shortcut | Function          |
 | ----------------- | ----------------- |
-| **Alt + I**       | UVAP Image Stream | 
+| **Alt + B**       | Opens the **Background** window | 
+| **Alt + E**       | Opens the **Elements** window | 
+| **Alt + H**       | Opens the **Help** window | 
+| **Alt + I**       | Opens the **UVAP Image Stream** toolbar | 
+| **Alt + S**       | Opens the **Source** window | 
 
 ## Passline Instructions
 
@@ -295,6 +303,21 @@ To remove a passline joint:
 
 1. Select **Save**.
 
+## Adding Background Image
+
+To add a background image:
+
+1. Open the **Background** window.
+
+1. Select **Upload Image**.
+
+1. Select the image file to be uploaded.
+
+1. Click **Open**.
+
+>**Note**  
+Removing or changing the uploaded image can be done through the **Background** window.
+
 ## UVAP Image Stream
 
 **UVAP Image Stream** is a built in module of **Stream Configurator**
@@ -308,20 +331,20 @@ Ensure that the following components are started:
 * [MGR]
 * [Web player]
 
-See [Prerequisites in Starting Stream Configurator UI] for further information
+See [Prerequisites in Starting Stream Configurator UI] for further information.
 
 ### Description
 
 Selecting the UVAP Image Stream button
 (<img src="../assets/sc_ui/button_topic_15.png" alt="UVAP Image Stream" />)
-on the left navigation bar brings up the **UVAP Image Stream** window:
+on the left navigation bar brings up the **UVAP Image Stream** toolbar:
 
 >**Note:**  
 The **Alt + I** keyboard shortcut also brings up the
-**UVAP Image Stream** window.
+**UVAP Image Stream** toolbar.
    
 <a name="UVAP Image Stream"></a>
-![UVAP Image Stream](../assets/sc_ui/uvap_image_stream.png)  
+![UVAP Image Stream](../assets/sc_ui/uvap_image_stream_live.png)  
 ***UVAP Image Stream*** 
 
 Where:
@@ -329,8 +352,12 @@ Where:
 * **Topic** is an user defined input
   
   >**Note**  
-  Ensure that the selected topic is started correctly.
+  Make sure that the selected topic is started correctly.  
+  Existing topics may appear as suggestions when topic input box is clicked.
 
+#### Live Footage Display
+
+UVAP image stream can be used to display a live image stream.
 
 * **Refresh** defines the update frequency of the stream:
 
@@ -339,7 +366,39 @@ Where:
   * `Interval (100 ms)`: updates based on the user-set interval rate (for 100 ms).
   * `Every nth frame`: updates based on the user-set frame rate.
 
-* **Opcaity** defines the transparency level of the stream on a `0-100` scale.
+* **Background Opacity** defines the transparency level of the stream on a `0-100` scale.
+
+An icon next to the topic field insicates the status of the topic:
+- <img src="../assets/sc_ui/topic_red_exclamation.png" alt="pin" /> indicates the topic is not available.
+- <img src="../assets/sc_ui/topic_yellow_refresh.png" alt="pin" /> indicates that the topic is loading.
+- <img src="../assets/sc_ui/topic_blue_play.png" alt="pin" /> indicates that the topic is online.
+
+#### Historical Image Display
+
+![UVAP Image Stream](../assets/sc_ui/uvap_image_stream_historical.png)
+
+UVAP image player can be used to display a single frame from an image stream.  
+**Timestamp** defines the timestamp of the frame to be displayed.
+
+If there is no frame in the chosen topic with the requested timestamp, UVAP image
+stream behaves the following way:
+
+ * If the requested timestamp is smaller than the timestamp of the first frame in the stream,
+ the first frame is displayed.
+ * If the requested timestamp is larger than the timestamp of the last frame in the stream,
+ the last frame is displayed.
+ * Otherwise, the frame with the timestamp immediately after the
+ specified timestamp is displayed (the frame with the closest timestamp that is
+ bigger than the specified one).
+
+An icon next to the topic field insicates the status of the topic:
+- <img src="../assets/sc_ui/topic_red_exclamation.png" alt="pin" /> indicates the image is not available.
+- <img src="../assets/sc_ui/topic_yellow_refresh.png" alt="pin" /> indicates that the image is loading.
+- <img src="../assets/sc_ui/topic_green_check.png" alt="pin" /> indicates that the image is online.
+
+#### Disable Background 
+
+Choose this option to remove video stream or uploaded image from background.
 
 ## Troubleshooting
 
@@ -394,6 +453,7 @@ correctly.
 Check the connection and ensure that the topic is valid and started correctly.
 
 
+[Adding Background Images]: #adding-background-images
 [Configuring Pass Detector]: conf_passdet.md#configuring-pass-detector
 [Exporting Passlines]: #exporting-passlines
 [Importing Passlines]: #importing-passlines

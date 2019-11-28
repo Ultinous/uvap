@@ -16,6 +16,9 @@ detecting if an individual enters or leaves an area of interest.
 >**Note:**  
 **Stream Configurator** is optimized for Google Chrome™ browser.
 
+The Stream Configurator UI is capable of displaying UVAP image streams. A static
+image can also be uploaded to guide passline creation.
+
 For further information, see [Starting Stream Configurator UI]. See
 the [Stream Configurator UI Guide] for further information on the settings
 and usage of the Stream Configurator UI.
