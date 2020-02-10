@@ -3,7 +3,10 @@ import json
 import numpy as np
 from confluent_kafka import Message
 from typing import List
+from turbojpeg import TurboJPEG
 
+jpeg = TurboJPEG('/usr/lib/x86_64-linux-gnu/libturbojpeg.so.0')
+turbo = TurboJPEG()
 
 class NoKeyErrorDict(dict):
     """
@@ -23,6 +26,7 @@ class NoKeyErrorDict(dict):
                 self[k] = v.asdict()
         return dict(self)
 
+    # todo make repr method pls
 
 def decode_standard_message(msg: Message) -> dict:
     return json.loads(msg.value().decode('utf-8'))
@@ -30,18 +34,19 @@ def decode_standard_message(msg: Message) -> dict:
 
 def decode_image_message(msg: Message) -> np.array:
     img_mat = np.fromstring(msg.value(), dtype=np.uint8)
-    return cv2.imdecode(img_mat, -1)
+    return turbo.decode(img_mat)
 
 
 def encode_image_to_message(img: np.array):
-    _, encoded = cv2.imencode('.jpg', img)
-    return encoded.tobytes()
+    return turbo.encode(img)
 
 
-def _get_message_type(message_topic):
+def _get_message_type(message_topic) -> str:
     if '.jpg' in message_topic:
         return 'image'
     elif '.ObjectDetectionRecord' in message_topic:
+        if '.filtered_dets.' in message_topic:
+            return 'filtered_bounding_box'
         return 'bounding_box'
     elif '.HeadPose3DRecord' in message_topic:
         return 'head_pose'
@@ -62,12 +67,12 @@ def _get_message_type(message_topic):
     return 'unknown'
 
 
-def _get_current_stream(message_topic):
+def _get_current_stream(message_topic: str) -> str:
     parts = message_topic.split('.')
     return parts[0]
 
 
-def _get_current_cam(message_topic):
+def _get_current_cam(message_topic: str) -> str:
     parts = message_topic.split('.')
     for idx, part in enumerate(parts):
         if 'cam' in part:
@@ -108,6 +113,8 @@ def message_list_to_frame_structure(messages: List[Message]) -> dict:
                     frame_dict[ts][stream][cam][type][detection] = [value]
                 else:
                     frame_dict[ts][stream][cam][type][detection].append(value)
+            elif type == 'filtered_bounding_box':
+                frame_dict[ts][stream][cam]['filtered_head_detection'][detection][type] = value
             else:
                 frame_dict[ts][stream][cam]['head_detection'][detection][type] = value
     return frame_dict

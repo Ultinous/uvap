@@ -6,7 +6,7 @@ hide_title: true
 
 # Data Model
 
-As shown below, microservices are connected through Kafka topics. This
+As shown below, microservices are connected through Kafka® topics. This
 section provides information about the schema and format of these topics.
 
 ![Dataflow Architecture of UVAP](../assets/fig_dataflow_architecture_of_UVAP.png)
@@ -134,15 +134,25 @@ This simple example is only a sneak peek of UVAP capabilities. For example,
 with **Pass Detection** microservice, even more information can be received
 about a `TrackChangeRecord` (which can be associated with `AgeRecords`).
 
+## Consuming and Producing messages
+
+While using UVAP it is possible to read the result topics of a particular microservice
+with your own code or to write custom messages, for example when creating your own staff directory using [Person Streams].
+A [Python implementation of a simple low- and high level Consumer and Producer] is also provided as a part of the
+package. For more details, see the [Demo Applications].
+
 ## Join
 
 Because the data model is normalized, it is common to read and join multiple
 topics. Joining Kafka topics is solved in the **Kafka Streams** Java API.
 A [Python implementation of Join] is also provided as a part of the
-package. For more details, see the demo applications.
+package. For more details, see the [Demo Applications].
 
 [Python implementation of Join]: ../../demo_applications/utils/kafka/time_ordered_generator_with_timeout.py
 [Kafka data proto]: ../../proto_files/ultinous/proto/common/kafka_data.proto
 [Tracker]: conf_track.md
 [Tracker Record Schemas]: conf_track.md#record-schemas
 [Topic Schemas]: #topic-schemas
+[Person Streams]: ms_reid.md#person-stream
+[Python implementation of a simple low- and high level Consumer and Producer]: ../../demo_applications/utils/kafka/kafka-cli.py
+[Demo Applications]: ../demo/demo_overview.md

@@ -12,16 +12,19 @@ video_dir="${current_directory}/../videos"
 models_dir="${current_directory}/../models"
 license_data_file="${current_directory}/../license/license.txt"
 license_key_file="${current_directory}/../license/license.key"
+display=false
 verbose=false
 
 uvap_mgr_docker_image_name="_auto_detected_"
 uvap_demo_applications_docker_image_name="_auto_detected_"
 uvap_kafka_tracker_docker_image_name="_auto_detected_"
 uvap_kafka_reid_docker_image_name="_auto_detected_"
+uvap_kafka_fvc_docker_image_name="_auto_detected_"
+uvap_kafka_detection_filter_docker_image_name="_auto_detected_"
 set +a
 
 parse_all_arguments "${@}"
-parse_argument_with_value "demo_name" "<head_detection|head_pose|demography|tracker|skeleton|basic_reidentification>"
+parse_argument_with_value "demo_name" "<head_detection|head_pose|demography|tracker|detection_filter|skeleton|reidentification>"
 parse_argument_with_value "video_dir" "directory path of the input and output videos - default: ${video_dir}"
 parse_argument_with_value "video_file_name" "basename of the input video file inside the --video-dir directory"
 parse_argument_with_value "fps_number" "the FPS number of the input video"
@@ -36,7 +39,10 @@ parse_argument_with_value "license_key_file" "key file of your UVAP license - de
 parse_argument_with_value "uvap_mgr_docker_image_name" "tag of docker image to use - default: will be determined by git tags"
 parse_argument_with_value "uvap_demo_applications_docker_image_name" "tag of docker image to use - default: will be determined by git tags"
 parse_argument_with_value "uvap_kafka_tracker_docker_image_name" "tag of docker image to use - default: will be determined by git tags"
+parse_argument_with_value "uvap_kafka_detection_filter_docker_image_name" "tag of docker image to use - default: will be determined by git tags"
 parse_argument_with_value "uvap_kafka_reid_docker_image_name" "tag of docker image to use - default: will be determined by git tags"
+parse_argument_with_value "uvap_kafka_fvc_docker_image_name" "tag of docker image to use - default: will be determined by git tags"
+parse_argument_without_value "display" "option to display the video during the annotation"
 parse_argument_without_value "verbose"
 validate_remaining_cli_arguments
 
@@ -45,18 +51,23 @@ if test "${verbose}" = "true"; then
 	ms_log_output="/dev/stdout"
 fi
 
+extra_demo_flags="-o -v"
+if test "${display}" = "true"; then
+	extra_demo_flags+=" -d"
+fi
+
 video_file_name="${video_file_name}" # parse_argument_with_value declares it - this just clears IDE warnings
 fps_number="${fps_number}" # parse_argument_with_value declares it - this just clears IDE warnings
 width_number="${width_number}" # parse_argument_with_value declares it - this just clears IDE warnings
 height_number="${height_number}" # parse_argument_with_value declares it - this just clears IDE warnings
 demo_name="${demo_name}" # parse_argument_with_value declares it - this just clears IDE warnings
-if ! [[ "${demo_name}" =~ ^(head_detection|head_pose|demography|tracker|skeleton|basic_reidentification)$ ]]; then
+if ! [[ "${demo_name}" =~ ^(head_detection|head_pose|demography|tracker|detection_filter|skeleton|reidentification)$ ]]; then
 	echo "ERROR: unrecognized demo name: ${demo_name}" >&2
 	echo "ERROR: override with --demo-name" >&2
 	print_help
 fi
 
-if test "basic_reidentification" = "${demo_name}"; then
+if test "reidentification" = "${demo_name}"; then
 	demo_mode="fve"
 elif test "skeleton" = "${demo_name}"; then
 	demo_mode="skeleton"
@@ -79,10 +90,11 @@ echo "Starting to configure..."
 	--templates-dir "${templates_dir}" \
 	--config-ac-dir "${config_ac_dir}" \
 	--demo-image-name "${uvap_demo_applications_docker_image_name}" \
+	 $(test "true" = "${use_dev_tags:-"false"}" && echo "--use-dev-tags") \
 	> "${ms_log_output}"
 echo "Finished configuring."
 
-sed -i -e 's/startTS=NOW/startTS=0/' -e 's/endTS=NEVER/endTS=END/' "${UVAP_HOME}"/config/uvap_*/*.properties
+sed -i -e 's/startTS=NOW/startTS=0/' -e 's/endTS=NEVER/endTS=END/' "${config_ac_dir}"/uvap_*/*.properties
 
 echo "Starting the core analysis..."
 "${current_directory}/run_mgr.sh" \
@@ -92,6 +104,7 @@ echo "Starting the core analysis..."
 	--license-data-file "${license_data_file}" \
 	--license-key-file "${license_key_file}" \
 	--run-mode "foreground" \
+	 $(test "true" = "${use_dev_tags:-"false"}" && echo "--use-dev-tags") \
 	-- \
 	--rm \
 	--net=uvap \
@@ -105,6 +118,7 @@ if test "tracker" = "${demo_name}"; then
 		--config-dir "${config_ac_dir}/uvap_kafka_tracker" \
 		--image-name "${uvap_kafka_tracker_docker_image_name}" \
 		--run-mode "foreground" \
+		 $(test "true" = "${use_dev_tags:-"false"}" && echo "--use-dev-tags") \
 		-- \
 		--rm \
 		--net=uvap \
@@ -112,32 +126,74 @@ if test "tracker" = "${demo_name}"; then
 	echo "Finished tracking."
 fi
 
-if test "basic_reidentification" = "${demo_name}"; then
+if test "detection_filter" = "${demo_name}"; then
 	sed -i \
-		-e 's/"start":"START_NOW"/"start":"START_BEGIN"/' \
-		-e 's/"end":"END_NEVER"/"end":"END_END"/' \
-		-e 's/"reid_max_count":1/"reid_max_count":10/' \
-		"${UVAP_HOME}"/config/uvap_kafka_reid/uvap_kafka_reid.json
-	echo "Starting the basic reidentification..."
-	"${current_directory}/run_kafka_reid.sh" \
-		--config-dir "${config_ac_dir}/uvap_kafka_reid" \
-		--image-name "${uvap_kafka_reid_docker_image_name}" \
+		-e 's/"start": "START_NOW"/"start": "START_BEGIN"/' \
+		-e 's/"end": "END_NEVER"/"end": "END_END"/' \
+		"${config_ac_dir}"/uvap_kafka_detection_filter/uvap_kafka_detection_filter.json
+	echo "Starting the detection filter..."
+	"${current_directory}/run_kafka_detection_filter.sh" \
+		--config-dir "${config_ac_dir}/uvap_kafka_detection_filter" \
+		--image-name "${uvap_kafka_detection_filter_docker_image_name}" \
 		--run-mode "foreground" \
+		$(test "true" = "${use_dev_tags:-"false"}" && echo "--use-dev-tags") \
 		-- \
 		--rm \
 		--net=uvap \
 		> "${ms_log_output}"
-	echo "Finished basic reidentification."
+	echo "Finished detection filter."
+fi
+
+if test "reidentification" = "${demo_name}"; then
+
+	sed -i \
+		-e 's/"start":"START_NOW"/"start":"START_BEGIN"/' \
+		-e 's/"end":"END_NEVER"/"end":"END_END"/' \
+		-e 's/"reid_max_count":1/"reid_max_count":10/' \
+		"${config_ac_dir}"/uvap_kafka_fvc/uvap_kafka_fvc_0.json
+	"${current_directory}/run_kafka_fvc.sh" \
+		--config-dir "${config_ac_dir}/uvap_kafka_fvc" \
+		--instance-id 0 \
+		--image-name "${uvap_kafka_fvc_docker_image_name}" \
+		--run-mode "foreground" \
+		 $(test "true" = "${use_dev_tags:-"false"}" && echo "--use-dev-tags") \
+		-- \
+		--rm \
+		--net=uvap \
+		> "${ms_log_output}"
+
+	sed -i \
+		-e 's/"start":"START_NOW"/"start":"START_BEGIN"/' \
+		-e 's/"end":"END_NEVER"/"end":"END_END"/' \
+		-e 's/"reid_max_count":1/"reid_max_count":10/' \
+		"${config_ac_dir}"/uvap_kafka_reid/uvap_kafka_reid.json
+	echo "Starting the reidentification..."
+	"${current_directory}/run_kafka_reid.sh" \
+		--config-dir "${config_ac_dir}/uvap_kafka_reid" \
+		--image-name "${uvap_kafka_reid_docker_image_name}" \
+		--run-mode "foreground" \
+		 $(test "true" = "${use_dev_tags:-"false"}" && echo "--use-dev-tags") \
+		-- \
+		--rm \
+		--net=uvap \
+		> "${ms_log_output}"
+	echo "Finished reidentification."
 fi
 
 echo "Starting to annotate..."
+demo_config=""
+if test "detection_filter" = "${demo_name}"; then
+	demo_config="--config-file-name ${config_ac_dir}/uvap_kafka_detection_filter/uvap_kafka_detection_filter.json"
+fi
 "${current_directory}/run_demo.sh" \
 	--demo-mode "${demo_mode}" \
 	--demo-name "${demo_name}" \
 	--demo-applications-dir "${demo_applications_dir}" \
-	--extra-demo-flags "-d -o -v" \
+	--extra-demo-flags "${extra_demo_flags}" \
 	--image-name "${uvap_demo_applications_docker_image_name}" \
 	--run-mode "foreground" \
+	$(test ! -z "${demo_config}" && echo ${demo_config}) \
+	$(test "true" = "${use_dev_tags:-"false"}" && echo "--use-dev-tags") \
 	-- \
 	--rm \
 	--net=uvap \

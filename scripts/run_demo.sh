@@ -11,11 +11,13 @@ image_name="_auto_detected_"
 demo_applications_dir="${current_directory}/../demo_applications"
 extra_demo_flags="-o"
 run_mode="background"
+demo_text="none"
 set +a
 
 parse_all_arguments "${@}"
 parse_argument_with_value "demo_name" "the name of the demo to run - see the Quick Start Guide for details"
 parse_argument_with_value "demo_mode" "<base|skeleton|fve>"
+parse_argument_with_value "demo_text" "<none|age|dwell_time|both> - default: none"
 parse_argument_with_value "demo_applications_dir" "path of the demo applications scripts - default: ${demo_applications_dir}"
 parse_argument_with_value "config_file_name" "path of configuration file - default:"
 parse_argument_with_value "extra_demo_flags" "extra demo flags (e.g.: -d, -o, -v) - default: -o"
@@ -35,6 +37,12 @@ if ! [[ "${demo_mode}" =~ ^(base|skeleton|fve)$ ]]; then
 	print_help
 fi
 
+if ! [[ "${demo_text}" =~ ^(none|age|dwell_time|both)$ ]]; then
+	echo "ERROR: unrecognized demo text: ${demo_text}" >&2
+	echo "ERROR: override with --demo-text" >&2
+	print_help
+fi
+
 if test "${image_name:-}" = "_auto_detected_"; then
 	image_name="$(get_docker_image_tag_for_component uvap_demo_applications)"
 fi
@@ -46,7 +54,7 @@ fi
 
 docker pull "${image_name}"
 container_name="uvap_demo_applications"
-test "$(docker container ls --filter name="${container_name}" --all --quiet | wc -l)" -eq 1 \
+test "$(docker container ls --filter name="^${container_name}\$" --all --quiet | wc -l)" -eq 1 \
 	&& docker container stop "${container_name}" > /dev/null \
 	&& docker container rm "${container_name}" > /dev/null
 
@@ -68,10 +76,11 @@ docker container create \
 	"${x11_arguments[@]}" \
 	"${not_our_args[@]/#/}" \
 	"${image_name}" \
-	python3.7 "apps/uvap/${demo_name}_DEMO.py" \
+	python3.7 -u "apps/uvap/${demo_name}_DEMO.py" \
 		kafka:9092 \
 		"${demo_mode}" \
 		${extra_demo_flags} \
+		$(test "${demo_name}" = "reid_with_name" && echo "${demo_text}") \
 		${config_file_in_container:-}
 
 tar -c -C "${demo_applications_dir}" -h -f - . | docker container cp --archive - "${container_name}:/ultinous_app/"

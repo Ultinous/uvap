@@ -11,7 +11,18 @@ Types of changes:
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
+## 2020-02-07
+#### release-2.680
+### Added
+- Added `Detection Filter` feature and documentation.
+- Added `Feature Vector Clustering` feature and documentation.
+### Changed
+- Replaced the `Basic reidentification` feature with the more advanced `Reidentification` feature.
+### Fixed
+- Fixed `Pass Detector` numbering of pass events; send `pass_realized` event for all realized passes.
+
 ## 2019-11-28
+#### release-2.642
 ### Added
 - Added `Stream Configurator UI` feature to use uploaded image.
 - Added `Stream Configurator UI` feature to find image by timestamp.
@@ -21,12 +32,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - Fixed `Tracker` not to lose the first detections at the beginning of tracks.
 
 ## 2019-11-11
+#### release-2.629
 ### Added
 - Added `Stream Configurator UI` function and documentation.
 ### Changed
 - Modified configuration of the `Basic Reidentification`.
 
 ## 2019-10-19
+#### release-2.616
 ### Added
 - Added new optional parameter of `Multi Graph Runner` miroservice: frame_period_ms.
 - Added `Time Synchronization Using NTP` chapter into the documentation.
@@ -42,6 +55,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 
 ## 2019-09-05
+#### release-2.568
 ### Added
 - Added `Basic Reidentification` microservice to the Docker repository (ultinous/uvap). 
 - Added `Basic Reidentification` demos into `Quick Start Guide`. 

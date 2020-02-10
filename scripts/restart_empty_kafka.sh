@@ -2,21 +2,23 @@
 
 set -eu
 
-# Stop Zookeeper and Kafka containers
-docker container stop zookeeper kafka
-
-# Collect docker volumes
-docker container inspect --format '{{json .Mounts}}' kafka zookeeper \
-	| jq --raw-output '.[].Name' > /tmp/kafka_volumes_list.txt
-
-# Remove Zookeeper and Kafka containers
-docker container rm zookeeper kafka
-
-# Remove docker volumes
-for volume in $(cat /tmp/kafka_volumes_list.txt); do
-	docker volume rm ${volume}
+# For both Zookeeper and Kafka containers do the following
+for container_name in kafka zookeeper; do
+	if test "$(docker container ls --filter name="^${container_name}\$" --all --quiet | wc -l)" -eq 1; then
+		# Stop the container
+		docker container stop "${container_name}" > /dev/null
+		# Collect the volumes of the container
+		docker container inspect --format '{{json .Mounts}}' "${container_name}" \
+			| jq --raw-output '.[].Name' > /tmp/volumes_list.txt
+		# Remove the container
+		docker container rm "${container_name}"
+		# Remove the volumes
+		for volume in $(cat /tmp/volumes_list.txt); do
+			docker volume rm ${volume}
+		done
+		rm /tmp/volumes_list.txt
+	fi
 done
-rm /tmp/kafka_volumes_list.txt
 
 # Start Zookeeper and Kafka containers
 docker run --net=uvap -d --name=zookeeper \

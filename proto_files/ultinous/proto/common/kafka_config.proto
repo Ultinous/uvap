@@ -69,43 +69,49 @@ message PassDetConfigRecord
   repeated PassLine pass_lines = 1;
 }
 
-/** Configuration for a single ROI filter in RoiFiltersConfigRecord
+/** Configuration of a single area for detection filter
 */
-message RoiFilterConfig
+message DetectionArea
 {
-  /** Identifier of the roi filter.
-  It can be anything that is unique within a RoiFiltersConfigRecord.
+  /** A (closed) polygon that a defines an area. Decisions are made depending
+  on which area(s) detection centroids are inside of.
+  Must contain at least three points, corresponding to polygon vertices
   */
-  string id = 1;
+  repeated Point vertices = 1;
+}
 
+/** Configuration for the detection filter microservice
+This MS can filter ObjectDetectionRecords by any combination of
+- detection type
+- detection confidence
+- location
+A detection must pass each and every configured criteria to pass the filter itself.
+*/
+message DetectionFilterConfigRecord
+{
   /** Minimum confidence of detection for passing the filter
   Compared to the 'detection_confidence' value of ObjectDetectionRecord.
   range: [0..1); 0 means no confidence based filtering
   default: 0
   */
-  float min_confidence = 2;
+  float min_confidence = 1;
 
   /** Set of allowed  detection types for passing the filter
   Empty set means no detection type based filtering
   */
-  repeated ObjectType detection_types = 3;
+  repeated ObjectType detection_types = 2;
 
-  /** ROI: (closed) polygon that a detection centroid needs to be inside to pass
-  Empty set means no location based filtering
-  Otherwise must contain at least three points, corresponding to polygon vertices
+  /** Areas of negative interest.
+  A detection is not going to pass if it is inside any of the negative areas.
+  Empty list means no negative area based filtering
   */
-  repeated Point poly = 4;
-}
+  repeated DetectionArea negative_areas = 3;
 
-/** Configuration for kafka_roifilter
-Each ROI filter can filter ObjectDetectionRecords by any combination of
-- detection type
-- detection confidence
-- location (must be within a ROI)
-*/
-message RoiFiltersConfigRecord
-{
-  repeated RoiFilterConfig filters = 1; // at least one ROI filter
+  /** Areas of positive interest.
+  A detection passes if it is inside any of the positive areas.
+  Empty list means no postive area based filtering.
+  */
+  repeated DetectionArea positive_areas = 4;
 }
 
 /**
@@ -113,23 +119,39 @@ Configuration of feature vector clustering algorithms.
 Clustering is based on a similarity measure between feature vectors and clusters.
 Currently supports trivial algorithms only where a single feature vector represents a cluster.
 The representative feature vector can be the last one belonging to this cluster, or an average of all previous ones.
-
 */
 message FVClusteringConfig
 {
-  /** Conditions for clusters to be realized. */
+  /** Conditions for clusters to be realized.
+  Clusters are unrealized until either they contain num_samples observations or time_limit_ms is reached.
+  Once they are realized, the action specified by realized_cluster_action is performed.
+  The time until time_limit_ms is measured from the first observation belonging to the cluster, after the previous realization of the same cluster.
+  Registration events are generated for both realized and unrealized clusters. 
+  */
   message ClusterRealizationConfig
   {
-    int32 min_num_samples = 1; ///< Minimum number of observations required for a cluster to be realized.
-    int64 time_limit_ms = 2; ///< Time limit for realization even when the number of observations is too small.
-  }
+    enum RealizedClusterAction
+    {
+      INVALID = 0;
+      REMOVE = 1; ///< Remove the realized cluster from internal DB. A delete event is triggered.
+      UNREALIZE = 2; ///< The realized cluster becomes unrealized until num_samples new observations arrive again.
+      KEEP_REALIZED = 3; ///< Once realized, the same cluster remains realized until removed.
+    }
 
+    uint32 num_samples = 1; ///< Number of observations in realized clusters.
+    int64 time_limit_ms = 2; ///< Time limit for realization even when the number of observations is too small, zero means infinite.
+    RealizedClusterAction realized_cluster_action = 3;
+  }
   /** Configuration for Cluster Merging.
   Merge attempts are triggered by the first input arriving after time_interval_ms since the last attempt.
   Clusters that are more similar to each other than the current similarity threshold will be merged.
-
   current_threshold = max(min_threshold, initial_threshold * threshold_discount_rate^num_inputs)
   where num_inputs is the sum of the two potentially mergeable clusters.
+
+  Typical values:
+  initial_threshold can be the same as reg_threshold below;
+  min_threshold can be the lowest score to allow merging;
+  threshold_discount rate can be between 0.95 and 0.999, depending on how many observations we require before lowering the threshold to min_threshold.
   */
   message ClusterMergingConfig
   {
@@ -178,22 +200,23 @@ message FVFieldSelector
 message FVRegStreamConfig
 {
   float reg_threshold = 1; ///< Similarity threshold for registration: decides whether to create a new cluster or to update an existing one.
-  int64 cluster_retention_period_ms = 2; ///< Cluster memory window size [ms]. Also at startup we rewind input this much. 0 means infinite.
+  /** Cluster memory window size [ms]. 0 means infinite.
+  Cluster delete events are triggered by the first input after the retention period expires.
+  The same period is used to look back to the previous inputs at startup when start_from_internal_state is false.
+  */
+  int64 cluster_retention_period_ms = 2;
 }
 
 /**
  Configuration for kafka_feature_vector_clustering.
  Also applies to the registration part of the kafka_reid microservice below.
-
  Inputs: Inputs are streams of feature vectors or clusters that may be extracted from
  - video camera streams
  - a previous feature vector clustering algorithm.
  Inputs can be any record type that contains either a FeatureVector or a FVCluster field.
-
  A new cluster is created when the input feature vector is less similar to any stored cluster than a threshold.
  The most similar cluster (above the threshold) is modified by adding the new input feature vector.
  New clusters and modifications are only emitted to the output topic when the cluster meets the requirements to be realized.
-
  Outputs: FVClusterUpdateRecord, and optionally an undocumented internal state topic
 */
 message FVClusteringConfigRecord
@@ -212,14 +235,12 @@ message FVClusteringConfigRecord
 
 /**
  Configuration for kafka_reid.
-
  Input:
    Inputs are streams of feature vectors or clusters that may be extracted from
    - video camera streams, via feature vector extraction and optionally pre-clustering
    - person databases containing images
    Inputs can be any record type that contains either a FeatureVector or a FVCluster field.
    Camera input streams can be used for registration, reidentification, or both.
-
  Reidentification:
    Feature vectors are reidentified as an existing identity when they are similar enough to
    a registered feature vector cluster.
@@ -227,16 +248,13 @@ message FVClusteringConfigRecord
    the concatenation of these top lists.
    Each top list has a maximum size configured for that reidentification stream (max_num_matches).
    A top list can be shorter if there are not enough matches reaching the minimum required score (min_similarity).
-
  Registration:
    The configuration for the clustering algorithm is the same as ClusteringConfig above.
    Feature vectors from camera streams are registered, i.e. stored as a new identity (cluster) when they are dissimilar
    to any other stored cluster.
    Feature vectors from a person database are registered by their kafka message key,
    which can be e.g. the name of the person.
-
  Outputs: ReidRecord and optionally an undocumented internal state topic
-
  */
 message ReidConfigRecord
 {
@@ -260,13 +278,19 @@ message ReidConfigRecord
   1. Empty payload: permanently delete cluster that has the same key as the input message key.
   2. Message contains a non-null feature vector or cluster field (as specified in FVStreamConfig):
     --> Add or update cluster with the same key as the key of the message.
+        ClusteringMethod has no effect on person streams; the representative feature vector is always replaced by the new observation.
     --> Activate/inactivate cluster according to the value of the field at is_active_path
-  ClusteringMethod has no effect on person streams. Updating a cluster always means replacing the feature vector.
+  3. The feature vector/cluster field is NULL
+    --> Activate/inactivate cluster according to the value of the field at is_active_path
   */
   message PersonStreamConfig
   {
     string is_active_path = 1; ///< Optional path to a boolean field in the input messages. true means activate cluster, false means inactivate cluster.
-    int64 cluster_retention_period_ms = 2; ///< Cluster memory window size [ms]. Also at startup we rewind input this much. 0 means infinite.
+    /** Cluster memory window size [ms]. 0 means infinite.
+    Cluster delete events are triggered by the first input after the retention period expired.
+    The same period is used to look back to the previous inputs at startup when start_from_internal_state is false.
+    */
+    int64 cluster_retention_period_ms = 2;
   }
 
   /** Configuration for a single input stream */
@@ -284,4 +308,3 @@ message ReidConfigRecord
   FVClusteringConfig clustering_config = 1;
   repeated InputStreamConfig input_stream_configs = 2; ///< Exactly as many configurations as input streams configured for the service.
 }
-

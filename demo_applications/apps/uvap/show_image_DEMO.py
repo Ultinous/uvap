@@ -12,7 +12,7 @@ def main():
     parser = argparse.ArgumentParser(
         epilog=
         """Description:
-           Plays and optionaly dumps video from a jpeg topic (a topic that ends with Image.jpg)."""
+           Plays and optionally dumps video from a jpeg topic (a topic that ends with Image.jpg)."""
         , formatter_class=RawTextHelpFormatter
     )
     parser.add_argument("broker", help="The name of the kafka broker.", type=str)

@@ -9,12 +9,14 @@
 ### Movement Detection
   - [People Tracking](detect_movement/feat_track.md)
   - [Pass Detection](detect_movement/feat_pass_det.md)
-### Facial Recognition
+### Facial Properties and Recognition
   - [Feature Vector](face_prop/feat_feature_vector.md)
+  - [Feature Vector Clustering](face_prop/feat_fv_clustering.md)
   - [Gender Detection](face_prop/feat_gender.md)
   - [Age Detection](face_prop/feat_age.md)
-  - [Reidentification (basic)](face_prop/feat_reid.md)
+  - [Reidentification](face_prop/feat_reid.md)
 ### Additonal Features
+  - [Detection Filter](other/feat_det_filter.md)
   - [Image Streams](other/feat_show_image.md)
   - [Frame Info](other/feat_frame_info.md)
   - [Stream Configurator](other/feat_sc_ui.md)

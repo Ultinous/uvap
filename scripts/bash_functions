@@ -212,4 +212,4 @@ validate_remaining_cli_arguments() {
 	fi
 }
 
-implode() { local d="${1}"; shift; echo -n "${1:-}"; shift; printf "%s" "${@/#/$d}"; }
+implode() { local d="${1}"; shift; echo -n "${1:-}"; shift; test -z "${@}" && return; printf "%s" "${@/#/$d}"; }

@@ -1,5 +1,5 @@
 ---
-id: start_sc
+id: start_sc_ui
 title: Starting Stream Configurator UI
 hide_title: true
 ---
@@ -50,7 +50,6 @@ Stream Configurator UI can also be built by running `generate_stream_configurato
 
 Use with the `--help` parameter to get more details.
 
-
 ## Starting Stream Configurator UI
 
 ### Prerequisites
@@ -60,23 +59,24 @@ components are up and running:
 >**Note**  
 It is important that the components are started up in this order.
 
+- [Zookeeper]
 - [Kafka]
 - [MGR]
 - [Web Player]
 
 To start the components:
 
-1. Start Zookeper:
+1. Start Zookeeper:
 
    ```
-   docker run --net=uvap -d --name=zookeeper \
+   $ docker run --net=uvap -d --name=zookeeper \
      -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-zookeeper:4.1.0
    ```
 
 2. Start Kafka:
 
    ```
-   docker run --net=uvap -d -p 9092:9092 --name=kafka \
+   $ docker run --net=uvap -d -p 9092:9092 --name=kafka \
      -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
      -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 \
      -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
@@ -87,13 +87,13 @@ To start the components:
 3. Start **MGR**:
 
    ```
-   "${UVAP_HOME}"/scripts/run_mgr.sh -- --net=uvap
+   $ "${UVAP_HOME}"/scripts/run_mgr.sh -- --net=uvap
    ```
 
 4. Start Web player:
 
    ```
-   "${UVAP_HOME}"/scripts/run_uvap_web_player.sh -- --net uvap
+   $ "${UVAP_HOME}"/scripts/run_uvap_web_player.sh -- --net uvap
    ```
 
 ### Starting the UI
@@ -113,7 +113,7 @@ Only Google Chrome™ version 76 and later is supported.
    ```
 
 1. Stream Configurator UI can be started by opening in a web browser:
-    
+
    ```
     $ google-chrome ${UVAP_HOME}/ui/uvap_stream_configurator_ui/index.html
    ```
@@ -125,4 +125,4 @@ and usage of the Stream Configurator UI.
 [MGR]: start_mgr.md
 [Web Player]: ../demo/demo_web_player.md
 [Stream Configurator UI Guide]: conf_sc_ui.md
-[Zookeper]: ../install/uvap_install_setup.md#starting-kafka
+[Zookeeper]: ../install/uvap_install_setup.md#starting-kafka

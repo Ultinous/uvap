@@ -1,3 +1,9 @@
+---
+id: demo_config_fve
+title: Configuring UVAP for FVE Demo Mode
+hide_title: true
+---
+
 # Configuring UVAP for FVE Demo Mode
 
 To configure UVAP for `fve` demo mode:

@@ -84,6 +84,8 @@ END_KEYPOINTS = (
     'LEFT_EAR', 'RIGHT_EAR', 'RIGHT_WRIST', 'LEFT_WRIST', 'RIGHT_ANKLE', 'LEFT_ANKLE'
 )
 
+ULTINOUS_LOGO = cv2.imread('resources/powered_by_white.png', cv2.IMREAD_UNCHANGED)
+
 
 class Position(enum.Enum):
     BOTTOM_RIGHT = 1
@@ -435,6 +437,47 @@ def draw_nice_text(
     return canvas
 
 
+def draw_nice_text_under_bb(
+        canvas: np.array,
+        text: str,
+        bounding_box: dict,
+        color: tuple,
+        scale=1.0,
+        shadow=True,
+        line=1
+) -> np.array:
+    """
+    Draw text with dynamically changing size and shadow to an image bottom of a bounding box.
+    :param canvas: target image
+    :param text: drawable text
+    :param bounding_box: bounding box for text location and size computation
+    :param color: BRG color of the text
+    :param scale: scaling factor, default for 1080p
+    :param shadow: to visualize text shadow or not
+    :param line: line number in which to write the message under the bounding box
+    :return: image with nice text
+    """
+    x = bounding_box['x']
+    y = bounding_box['y']
+    w = bounding_box['width']
+    h = bounding_box['height']
+
+    font_size = w * scale / 60
+    font_face = cv2.FONT_HERSHEY_COMPLEX_SMALL
+    font_thicness = 1
+    (txt_size, _) = cv2.getTextSize(text, font_face, font_size, font_thicness)
+
+    pt1 = x * scale + w * scale / 2 - txt_size[0] / 2
+    pt2 = (y + h) * scale + int(txt_size[1])*line
+
+    if shadow:
+        cv2.putText(canvas, text, (int(pt1), int(pt2)), font_face, font_size, (0, 0, 0), font_thicness + 1,
+                    lineType=cv2.LINE_AA)
+    cv2.putText(canvas, text, (int(pt1), int(pt2)), font_face, font_size, color, font_thicness, lineType=cv2.LINE_AA)
+
+    return canvas
+
+
 def draw_overlay(
         canvas: np.array,
         overlay: np.array,
@@ -482,6 +525,18 @@ def draw_overlay(
     canvas[y:y + h, x:x + w] = cv2.add(alpha_roi, alpha_overlay)
 
     return canvas
+
+
+def draw_ultinous_logo(
+        canvas: np.array,
+        scale=1.0
+):
+    return draw_overlay(
+        canvas=canvas,
+        overlay=ULTINOUS_LOGO,
+        position=Position.BOTTOM_RIGHT,
+        scale=scale
+    )
 
 
 def draw_head_pose(
@@ -537,7 +592,7 @@ def draw_polyline(
     Draw a polyline on the input image
     :param canvas: target image
     :param points: Points of the polylinye
-    :param color: BRG color of the line
+    :param color: BGR color of the line
     :param thickness: thickness of the line.
     :param is_closed: If true, the line will be closed.
     :param scaling: scaling factor, default 1080p

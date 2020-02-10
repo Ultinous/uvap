@@ -1,3 +1,9 @@
+---
+id: demo_web_player
+title: Starting Web Player
+hide_title: true
+---
+
 # Web Display
 
 ## Starting Web Player

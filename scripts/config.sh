@@ -91,12 +91,28 @@ chmod +x "${jinja_run_script_path}"
 
 jinja_run="python3.7 utils/jinja_template_filler.py ${mounted_config_dir}/params.yaml"
 
-for uvap_component in $(get_uvap_components_list AND "properties" "${demo_mode}" | force_uvap_prefix); do
-	mkdir -p "${config_ac_dir}/${uvap_component}/"
-	echo "${jinja_run} ${mounted_templates_dir}/${uvap_component}_${demo_mode}_TEMPLATE.properties ${mounted_config_dir}/${uvap_component}/${uvap_component}.properties" >> "${jinja_run_script_path}"
-	test -e "${templates_dir}/${uvap_component}_${demo_mode}_TEMPLATE.json" &&
-		echo "${jinja_run} ${mounted_templates_dir}/${uvap_component}_${demo_mode}_TEMPLATE.json ${mounted_config_dir}/${uvap_component}/${uvap_component}.json" >> "${jinja_run_script_path}"
+add_config_to_jinja_run_script() {
+	local config_file_name=${1:-}
+	local instance_id=${2:-}
+	test -z "${config_file_name}" && echo "${error?"config_file_name parameter is unset"}"
+	echo "${jinja_run} ${mounted_templates_dir}/${uvap_component_name}_${demo_mode}_TEMPLATE.properties ${mounted_config_dir}/${uvap_component_name}/${config_file_name}.properties" ${instance_id}>> "${jinja_run_script_path}"
+	test -e "${templates_dir}/${uvap_component_name}_${demo_mode}_TEMPLATE.json" &&
+		echo "${jinja_run} ${mounted_templates_dir}/${uvap_component_name}_${demo_mode}_TEMPLATE.json ${mounted_config_dir}/${uvap_component_name}/${config_file_name}.json" ${instance_id}>> "${jinja_run_script_path}"
+	true
+}
+
+for raw_service_name in $(get_uvap_components_list AND "properties" "${demo_mode}"); do
+	uvap_component_name=$(echo ${raw_service_name} | force_uvap_prefix)
+	mkdir -p "${config_ac_dir}/${uvap_component_name}/"
+	if has_uvap_component_attribute "${raw_service_name}" 'instance_per_stream'; then
+		for (( stream_idx=0; stream_idx < $(echo ${stream_uris} | wc -w ); ++stream_idx )); do
+			add_config_to_jinja_run_script "${uvap_component_name}_${stream_idx}" "${stream_idx}"
+		done
+	else
+		add_config_to_jinja_run_script "${uvap_component_name}"
+	fi
 done
+
 for uvap_component in $(get_uvap_components_list AND "data_flow" "${demo_mode}" | force_uvap_prefix); do
 	mkdir -p "${config_ac_dir}/${uvap_component}/"
 	echo "${jinja_run} ${mounted_templates_dir}/${uvap_component}_${demo_mode}_TEMPLATE.prototxt ${mounted_config_dir}/${uvap_component}/${uvap_component}.prototxt" >> "${jinja_run_script_path}"
@@ -104,7 +120,7 @@ done
 
 docker pull "${demo_image_name}" > /dev/null
 container_name="uvap_config"
-test "$(docker container ls --filter name="${container_name}" --all --quiet | wc -l)" -eq 1 \
+test "$(docker container ls --filter name="^${container_name}\$" --all --quiet | wc -l)" -eq 1 \
 	&& docker container stop "${container_name}" > /dev/null \
 	&& docker container rm "${container_name}" > /dev/null
 
@@ -126,5 +142,5 @@ tar -c -C "${demo_applications_dir}" -h -f - . | docker container cp --archive -
 docker container start --attach "${container_name}" > /dev/null
 
 if test "base" = "${demo_mode}"; then
-	${current_directory}/generate_stream_configurator_ui.sh "--image-name" "${configurator_image_name}"
+	${current_directory}/generate_stream_configurator_ui.sh "--image-name" "${configurator_image_name}" $(test "true" = "${use_dev_tags:-"false"}" && echo "--use-dev-tags")
 fi

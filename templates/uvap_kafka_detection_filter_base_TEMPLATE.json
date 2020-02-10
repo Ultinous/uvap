@@ -1,0 +1,90 @@
+{
+  "source_options": {
+    "start": "START_NOW",
+    "end": "END_NEVER"
+  },
+  "source": {
+    "broker_list": "{{ KAFKA_BROKER_LIST }}",
+    "name": "{{ KAFKA_TOPIC_PREFIX }}.cam.0.dets.ObjectDetectionRecord.json"
+  },
+  "target_options": {
+    "handling": "REPLACE"
+  },
+  "target": {
+    "broker_list": "{{ KAFKA_BROKER_LIST }}",
+    "name": "{{ KAFKA_TOPIC_PREFIX }}.cam.0.filtered_dets.ObjectDetectionRecord.json"
+  },
+  "config_data": {
+    "min_confidence": 0.99,
+    "detection_types": [
+      "PERSON_HEAD",
+      "PERSON_FACE"
+    ],
+
+    "negative_areas": [
+      {
+        "vertices": [
+          {
+            "x": 1373,
+            "y": 255
+          },
+                    {
+            "x": 1373,
+            "y": 471
+          },
+                    {
+            "x": 1600,
+            "y": 471
+          },
+                    {
+            "x": 1600,
+            "y": 255
+          }
+        ]
+      }
+    ],
+
+    "positive_areas": [
+      {
+        "vertices": [
+          {
+            "x": 933,
+            "y": 210
+          },
+                    {
+            "x": 933,
+            "y": 708
+          },
+                    {
+            "x": 1668,
+            "y": 708
+          },
+                    {
+            "x": 1668,
+            "y": 210
+          }
+        ]
+      },
+      {
+        "vertices": [
+          {
+            "x": 305,
+            "y": 446
+          },
+                    {
+            "x": 305,
+            "y": 1041
+          },
+                    {
+            "x": 1054,
+            "y": 1041
+          },
+                    {
+            "x": 1054,
+            "y": 446
+          }
+        ]
+      }
+    ]
+  }
+}

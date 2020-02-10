@@ -61,7 +61,12 @@ message SourceTopicOptions
     END_END = 2;
   }
 
-  string consumer_group = 1; ///< Kafka consumer group. If left empty an UUID will be generated.
+  /**
+   * Kafka consumer group.
+   * If left empty an UUID will be generated.
+   * If not empty and the service is restarted, processing will continue from where it left.
+   */
+  string consumer_group = 1;
 
   Start start = 2;
   /**
@@ -88,6 +93,8 @@ message SourceTopicOptions
    * Note: Maximum year to set is 2037 (known limitation)
    */
   string end_date_time = 5;
+
+  int64 message_processing_latency_ms = 6; ///< Message processing latency. Must be nonnegative.
 }
 
 /**
@@ -105,8 +112,8 @@ message TargetTopicOptions
   Handling handling = 1;
 }
 
-/** Clustering Microservice Configuration */
-message ClusteringMSConfig
+/** Feature Vector Clustering Microservice Configuration */
+message FeatureVectorClusteringMSConfig
 {
   SourceTopicOptions source_options = 1; ///< Optional. Options for opening source topics.
   repeated Topic sources = 2; ///< Source topics
@@ -124,8 +131,8 @@ message ClusteringMSConfig
  */
 message ReidMSConfig
 {
-  SourceTopicOptions source_options = 1; ///< Optional. Options for opening source topics.
-  repeated Topic sources = 2; ///< Source topics
+  SourceTopicOptions source_options = 1; ///< Optional. Options for opening source camera and person stream topics.
+  repeated Topic sources = 2; ///< List of camera and person stream topics.
 
   TargetTopicOptions target_options = 3; ///< Options for opening target topic.
   Topic target = 4; ///< Target topic
@@ -133,4 +140,18 @@ message ReidMSConfig
   Topic internal_state = 5; ///< Internal state topic
 
   ReidConfigRecord config_data = 6; ///< Functional configuration.
+}
+
+/**
+ * Detection Filter Microservice Configuration
+ */
+message DetectionFilterMSConfig
+{
+  SourceTopicOptions source_options = 1; ///< Optional. Options for opening source topics.
+  Topic source = 2; ///< Source topic
+
+  TargetTopicOptions target_options = 3; ///< Options for opening target topic.
+  Topic target = 4; ///< Target topic
+
+  DetectionFilterConfigRecord config_data = 5; ///< Functional configuration.
 }

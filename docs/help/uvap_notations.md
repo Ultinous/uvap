@@ -32,7 +32,7 @@ $ command-to-run argument1 argument2 \
 ## UVAP Components
 
 **Bold font** denotes UVAP microservices. For example:  
->**Basic Reidentification** microservice processes feature vectors and finds reappearances.
+>**Reidentification** microservice processes feature vectors and finds reappearances.
 
 _Italics font_ denotes UVAP features. For example:  
 >The _Tracking_ feature is provided by the **Tracker** microservice.

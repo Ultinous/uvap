@@ -6,17 +6,16 @@ hide_title: true
 
 # Setting Up UVAP
 
-This instruction page is intended to guide through the initial installation
+This instruction page guides through the initial installation
 of UVAP. This procedure has to be executed only once. For upgrade instructions,
 see [Upgrading UVAP].
 
 All shell commands in the UVAP Documentation have to run successfully.
-Always check the return value of an issued command (`echo $?`). If a
+Always check the return value of an issued command (use `echo $?`). If a
 command fails (returns a non-zero return value), do not proceed.
 Instead, examine the error message printed by the issued command, and
-make any steps necessary for the command to succeed. Ask for help via
-email (sent to `support@ultinous.com`), if for any reason you can not
-deal with the problem on your own.
+make any steps necessary for the command to succeed. Contact Ultinous support through
+email (sent to `support@ultinous.com`) if necessary.
 
 ## Prerequisite
 
@@ -39,7 +38,7 @@ and add it to the `sudo` group. To do so:
    $ sudo adduser ultinous sudo
    ```
    
-1. Change user on graphical environment (log out, then log in with `ultinous`
+1. Change user through UI (log out, then log in with `ultinous`
    user).
 
 ## Downloading Helper Scripts
@@ -59,7 +58,7 @@ Check the `README.md` file for a brief overview of this repository.
 ## Installing NVIDIA Video Driver
 
 UVAP requires a specific GPU driver installed to run properly. To install
-NVIDIA video driver:
+NVIDIA® video driver:
 
 1. Add the `graphics-drivers/ppa` repository to the APT:
 
@@ -71,7 +70,7 @@ NVIDIA video driver:
 1. Install NVIDIA video driver:
 
    ```
-   $ sudo apt install nvidia-driver-410
+   $ sudo apt install nvidia-driver-435
    ```
    
 1. Reboot the node to use the new driver (and log in with `ultinous` user).
@@ -98,7 +97,7 @@ extended with an NVIDIA driver related add-on.
    $ sudo adduser ultinous docker
    ```
 
-1. Log out from the graphical environment and log in again, so the previous step will take effect.
+1. Log out from the graphical environment and log in again, to make the previous step take effect.
 
 1. On the server machine, enable `nvidia-persistenced` to prevent the sleep
    state of the GPU:
@@ -152,13 +151,14 @@ extended with an NVIDIA driver related add-on.
 
 ## Starting Kafka
 
-UVAP provides several sample streams over Kafka where the integrator can
-connect to and implement some custom solutions based on the streams coming out.
+UVAP provides several sample streams over Kafka® where the integrator can
+connect to and implement custom solutions based on the outcoming streams.
 The way how Kafka is started is just an example, which can be easily and quickly
-carried out. The developer guide covers the necessary steps to permanently
-install and configure a Kafka environment that is suitable for production use
-cases. The following steps should be performed in a single boot up period of the
-node. After a reboot, start over each step.
+carried out.  
+The [Kafka developer guide] covers the necessary steps to permanently 
+install and configure a Kafka environment that is suitable for production use cases. 
+The following steps must be performed in a single boot up period of the node. After 
+a reboot, start over each step.
 
 1. Edit `/etc/hosts` file: add `zookeeper` as name for `127.0.0.1`:
 
@@ -184,7 +184,7 @@ node. After a reboot, start over each step.
      -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-zookeeper:4.1.0
    ```
    
-1. Start / restart a Kafka container: 
+1. Start or restart a Kafka container: 
 
    ```
    $ docker rm -f kafka # Not necessary if not running
@@ -252,12 +252,12 @@ Run the install script:
 
 ## Additional Tools
 
-There are some useful utilities which can be handy during the testing.
+The following useful utilities can be handy during testing.
 
-### Installing VLC
+### Installing VLC media player
 
-**VLC** is a video playback application to test live stream or playback a
-pre-recorded file.
+**VLC media player** is a video playback application that can be used
+to test live streams or playback a pre-recorded file.
 
 To install VLC:
 
@@ -265,10 +265,10 @@ To install VLC:
    $ sudo apt-get install vlc
    ```
 
-### Installing ffmpeg
+### Installing FFmpeg
 
-**ffmpeg** is a command line tool which can convert between different video formats
-and codecs.
+**FFmpeg** is a command line tool which can convert between different video
+formats and codecs.
 
 To install ffmpeg:
 
@@ -279,3 +279,4 @@ To install ffmpeg:
 [License Key]: uvap_install_license.md
 [System Requirements]: uvap_install_sysreq.md
 [Upgrading UVAP]: ../upgrade/uvap_upgrade.md
+[Kafka developer guide]: https://kafka.apache.org/10/documentation/streams/developer-guide/

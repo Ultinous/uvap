@@ -1,10 +1,10 @@
 ---
 id: conf_reid
-title: Configuring Basic Reidentifier
+title: Configuring Reidentifier
 hide_title: true
 ---
 
-# Configuring Basic Reidentifier
+# Configuring Reidentifier
 
 This microservice is not GPU related. It can be run in batch mode, therefore the
 microservice stops after processing the last source record.
@@ -39,7 +39,7 @@ setting both `ultinous.service.kafka.reid.config.data` and
 
 | Property      | `ultinous.service.kafka.reid.ms.config.data`    |
 | ------------- | ------------------------------------------------------ |
-| Description   | **Basic Reidentifier** microservice configuration of source and target topics in one-liner JSON format corresponding to the definitions described in [Superconfig Topic Definitions]. |
+| Description   | **Reidentifier** microservice configuration of source and target topics in one-liner JSON format corresponding to the definitions described in [Superconfig Topic Definitions]. |
 | Required      | Required                                               |
 | Notes         | Required if no other reidentification configuration is set.<br> One configuration fits all. |
 
@@ -47,7 +47,7 @@ setting both `ultinous.service.kafka.reid.config.data` and
 	
 | Property      | `ultinous.service.kafka.reid.ms.config.file`    |
 | ------------- | ------------------------------------------------------ |
-| Description   | **Basic Reidentifier** microservice configuration file path. Content must be in one-liner JSON format described in [Superconfig Topic Definitions].  |
+| Description   | **Reidentifier** microservice configuration file path. Content must be in one-liner JSON format described in [Superconfig Topic Definitions].  |
 | Required      | Required                                               |
 | Notes         | Required if no other reidentification configuration is set.<br> One configuration fits all. |
 
@@ -55,7 +55,7 @@ setting both `ultinous.service.kafka.reid.config.data` and
 
 | Property      | `ultinous.service.kafka.reid.config.data`    |
 | ------------- | ------------------------------------------------------ |
-| Description   | **Basic Reidentifier** configurations of input streams defined in JSON format. |
+| Description   | **Reidentifier** configurations of input streams defined in JSON format. |
 | Required      | Optional                                               |
 | Notes         | Should only be set if the `ReidMSConfig` contains no `config_data` global reidentification configuration. |
 
@@ -63,7 +63,7 @@ setting both `ultinous.service.kafka.reid.config.data` and
   
 | Property      | `ultinous.service.kafka.reid.config.file`   |
 | ------------- | ------------------------------------------------------ |
-| Description   | **Basic Reidentifier** configuration file path. File content must be in one-liner JSON format same as described at `ultinous.service.kafka.reid.config.data` above. |
+| Description   | **Reidentifier** configuration file path. File content must be in one-liner JSON format same as described at `ultinous.service.kafka.reid.config.data` above. |
 | Required      | Optional                                               |
 | Notes         | Should only be set if the `ReidMSConfig` contains no `config_data` global reidentification configuration. |
 
@@ -104,7 +104,12 @@ Configuration records are separated into the following three values:
     "end":"END_NEVER"
   },
   "sources":
-  [
+  [  
+    {
+      "broker_list":"demoserver:9092",
+      "name":"staff.FeatureVectorRecord.json",
+      "auth_ref":"srcAuth"
+    }
     {
       "broker_list":"demoserver:9092",
       "name":"cam.entrance.FeatureVectorRecord.json"
@@ -138,7 +143,17 @@ name. The target stream is being replaced.
    "clustering_config": {
      "method": "USE_LAST"
    },
-   "input_stream_configs": [
+   "input_stream_configs": [  
+      {
+       "stream_id": "person",
+       "fv_field_selector": {
+         "feature_vector_path": "features"
+       },
+       "person_stream_config": 
+        {
+         "cluster_retention_period_ms": 3600000
+        }
+     }
      {
        "stream_id": "entranceCamera",
        "fv_field_selector": {
@@ -192,6 +207,10 @@ See the table below for the field descriptions:
 | `min_similarity`              | Child parameter of `reid_stream_config`. Similarity value. If the similarity score (see `score` under [`ReidRecord`]) between the input and a stored cluster reaches this value, a reidentification event takes place. <br> Must be in the `[0.0..1.0]` interval, default is `0.0`. <br> Match count can still be limited, see `max_num_matches`. |
 | `max_num_matches`             | Child parameter of `reid_stream_config`. Defines the maximum number of the returned matching clusters (with a score above `min_similarity`). <br>Must be positive.|
 
+>**Note:**  
+If the input is a cluster topic, `fv_field_selector` must contain `fv_cluster_path`
+instead of `feature_vector_path`.
+
 In this example, the `exitCamera` stream has a minimum
 reidentification score of `0.8` set by `min_similarity`,
 which means the result produced from this
@@ -218,10 +237,10 @@ is a newly set or an updated one.
 * `REG_EVENT`: the event is a registration or a cluster update
 * `REID_EVENT`: the event is a reidentification
 * `DELETE_EVENT`: the event is a cluster removal
-* `HEARTBEAT`: the input is processed and there are no more messages:
+* `END_OF_INPUT_RECORD`: the input is processed and there are no more messages:
    
    ```
-   {"type":"HEARTBEAT"}
+   {"type":"END_OF_INPUT_RECORD"}
    ```
 
 #### Registration ReidRecord Example
@@ -245,9 +264,9 @@ is a newly set or an updated one.
             "type":"PERSON_FACE"
           },
         "num_observations":1
+        "is_realized":true
       },
     "input_stream_id":"entranceCamera",
-    "is_realized":true
   }
 }
 ```
@@ -343,19 +362,63 @@ period, see `cluster_retention_period` in [`ReidConfigRecord`].
 The `deleted_cluster` field contains the first detection time, key and stream
 information of the deleted cluster.
 
+## Person Stream Configuration
+
+The person stream can be used to add, update, or delete clusters in the internal
+database of the Reidentifier.
+
+The Reidentifier reads the Person Stream if `person_stream_config` is specified
+in the `input_stream_configs`, see the [Kafka configuration proto]. The topic
+settings of person streams may differ from those of camera streams, see 
+`ReidMSConfig` in the [Kafka superconfiguration proto].
+
+In the person stream, the `key` of the individual records can be changed to any
+desired string (for example the name of the person or a unique ID). In addition
+to the key, the record must contain a payload that has a feature vector or cluster field.
+
+### Managing the Person Stream  
+  
+To modify a feature vector cluster in the internal reidentification database, add a
+record to the person stream where the key is the key of the cluster to be modified
+and the payload contains the new feature vector.
+
+To delete a feature vector from the person stream, add a record to the person
+stream where the key is the key of the cluster to be deleted and the payload is
+empty.
+
+### Example Person Stream Record:
+
+```
+{
+  "key": "employee_1",
+  "payload": {
+    "features": {
+      "model_id": "face_rec_v6",
+      "feature": [-0.974957268,-0.414262786, ... ,0.200180188,0.489824344],
+      "type": "PERSON_FACE"
+    },
+    "end_of_frame": false
+  }
+}
+```
+
+In this example the unique key is `"employee_1"` and the corresponding payload is the
+1024 byte long feature vector contained in `feature: [-0.974957268,-0.414262786, ... ,0.200180188,0.489824344]`.
+
+
 ## Feature Demo
 
-For the basic reidentification feature demos, see
-[Basic Reidentification with One Camera] and
-[Basic Reidentification with Two Cameras].
+For the reidentification feature demos, see
+[Single-Camera Reidentification Demo with Pre-clustering] and 
+[Reidentification Demo with Person Names].
 
 
-[Basic Reidentification with One Camera]: ../demo/demo_reid_1.md#basic-reidentification-demo-with-one-camera
-[Basic Reidentification with Two Cameras]: ../demo/demo_reid_2.md#basic-reidentification-demo-with-two-cameras
+[Single-Camera Reidentification Demo with Pre-clustering]: ../demo/demo_reid_1.md#reidentification-demo-with-one-camera
 [Kafka superconfiguration proto]: ../../proto_files/ultinous/proto/common/kafka_superconfig.proto
 [Kafka configuration proto]: ../../proto_files/ultinous/proto/common/kafka_config.proto
 [Kafka data proto]: ../../proto_files/ultinous/proto/common/kafka_data.proto
 [`ReidRecord`]: #reidentification-reidrecord-example
 [`ReidConfigRecord`]: #example-of-a-reidconfigrecord-from-kafka
 [Superconfig Authentication Definitions]: conf_superconfig.md#authentication-definition
-[Superconfig Topic Definitions]: conf_superconfig.md#topic-definitions
+[Superconfig Topic Definitions]: conf_superconfig.md#topic-definitions  
+[Reidentification Demo with Person Names]: ../demo/demo_reid_with_name.md

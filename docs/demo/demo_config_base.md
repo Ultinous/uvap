@@ -1,3 +1,9 @@
+---
+id: demo_config_base
+title: Configuring UVAP for Base Demo Mode
+hide_title: true
+---
+
 # Configuring UVAP for Base Demo Mode
 
 To configure UVAP for `base` demo mode:

@@ -13,7 +13,7 @@ example in
 <a href="https://ffmpeg.org" target="_blank">ffmpeg</a> or
 <a href="https://gstreamer.freedesktop.org" target="_blank">gstreamer</a>.
 UVAP uses
-<a href="https://kafka.apache.org" target="_blank">Apache Kafka</a>
+<a href="https://kafka.apache.org" target="_blank">Apache Kafka®</a>
 for data channels and
 <a href="https://www.docker.com" target="_blank">Docker</a>
 to run the processors. These technologies provide a generic and
@@ -52,7 +52,7 @@ image processing is done inside **MGR**.
 
 For further information, see the following topics:
 * [Multi-Graph Runner microservice description]
-* [Cofiguring Multi-Graph Runner]
+* [Configuring Multi-Graph Runner]
 * [Starting Multi-Graph Runner]
 
 ## Tracker
@@ -66,7 +66,7 @@ long an individual stays in an area of interest.
 
 For further information, see the following topics:
 * [Tracker microservice description]
-* [Cofiguring Tracker]
+* [Configuring Tracker]
 * [Starting Tracker]
 
 ## Pass Detector
@@ -80,31 +80,31 @@ or leaves an area of interest, for example; the queue area in a store.
 
 For further information, see the following topics:
 * [Pass Detector microservice description]
-* [Cofiguring Pass Detector]
+* [Configuring Pass Detector]
 * [Starting Pass Detector]
 
-## Basic Reidentifier
+## Reidentifier
 
-**Basic Reidentifier** microservice uses **`Face Feature Vectors`** topics
+**Reidentifier** microservice uses **`Face Feature Vectors`** topics
 produced by **MGR** and produces **`Reidentification Events`** topic. An individual can
 be registered at the first appearance on a camera stream and can be reidentified
 later, even on a different camera stream. This can be very helpful at waiting
 time estimation.
 
 For further information, see the following topics:
-* [Basic Reidentifier microservice description]
-* [Cofiguring Basic Reidentifier]
-* [Starting Basic Reidentifier]
+* [Reidentifier microservice description]
+* [Configuring Reidentifier]
+* [Starting Reidentifier]
 
 
-[Basic Reidentifier microservice description]: ms_reid.md
-[Cofiguring Basic Reidentifier]: conf_reid.md
-[Cofiguring Multi-Graph Runner]: conf_mgr.md
-[Cofiguring Pass Detector]: conf_passdet.md
-[Cofiguring Tracker]: conf_track.md
+[Reidentifier microservice description]: ms_reid.md
+[Configuring Reidentifier]: conf_reid.md
+[Configuring Multi-Graph Runner]: conf_mgr.md
+[Configuring Pass Detector]: conf_passdet.md
+[Configuring Tracker]: conf_track.md
 [Multi-Graph Runner microservice description]: ms_mgr.md
 [Pass Detector microservice description]: ms_passdet.md
-[Starting Basic Reidentifier]: start_reid.md
+[Starting Reidentifier]: start_reid.md
 [Starting Multi-Graph Runner]: start_mgr.md
 [Starting Pass Detector]: start_passdet.md
 [Starting Tracker]: start_track.md

@@ -8,6 +8,7 @@ script_name="$(basename "${0}")"
 script_name_without_extension="${script_name%".sh"}"
 service_name="${script_name_without_extension#"run_"}"
 service_name="${service_name#"generate_"}"
+instance_id=""
 
 get_uvap_components_list() {
 	set -o pipefail
@@ -49,8 +50,12 @@ get_docker_image_tag_for_component() {
 		echo "ERROR: a component name given as an argument is required" >&2
 		exit 1
 	fi
-	git_tag="$(get_current_release_git_tag)"; test ${?} -ne 0 && exit 1
-	echo "ultinous/uvap:${1}_${git_tag}"
+	if test "true" = "${use_dev_tags:-"false"}"; then
+		:
+	else
+		git_tag="$(get_current_release_git_tag)"; test ${?} -ne 0 && exit 1
+		echo "ultinous/uvap:${1}_${git_tag}"
+	fi
 }
 
 docker_container_run() {
@@ -69,17 +74,20 @@ docker_container_run() {
 	container_dynamic_options=()
 	test ! -z "${models_dir:-}" && container_dynamic_options+=("--mount" "type=bind,readonly,source=${models_dir},destination=/ultinous_app/models/")
 	if test ! -z "${config_dir:-}"; then
-		container_properties_file_path="${config_dir}/${container_name}.properties"
-		test -e "${container_properties_file_path}" || echo "${error?"ERROR: properties file ${container_properties_file_path} does not exist"}"
-		test -r "${container_properties_file_path}" || echo "${error?"ERROR: properties file ${container_properties_file_path} is not readable"}"
-		test -f "${container_properties_file_path}" || echo "${error?"ERROR: properties file ${container_properties_file_path} is not a regular file"}"
+		properties_file_name=$(test -z "${instance_id}" && echo "${container_name}.properties" || echo "${container_name}_${instance_id}.properties")
+		properties_file_path="${config_dir}/${properties_file_name}"
+		container_config_dir="/ultinous_app/config/${container_name}"
+		container_properties_file_path="${container_config_dir}/${properties_file_name}"
+		test -e "${properties_file_path}" || echo "${error?"ERROR: properties file ${properties_file_path} does not exist"}"
+		test -r "${properties_file_path}" || echo "${error?"ERROR: properties file ${properties_file_path} is not readable"}"
+		test -f "${properties_file_path}" || echo "${error?"ERROR: properties file ${properties_file_path} is not a regular file"}"
 		container_dynamic_options+=(\
-			"--mount" "type=bind,readonly,source=${config_dir},destination=/ultinous_app/config/${container_name}" \
-			"--env" "${service_name^^}_PROPERTY_FILE_PATHS=/ultinous_app/config/${container_name}/${container_name}.properties" \
-			"--env" "${service_name^^}_MS_PROPERTY_FILE_PATHS=/ultinous_app/config/${container_name}/${container_name}.properties" \
-			"--env" "${service_name^^}_FILE_PATHS=/ultinous_app/config/${container_name}/${container_name}.properties" \
+			"--mount" "type=bind,readonly,source=${config_dir},destination=${container_config_dir}" \
+			"--env" "${service_name^^}_PROPERTY_FILE_PATHS=${container_properties_file_path}" \
+			"--env" "${service_name^^}_MS_PROPERTY_FILE_PATHS=${container_properties_file_path}" \
+			"--env" "${service_name^^}_FILE_PATHS=${container_properties_file_path}" \
 		)
-		for port in $(grep -Fi ".port=" "${container_properties_file_path}" | cut -f2 -d'=' | tr -d "'" | tr -d '"'); do
+		for port in $(grep -Fi ".port=" "${properties_file_path}" | cut -f2 -d'=' | tr -d "'" | tr -d '"'); do
 			container_dynamic_options+=("--publish" "${port}:${port}")
 		done
 	fi
@@ -94,17 +102,19 @@ docker_container_run() {
 		container_dynamic_options+=("--group-add" "video")
 	fi
 
-	test "$(docker container ls --filter name="${container_name}" --all --quiet | wc -l)" -eq 1 \
-		&& docker container stop "${container_name}" > /dev/null \
-		&& docker container rm "${container_name}" > /dev/null
+    container_name_with_id="$(implode '-' "${container_name}" "${instance_id}")"
+
+	test "$(docker container ls --filter name="^${container_name_with_id}\$" --all --quiet | wc -l)" -eq 1 \
+		&& docker container stop "${container_name_with_id}" > /dev/null \
+		&& docker container rm "${container_name_with_id}" > /dev/null
 	docker pull "${image_name}"
 	${docker_executable} container create \
-		--name "${container_name}" \
+		--name "${container_name_with_id}" \
 		--user "${user_spec}" \
 		"${container_dynamic_options[@]}" \
 		"${not_our_args[@]/#/}" \
 		"${image_name}" \
 		"${@}"
 
-	docker container start $(test "${run_mode:-}" = "foreground" && echo "--attach") "${container_name}"
+	docker container start $(test "${run_mode:-}" = "foreground" && echo "--attach") "${container_name_with_id}"
 }

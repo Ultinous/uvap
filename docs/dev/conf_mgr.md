@@ -7,23 +7,25 @@ hide_title: true
 # Configuring Multi-Graph Runner
 
 To configure an **MGR** instance, the combination of the different algorithms needs
-to be specified. **MGR** can be configured with a dataflow graph. The **MGR** dataflow
+to be specified.
+
+**MGR** can be configured with a dataflow graph. The **MGR** dataflow
 is a directed bipartite graph consisting of data nodes and process nodes.
 
 This model is very similar to the UVAP dataflow. However, **MGR** deals with
 high-bitrate uncompressed video streams. This data cannot be transferred over
-Kafka due to the I/O and network limitations. **MGR** deals with low-level image
+Kafka because of the I/O and network limitations. **MGR** deals with low-level image
 processing algorithms while the rest of the microservices deal with higher level
 lightweight data.
 
-Another significant difference is that the **MGR** dataflow is synchronized:
-all the processing nodes (within one `data_run`, see later) are called exactly
-once for each input frame in dependency order.
+Another significant difference is that the **MGR** dataflow is synchronized.
+Meaning, all the processing nodes (within one `data_run`, see later) are called
+exactly once for each input frame in dependency order.
 
 ## Configuration File Format
 
 The dataflow configuration is a text file following the prototext
-(`.prototxt`) format. It is a simple structured format, best can be understood
+(`.prototxt`) format. It is a simple structured format that can be best understood
 from the example below. Formal definition of the configuration file is
 given in the [UVAP MGR configuration format proto file].
 
@@ -91,8 +93,8 @@ definition (`...` is used to substitute for omitted parts):
    ```
 
 Below is a full example of a dataflow configuration file. This simply reads the
-webcam stream, runs head detector on every second frame, then writes the
-detection results to a Kafka stream. 
+webcam stream, runs head detector on every second frame then writes the
+detection results to a Kafka stream.  
 The following graph is annotated with comments embedded for better understanding:
 
    ```
@@ -163,19 +165,18 @@ dataflow:
 <a name="fig_ex_dataflow"></a>
 ![Example Dataflow](../assets/fig_example_dataflow.png)  
 _Example Dataflow_  
-Rectangles are data nodes, process nodes are ellipses.
+Rectangles are data nodes and ellipses are process nodes.
 
-The `data_flow` section describes the dataflow itself. First, all data nodes
-have to be listed. After that, comes the list of process nodes. Process nodes
-are executed in the order of the listing. Process nodes refers to the input and
-output data nodes in their configuration.
+The `data_flow` section describes the dataflow itself. First, list all data
+nodes then list all process nodes. Process nodes are executed in the order of
+the listing. Process nodes refer to the input and output data nodes in their
+configuration.
 
-For very detailed configurations options, see the [UVAP MGR configuration format
+For configurations options in more detail, see the [UVAP MGR configuration format
 proto file]. Comments are embedded for explanation.
 
 The example [`full.prototxt`] is a more complex dataflow, involving two cameras and most
 of the deep learning models.
-
 
 ## Feature Demo
 

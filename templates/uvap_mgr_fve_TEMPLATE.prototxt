@@ -14,13 +14,15 @@ data_run {
     frame_period_ms: 125
   }
   data_flow {
-    data_node {type: FRAME name: "input"}
-    data_node {type: DETECTIONS name: "dets_raw"}
-    data_node {type: DETECTIONS name: "dets"}
-    data_node {type: HEAD_POSE_3DS name: "poses"}
-    data_node {type: DETECTIONS name: "dets_filtered"}
-    data_node {type: FEATURE_VECTORS name: "fvecs"}
-    data_node {type: FRAME_INFO name: "frameinfo"}
+    data_node: {type: FRAME name: "input"}
+    data_node: {type: DETECTIONS name: "dets_raw"}
+    data_node: {type: DETECTIONS name: "dets"}
+    data_node: {type: HEAD_POSE_3DS name: "poses"}
+    data_node: {type: DETECTIONS name: "dets_filtered"}
+    data_node: {type: FEATURE_VECTORS name: "fvecs"}
+    data_node: {type: FRAME_INFO name: "frameinfo"}
+    data_node: {type: GENDERS name: "genders"}
+    data_node: {type: AGES name: "ages"}
 
     process_node:
     {
@@ -83,6 +85,20 @@ data_run {
         }
       }
     }
+    process_node:
+    {
+      type: FACE_DEMOGRAPHY_CALC
+      name: "demography"
+      logging: false
+      face_demography_calc_config:
+      {
+        input_frame: "input"
+        input_detections: "dets_filtered"
+        output_genders: "genders"
+        output_ages: "ages"
+        use_multicrop: true
+      }
+    }
     process_node {
       type: FACE_FEATURE_CALC
       name: "facerec"
@@ -119,6 +135,13 @@ data_run {
       kafka_output_config {
         topic_name: "cam.{{loop.index - 1}}.frameinfo.FrameInfoRecord.json"
         input_node: "frameinfo"
+      }
+    }
+    process_node:{
+      type: KAFKA_OUTPUT name: "age_out"
+      kafka_output_config: {
+        topic_name: "cam.{{loop.index - 1}}.ages.AgeRecord.json"
+        input_node: "ages"
       }
     }
   }

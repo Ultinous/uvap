@@ -8,15 +8,14 @@ hide_title: true
 
 ## Introduction
 
-The purpose of this document is to provide an example for the analysis results
+This document provides an example for the analysis results
 you can create with UVAP.
-You can check the syntax and contents of the resulting Kafka topics even without
+You can check the syntax and contents of the resulting Kafka® topics even without
 installing a camera.
-Developers working on their own application can start testing it on these topics,
+Developers working on their own applications can start testing them on these topics,
 in parallel with setting up their own UVAP instance to produce similar results.
 
-We have recorded and analyzed two video streams and provide the results for
-the following:
+Two video streams were recorded and analyzed and the following results are provided:
 
 - head detection
 - 3D head pose
@@ -26,8 +25,7 @@ the following:
 - people tracking
 - pass detection
 
-In addition, for one of the streams, we also provide anonymization and for the
-other stream, we provide skeleton key points.
+In addition, anonymization for one stream and skeleton key points for the other are also provided.
 
 We have packed these results into two Docker images.
 
@@ -37,8 +35,8 @@ For the notations used in this document, see [Typographic Conventions].
 
 ### System
 
-In order to have a Kafka instance and have the UVAP Kafka topics in it, the
-following system requirements are have to be met:
+To have a Kafka instance and the UVAP Kafka topics in it, the
+following system requirements must be met:
 - Operating system: Ubuntu Linux 18.04 LTS
 - A unix account that can gain root privileges with `sudo`
 - Free disk space for Docker images: ~2.3 GiB
@@ -65,14 +63,14 @@ We use a containerized solution provided by Docker.
    ```
    
 1. Add your unix user to the Docker unix group  
-   The `[USER]` should be replaced with your name of logged in user:
+   Replace `[USER]` with your logged in user name:
    
    ```
    $ sudo adduser [USER] docker
    ```
    
-1. Log out from the graphical environment (or TTY) and log in again, so
-   the previous step will take effect.
+1. Log out from the graphical environment (or TTY) and log in again to make
+   the previous step take effect.
 
 ### Permissions
 
@@ -107,8 +105,7 @@ DockerHub access:
 
 All the Docker images needed can be pulled from the Ultinous DockerHub
 repositories, so no extra Docker credentials are needed.
-The necessary Docker containers from these Docker images can be created and
-started with the following shell commands:
+Create and start the necessary Docker containers from these Docker images with the following shell commands:
 
 1. Create a separate internal Docker network:
 
@@ -181,7 +178,7 @@ started with the following shell commands:
    
 ## Listing Analysis Result Topics
 
-Now the Kafka topics included in this example can be listed.
+After the necessary Docker containers are created and started, the Kafka topics included in this example can be listed.
 
 ### List Topics
 
@@ -214,8 +211,6 @@ uvapdemo.cam.118.passes.PassDetectionRecord.json
 uvapdemo.cam.118.poses.HeadPose3DRecord.json
 uvapdemo.cam.118.skeletons.SkeletonRecord.json
 uvapdemo.cam.118.tracks.TrackRecord.json
-uvapdemo.person.FeatureVectorRecord.json
-uvapdemo.reids.ReidRecord.json
 ```
 
 ### List Messages from a Topic  
@@ -231,7 +226,7 @@ $ docker exec kafka kafka-console-consumer \
 
 ## Cleaning Up
 
-When you finished the work with these Kafka topics, you can remove them with the following commands:
+When they are no longer needed, the Kafka topics can be removed with the following commands:
 
 ```
 $ docker container inspect --format '{{json .Mounts}}' kafka zookeeper \

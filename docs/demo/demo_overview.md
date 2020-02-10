@@ -98,7 +98,8 @@ For running the components of UVAP, see the instructions below:
 * [Starting Multi Graph Runner]
 * [Starting Tracker]
 * [Starting Pass Detection]
-* [Starting Basic Reidentification]
+* [Starting Reidentification]  
+* [Starting Feature Vector Clustering]
 
 ### Setting the Retention Period
 
@@ -195,7 +196,8 @@ demo_applications/
 │       ├── list_messages.py
 │       ├── list_topics.py
 │       ├── pass_detection_DEMO.py
-│       ├── basic_reidentification_DEMO.py
+│       ├── reid_with_name_DEMO.py
+│       ├── reidentification_DEMO.py
 │       ├── show_image_DEMO.py
 │       ├── skeleton_DEMO.py
 │       └── tracker_DEMO.py
@@ -204,6 +206,7 @@ demo_applications/
 │   └── powered_by_white.png
 └── utils
     ├── kafka
+    │   ├── kafka-cli.py
     │   └── time_ordered_generator_with_timeout.py
     ├── uvap
     │   ├── graphics.py
@@ -235,7 +238,7 @@ can be run in the Docker container, and all of them have a help function.
 For example:
 
 ```
-<DOCKER># /usr/bin/python3.6 apps/uvap/show_image_DEMO.py -h
+<DOCKER># python3 apps/uvap/show_image_DEMO.py -h
 ```
 
 Expected output:
@@ -254,7 +257,7 @@ optional arguments:
   -o OFFSET, --offset OFFSET
 
 Description:
-           Plays and optionaly dumps video from a jpeg topic (a topic that ends with Image.jpg).
+           Plays and optionally dumps video from a jpeg topic (a topic that ends with Image.jpg).
 ```
 
 ### Helper Scripts
@@ -271,7 +274,7 @@ The following Kafka data can be listed:
 To list topics from Kafka:
 
 ```
-<DOCKER># /usr/bin/python3.6 /ultinous_app/apps/uvap/list_topics.py kafka:9092
+<DOCKER># python3 /ultinous_app/apps/uvap/list_topics.py kafka:9092
 ```
 
 Expected output:
@@ -293,13 +296,14 @@ base.cam.0.passdet.PassDetectionRecord.json
 To list messages from a topic:
 
 ```
-<DOCKER># /usr/bin/python3.6 /ultinous_app/apps/uvap/list_messages.py kafka:9092 [TOPIC]
+<DOCKER># python3 /ultinous_app/apps/uvap/list_messages.py kafka:9092 \
+          [TOPIC]
 ```
 
 Where `[TOPIC]` is a specified Kafka topic, for example:
 
 ```
-<DOCKER># /usr/bin/python3.6 /ultinous_app/apps/uvap/list_messages.py kafka:9092 \
+<DOCKER># python3 /ultinous_app/apps/uvap/list_messages.py kafka:9092 \
           base.cam.0.genders.GenderRecord.json
 ```
 
@@ -330,7 +334,7 @@ The following script template can be used to start the demos.
  <br><br>
  If this script is run in a demo mode for the first time, the demo application
  is creating a new (`*.Image.jpg`) topic in Kafka. Similarly to the other JPG
- topics, these demo-writed-topics consume a lot of storage space, unless their
+ topics, these demo-written-topics consume a lot of storage space, unless their
  retention time is decreased with the `set_retention.sh` script; for more
  information see [Setting the Retention Period].
 
@@ -352,7 +356,8 @@ Where:
   * `demography`
   * `head_detection`
   * `head_pose`
-  * `basic_reidentification`
+  * `reid_with_name`
+  * `reidentification`
   * `show_image`
   * `skeleton`
   * `tracker`
@@ -395,18 +400,17 @@ Restart the web player with the following command:
 >```  
 >:exclamation: Warning :exclamation: [UVAP config](#uvapConfigSh) will override this configuration file.
 
-
 1. Start the web player:
 
     > **Attention!**  
-	Before starting this microservice, the command below silently stops and
-	removes the Docker container named `uvap_web_player`, if such already exists.
-    
-	```
+    Before starting this microservice, the command below silently stops and
+    removes the Docker container named `uvap_web_player`, if such already exists.
+
+    ```
     $ "${UVAP_HOME}"/scripts/run_uvap_web_player.sh -- --net uvap
     ```
-    
-	The output of the above command should be:
+
+    The output of the above command should be:
     * some information about pulling the required Docker image
     * the ID of the Docker container created
     * the name of the Docker container created: `uvap_web_player`
@@ -417,66 +421,67 @@ Restart the web player with the following command:
 
 1. Test status:
 
-    a.) Checking the log of the Docker container:
-    
-	```
-    $ docker logs uvap_web_player
-    ```
-    
-	Expected output example:  
+    1. Checking the log of the Docker container:
 
-    ```
-    2019-07-16T10:38:12.043161Z INFO    [main]{com.ultinous.util.jmx.JmxUtil}(startConnectorServer/063) JMXConnectorServer listening on localhost:6666
-    Jul 16, 2019 10:38:12 AM io.netty.handler.logging.LoggingHandler channelRegistered
-    INFO: [id: 0xa3704b61] REGISTERED
-    Jul 16, 2019 10:38:12 AM io.netty.handler.logging.LoggingHandler bind
-    INFO: [id: 0xa3704b61] BIND: /0.0.0.0:9999
-    Jul 16, 2019 10:38:12 AM io.netty.handler.logging.LoggingHandler channelActive
-    INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] ACTIVE
-    2019-07-16T10:38:12.130916Z INFO    [main]{com.ultinous.uvap.web.player.MjpegPlayerServer}(start/075) Video Player listening on 0.0.0.0:9,999
-    Jul 16, 2019 10:39:15 AM io.netty.handler.logging.LoggingHandler channelRead
-    INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] READ: [id: 0x9a81e318, L:/0:0:0:0:0:0:0:1%0:9999 - R:/0:0:0:0:0:0:0:1%0:59966]
-    Jul 16, 2019 10:39:15 AM io.netty.handler.logging.LoggingHandler channelRead
-    INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] READ: [id: 0x56df1d95, L:/0:0:0:0:0:0:0:1%0:9999 - R:/0:0:0:0:0:0:0:1%0:59968]
-    Jul 16, 2019 10:39:15 AM io.netty.handler.logging.LoggingHandler channelReadComplete
-    INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] READ COMPLETE
-    ```
+        ```
+        $ docker logs uvap_web_player
+        ```
 
-    b.) Checking the service:
-    
-	```
-    $ wget --save-headers --content-on-error --output-document=- \
-      --show-progress=no --quiet 'http://localhost:9999/' | head -n1
-    ```
-    
-	Expected output example:
-    
-	```
-    HTTP/1.1 200 OK
-    ```
+        Expected output example:  
+
+        ```
+        2019-07-16T10:38:12.043161Z INFO    [main]{com.ultinous.util.jmx.JmxUtil}(startConnectorServer/063) JMXConnectorServer listening on localhost:6666
+        Jul 16, 2019 10:38:12 AM io.netty.handler.logging.LoggingHandler channelRegistered
+        INFO: [id: 0xa3704b61] REGISTERED
+        Jul 16, 2019 10:38:12 AM io.netty.handler.logging.LoggingHandler bind
+       INFO: [id: 0xa3704b61] BIND: /0.0.0.0:9999
+        Jul 16, 2019 10:38:12 AM io.netty.handler.logging.LoggingHandler channelActive
+        INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] ACTIVE
+        2019-07-16T10:38:12.130916Z INFO    [main]{com.ultinous.uvap.web.player.MjpegPlayerServer}(start/075) Video Player listening on 0.0.0.0:9,999
+        Jul 16, 2019 10:39:15 AM io.netty.handler.logging.LoggingHandler channelRead
+        INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] READ: [id: 0x9a81e318, L:/0:0:0:0:0:0:0:1%0:9999 - R:/0:0:0:0:0:0:0:1%0:59966]
+        Jul 16, 2019 10:39:15 AM io.netty.handler.logging.LoggingHandler channelRead
+        INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] READ: [id: 0x56df1d95, L:/0:0:0:0:0:0:0:1%0:9999 - R:/0:0:0:0:0:0:0:1%0:59968]
+        Jul 16, 2019 10:39:15 AM io.netty.handler.logging.LoggingHandler channelReadComplete
+        INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] READ COMPLETE
+        ```
+
+    1. Checking the service:
+
+        ```
+        $ wget --save-headers --content-on-error --output-document=- \
+          --show-progress=no --quiet 'http://localhost:9999/' | \
+          head -n1
+        ```
+
+        Expected output example:
+
+        ```
+        HTTP/1.1 200 OK
+        ```
 
 1. Navigate to the following URL in the browser:  
     
-	> **Attention!**  
+    > **Attention!**  
     This tool is intended for demo and debug purposes only.  
     It only has real time playing capability and it has no authorization or
-	authentication.  
+    authentication.  
     It should only be used in a private network, because it provides a direct
-	access for Kafka (`*.Image.jpg`) topics.
-	
-	```
+    access for Kafka (`*.Image.jpg`) topics.
+
+    ```
     http://localhost:9999#[KAFKA_IMAGE_TOPIC_NAME]
     ```
-    
-	Where `[KAFKA_IMAGE_TOPIC_NAME]` is the topic name. For more information
-	on values, see [`basic`], [`fve`] or [`skeleton`] demo descriptions.
+
+    Where `[KAFKA_IMAGE_TOPIC_NAME]` is the topic name. For more information
+    on values, see [`basic`], [`fve`] or [`skeleton`] demo descriptions.
 
     > **Note:**  
-	Refresh web display (press **F5**) after giving a new topic name.
+    Refresh web display (press **F5**) after giving a new topic name.
 
     Full screen mode:
     
-	* Activate: Click on the video to activate full screen mode.
+    * Activate: Click on the video to activate full screen mode.
     * Exit: Press **Esc** to exit full screen mode.
 
 ### Base Mode Demos
@@ -498,7 +503,8 @@ The `[DEMO_MODE]` should be `fve` during the configuration.
 
 Feature vector mode Demos are the following:
 
-* [Basic reidentification]
+* [Single Camera Reidentification]
+* [Reidentification Demo with Person Names]
 
 ### Skeleton Mode Demos
 
@@ -510,7 +516,6 @@ Skeleton mode demos are the following:
 
 
 [`basic`]: #base-mode-demos
-[Basic reidentification]: demo_reid.md
 [Configuring UVAP]: #configuring-uvap
 [Demography]: demo_demography.md
 [`fve`]: #feature-vector-mode-demos
@@ -521,13 +526,16 @@ Skeleton mode demos are the following:
 [Messages]: #list-messages
 [MGR Configuration]: ../dev/conf_mgr.md
 [Pass detection]: demo_pass_det.md
+[Reidentification Demo with Person Names]: demo_reid_with_name.md
+[Single Camera Reidentification]: demo_reid_1.md
 [Setting the Retention Period]: #setting-the-retention-period
 [Show image]: demo_show_image.md
 [`skeleton`]: #skeleton-mode-demos
 [Starting Multi Graph Runner]: ../dev/start_mgr.md
 [Starting Tracker]: ../dev/start_track.md
 [Starting Pass Detection]: ../dev/start_passdet.md
-[Starting Basic Reidentification]: ../dev/start_reid.md
+[Starting Reidentification]: ../dev/start_reid.md  
+[Starting Feature Vector Clustering]: ../dev/start_fv_clustering.md
 [Topics]: #list-topics
 [Tracking]: demo_track.md
 [Tree View of the Demo Package]: #demo_tree

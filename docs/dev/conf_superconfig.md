@@ -6,13 +6,12 @@ hide_title: true
 
 # Microservice Superconfiguration
 
-The following are overall general integration configuration settings of the
+This document introduces overall general integration configuration settings of the
 UVAP microservices.
 
 ## Authentication Definition
 
-Optional authentication definitions of source and target topic brokers.
-The definitions contain the broker ID, user name and password in JSON format.
+The following are optional authentication definitions of source and target topic brokers. The definitions contain the broker ID, user name and password in JSON format.
 
 | `auth_defs` | List of authentication definition data |
 |--|--|
@@ -37,25 +36,25 @@ The following `source_options` are available:
 | `START_NOW` | Start from the current timestamp. |
 | `START_END` | Start at the end of the records. |
 
-| `start_date_time` | Starts reading from the set timestamp defined in ISO-8601 format (opt. millisec and tz). |
+| `start_date_time` | Starts reading from the set timestamp defined in ISO-8601 format (milliseconds and time zone are optional). Only records with equal or later timestamps are processed. |
 |--|--|
 
 >**Note:**  
-`start_date_time` must only be set if `start` is set to `START_DATETIME`.  
+Set `start_date_time` only if `start` is set to `START_DATETIME`.  
 For example: `2019-04-08 10:10:24.123 +01:00`
 
 
 | `end` | Defines the record position where Kafka stops reading. |
 |--|--|
-| `END_NEVER` | The microservice will not stop after the last record has been processed, will wait for new input records. |
+| `END_NEVER` | The microservice does not stop after the last record is processed, instead it waits for new input records. |
 | `END_DATETIME` | Ends at a specific timestamp. |
-| `END_END` | The microservice stops after processing the last source record |
+| `END_END` | The microservice stops after processing the last source record. |
 
-| `end_date_time` |  Ends reading at reaching a specific timestamp defined in ISO-8601 format (opt. millisec and tz). |
+| `end_date_time` |  Ends reading at reaching a specific timestamp defined in ISO-8601 format (milliseconds and time zone are optional). Only records with earlier timestamps are processed. |
 |--|--|
 
 >**Note:**
-`end_date_time`: Must only be set if `end` is set to `END_DATETIME`.  
+Set `end_date_time` only if `end` is set to `END_DATETIME`.  
 For example: `2019-04-08 10:10:24.123 +01:00`
 	
 ### Source Topic Configs
@@ -75,8 +74,8 @@ The following `target_options` are available.
 | `handling` | Defines the target topic behaviour. |
 |--|--|
 | `REPLACE` | Delete target topic.|
-| `CHECK_TS` | Raise error if topic exists with more recent *latest timestamp*. |
-| `SKIP_TS` | Skip events up to the latest timestamp in target topic. |
+| `CHECK_TS` | Raise an error if the topic exists with a newer <b>latest timestamp</b>. |
+| `SKIP_TS` | Skip events up to the latest timestamp in the target topic. |
 
 ### Target Topic Configs
 
@@ -116,7 +115,7 @@ source broker connections, while the second one is not used in this example.
 
 ### Example Microservice Configuration
 
-The sources were set to be read from the given date and never stop reading them.
+The sources are set to be read from the given date and never stop being read.
 Two feature vector sources are defined with broker list and name, using the
 predefined authentication parameters.
 The target stream is being replaced and can be accessed without any authentication.
@@ -131,7 +130,12 @@ The target stream is being replaced and can be accessed without any authenticati
     "consumer_group":"hardwareStore"
   },
   "sources":
-  [
+  [  
+    {
+      "broker_list":"demoserver:9092",
+      "name":"staff.FeatureVectorRecord.json",
+      "auth_ref":"srcAuth"
+    }
     {
       "broker_list":"demoserver:9092",
       "name":"cam.entrance.FeatureVectorRecord.json",

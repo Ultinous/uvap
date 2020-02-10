@@ -54,8 +54,8 @@ can be controlled with the drop mode in the `environment` section:
      profile: true
      analysis_thread_count: 2
      gui: NORMAL
-     drop_off: {}    # do not drop frames, instead queue them up
-     #drop_on: {}    # if the system gets overloaded drop frames
+     #drop_off: {}    # do not drop frames, instead queue them up
+     drop_on: {}    # if the system gets overloaded drop frames
      kafka_broker_list: "localhost:9092"
    }
    ```

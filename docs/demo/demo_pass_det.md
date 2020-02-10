@@ -38,8 +38,8 @@ Required topics:
 Start the demo with `run_demo.sh`:
    
    ```
-   $ ~/uvap/scripts/run_demo.sh --name-of-demo pass_detection --demo-mode base \
-     --config-file $HOME/uvap/models/uvap-kafka-passdet/uvap_kafka_passdet.properties
+   $ ~/uvap/scripts/run_demo.sh --demo-name pass_detection --demo-mode base \
+  --config-file-name $HOME/uvap/config/uvap_kafka_passdet/uvap_kafka_passdet.properties -- --net uvap
    ```
    
    >**Note:**  

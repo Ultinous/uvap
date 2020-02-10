@@ -16,7 +16,7 @@ problems instead of starting a few prewritten demos. This section describes
 the following:
 
 * Installation package of the `uvap_demo_applications` Docker container.
-* Installation of a useful editor for Python programming language.
+* Installation of a useful editor for Python® programming language.
 
 ### Requirements
 
@@ -43,6 +43,7 @@ sudo apt-get update \
     libsm6 \
     libxext6 \
     libxrender-dev \
+    libturbojpeg \
 && sudo apt-get clean \
 && pip3 install \
     confluent-kafka \
@@ -57,7 +58,9 @@ sudo apt-get update \
     xlrd \
     opencv-python \
     gevent \
-    sortedcontainers
+    sortedcontainers \
+    javaproperties \
+	PyTurboJPEG
 ```
 
 ### PyCharm

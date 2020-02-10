@@ -28,7 +28,7 @@ option java_multiple_files = true;
 
 import "ultinous/proto/common/kafka_common.proto";
 
-/** Output of MGR Object Detection.
+/** Output of MGR Object Detection and the Detection Filter.
 
   One instance of this record is generated for each detected head/face on each frame.
 
@@ -231,11 +231,12 @@ message PassEvent
     A track crosses a pass line. That is, the previous and current TrackChangeRecord points are
     on opposite sides of the pass line. The last point of the track can be either detected or predicted.
       Key is pass_line_id.
-      Time is the time of the frame containing the last point of the track.
+      Time is the time of the frame containing the last point of the track, i.e. the first frame after the passage.
   E2. Passage Realization event:
     A prediction based passage event is confirmed by a true detection.
+    A single track change input may trigger several Passage Realization Events when the track contained several passages based on prediction.
       Key is empty.
-      Time is the time of the frame immediately after the passage, i.e. the one containing a prediction for this track.
+      Time is the time of the frame containing the last point of the track, i.e. the frame containing the true detection.
   E3. End of Track event:
     A track has ended. It is sent out even if the track didn't generate passage event.
       Key is empty.
@@ -278,19 +279,7 @@ message PassDetectionRecord
   }
 }
 
-/** Output of kafka_roifilter.
-
-  One instance of this record is generated every time an ObjectDetectionRecord passes a filter.
-  time: Time of object detection record
-  key: Same sas the key of the contained ObjectDetectionRecord
-*/
-message FilteredObjectDetectionRecord
-{
-  string filter_id = 1; ///< Identifier of the passing filter
-  ObjectDetectionRecord detection = 2; ///< The detection that passed
-}
-
-/** Key to feature vector clusters. */
+/** Key to feature vector clusters.*/
 message FVClusterId
 {
   int64 first_detection_time = 1; ///< Time of the feature vector input record at first observation belonging to this cluster.
@@ -302,11 +291,17 @@ message FVClusterId
 message FVCluster
 {
   FeatureVector representative_fv = 1; ///< Feature vector representative to the cluster. May be different from any input feature vector.
-  int32 num_observations = 2; ///< Number of input feature vectors that are aggregated into representative_fv.
+  uint32 num_observations = 2; ///< Number of input feature vectors that are aggregated into representative_fv. Must be positive.
+  /** Shows if cluster has been realized.
+  If cluster_realization in the configuration is null, this value will always be true.
+  Clusters are not meant to be used until is_realized is true.
+  While false, outputs are only saved to keep track of input keys and their clusters.
+  */
+  bool is_realized = 3;
 }
 
 /** Event of adding a new feature vector to a cluster system.
-  Happens for each feature vector input of kafka_clustering.
+  Happens for each feature vector input of kafka_feature_vector_clustering.
   Happens for each feature vector input from a registration stream of kafka_reid.
     The feature vector input is either registered as a new cluster or updates the feature a stored cluster.
 */
@@ -315,7 +310,6 @@ message FVRegistrationEvent
   FVClusterId cluster_id = 1; ///< Stored id after registration. Can be new or updated.
   FVCluster cluster = 2; ///< Stored cluster after registration.
   string input_stream_id = 3; ///< Stream id of the current input record.
-  bool is_realized = 4; ///< Clusters are not meant to be used until is_realized is true. While false, outputs are only saved to keep track of input keys and their clusters.
 }
 
 /** Event of merging some clusters into one. */
@@ -326,19 +320,32 @@ message FVClusterMergingEvent
   repeated FVClusterId merged_clusters = 3; ///< List of merged clusters.
 }
 
-/** Event of deleting a cluster when its retention period expires. */
+/** Event of deleting a cluster when its retention period expires.
+  Provides the reason of deleting:
+  1. EXPIRED: Deleted because the expiration period has reached.
+  2. REMOVED: Deleted by deletion message.
+  3. REALIZED: Deleted because the cluster has been successfully realized.
+*/
 message FVClusterDeletedEvent
 {
+  enum DeletionReason
+  {
+    EXPIRED = 0;
+    REMOVED = 1;
+    REALIZED = 2;
+  }
+
   FVClusterId deleted_cluster = 1; ///< Id of deleted cluster.
+  DeletionReason reason = 2; ///< Deletion reason.
 }
 
-/** Output of kafka_clustering.
+/** Output of kafka_feature_vector_clustering.
 
   One instance of this record is generated when any of the following happens:
   1. reg_event: The feature vector input is either registered as a new cluster or updates a stored cluster.
   2. merge_event: Some of the clusters are merged into one cluster.
   3. delete_event: A cluster is deleted because its retention period expired.
-  4. heartbeat: There will be no more events for this input. This is denoted by an empty message.
+  4. end_of_input_record: There will be no more events for this input. This is denoted by an empty message.
 
   time: Time of the current input record.
   key: Key of the current input record.
@@ -347,7 +354,7 @@ message FVClusterUpdateRecord
 {
   enum Type
   {
-    HEARTBEAT = 0;
+    END_OF_INPUT_RECORD = 0;
     REG_EVENT = 1;
     MERGE_EVENT = 2;
     DELETE_EVENT = 3;
@@ -371,7 +378,7 @@ message FVClusterUpdateRecord
   2. reg_event: The input from a registration stream is either registered as a new cluster or updates a stored cluster.
   3. merge_event: Some of the clusters are merged into one cluster.
   4. delete_event: A cluster is deleted because its retention period expired.
-  5. heartbeat: There will be no more events for this input. This is denoted by an empty message.
+  5. end_of_input_record: There will be no more events for this input. This is denoted by an empty message.
 
   time: Time of the current input record.
   key: Key of the current input record.
@@ -380,7 +387,7 @@ message ReidRecord
 {
   enum Type
   {
-    HEARTBEAT = 0;
+    END_OF_INPUT_RECORD = 0;
     REID_EVENT = 1;
     REG_EVENT = 2;
     MERGE_EVENT = 3;

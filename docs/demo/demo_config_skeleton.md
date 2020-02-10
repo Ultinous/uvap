@@ -1,3 +1,9 @@
+---
+id: demo_config_skeleton
+title: Configuring UVAP for Skeleton Demo Mode
+hide_title: true
+---
+
 # Configuring UVAP for Skeleton Demo Mode
 
 To configure UVAP for `skeleton` demo mode:

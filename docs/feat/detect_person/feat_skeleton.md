@@ -6,7 +6,7 @@ hide_title: true
 
 # Skeleton Detection
 
-The _Skeleton Detection_ feature detects a the position of a person's body and
+The _Skeleton Detection_ feature detects the position of a person's body and
 its joints on a video frame. This feature can be used for fall detection and in
 other higher level features or applications.
 

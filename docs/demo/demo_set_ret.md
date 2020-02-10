@@ -1,3 +1,9 @@
+---
+id: demo_set_ret
+title: Setting the Retention Period
+hide_title: true
+---
+
 # Setting the Retention Period
 
 Kafka has a default retention period set to 168 hours. The `*.Image.jpg` topics

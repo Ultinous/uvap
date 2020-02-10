@@ -53,7 +53,8 @@ Features relevant to facial properties and recognition are the following:
 - [Gender Detection]
 - [Age Detection]
 - [Feature Vector]
-- [Reidentification (basic)]
+- [Feature Vector Clustering]
+- [Reidentification]
 
 ### Movement Detection
 
@@ -68,16 +69,16 @@ UVAP has some other features that not directly pertain to video analysis but
 help the integrator to set up and monitor the system.
 These technical features are the following:
 
+- [Detection Filter]
 - [Image Streams]
 - [Frame Info]
 - [Stream Configurator]
 - [Video Annotation]
 
-
-
 [3D Head Pose]: detect_person/feat_head_pose.md
 [Age Detection]: face_prop/feat_age.md
 [Anonymization]: detect_person/feat_anonym.md
+[Detection Filter]: other/feat_det_filter.md
 [Facial Properties and Recognition]: #facial-properties-and-recognition
 [Feature Vector]: face_prop/feat_feature_vector.md
 [Frame Info]: other/feat_frame_info.md
@@ -88,7 +89,8 @@ These technical features are the following:
 [Person Detection]: #person-detection
 [Person Tracking]: detect_movement/feat_track.md
 [Pass Detection]: detect_movement/feat_pass_det.md
-[Reidentification (Basic)]: face_prop/feat_reid.md
+[Reidentification]: face_prop/feat_reid.md
 [Skeleton Detection]: detect_person/feat_skeleton.md
 [Stream Configurator]: other/feat_sc_ui.md
 [Video Annotation]: other/feat_video_annotation.md
+[Feature Vector Clustering]: face_prop/feat_fv_clustering.md

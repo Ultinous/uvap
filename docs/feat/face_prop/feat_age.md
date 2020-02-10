@@ -24,8 +24,10 @@ In an integrator application, in order to improve accuracy it is recommended
 to aggregate multiple age detection results based on tracks provided by the
 _Tracker_ feature or feature vector similarity.
 
-For a quick example setup of the _Age Detection_ feature, see the [Demo].
+For a quick example setup of the _Age Detection_ feature, see the [Demo].  
+The _Age Detection_ feature is also demonstrated in the [Reidentification Demo with Person Names].  
 
 
 [MGR]: ../../dev/ms_mgr.md
-[Demo]: ../../demo/demo_demography.md
+[Demo]: ../../demo/demo_demography.md  
+[Reidentification Demo with Person Names]: ../../demo/demo_reid_with_name.md

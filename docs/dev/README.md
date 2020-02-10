@@ -8,13 +8,17 @@
   - [Multi-Graph Runner](ms_mgr.md)
   - [Tracker](ms_track.md)
   - [Pass Detector](ms_passdet.md)
-  - [Basic Reidentifier](ms_reid.md)
+  - [Feature Vector Clustering](ms_cluster.md)
+  - [Reidentifier](ms_reid.md)
+  - [Detection Filter](ms_det_filter.md)
 
 ## Configuring Microservices
   - [Configuring Multi-Graph Runner](conf_mgr.md)
   - [Configuring Tracker](conf_track.md)
   - [Configuring Pass Detector](conf_passdet.md)
-  - [Configuring Basic Reidentifier](conf_reid.md)
+  - [Configuring Feature Vector Clustering](conf_cluster.md)
+  - [Configuring Reidentifier](conf_reid.md)
+  - [Configuring Detection Filter](conf_det_filter.md)
   - [Stream Configurator User Interface](conf_sc_ui.md)
   - [Superconfig](conf_superconfig.md)
   

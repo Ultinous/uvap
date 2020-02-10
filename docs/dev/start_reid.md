@@ -1,10 +1,10 @@
 ---
 id: start_reid
-title: Starting Basic Reidentifier
+title: Starting Reidentifier
 hide_title: true
 ---
 
-# Starting Basic Reidentifier
+# Starting Reidentifier
 
 Starts reidentification on the frames of a previously configured video stream.
 
@@ -38,12 +38,12 @@ Required input topics:
   and collects the registration based on the feature vectors of
   registration topics (for example, `cam.0`).
 
-For information on **Basic Reidentifier** configuration, see
-[Configuring Basic Reidentifier].
+For information on **Reidentifier** configuration, see
+[Configuring Reidentifier].
 
-## Starting Basic Reidentifier
+## Starting Reidentifier
 
-To start **Basic Reidentifier**:
+To start **Reidentifier**:
 
 1. Run the microservice
 
@@ -118,5 +118,5 @@ fve.cam.99.reids.ReidRecord.json
 
 This is an aggregated topic, consuming feature vectors from every cameras and producing a single topic containing registration and reidentification entries.
 
-[Configuring Basic Reidentifier]: conf_reid.md#configuring-basic-reidentifier
+[Configuring Reidentifier]: conf_reid.md#configuring-reidentifier
 [Starting Multi-Graph Runner]: start_mgr.md#starting-multi-graph-runner

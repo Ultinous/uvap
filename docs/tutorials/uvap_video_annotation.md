@@ -20,7 +20,8 @@ Before continuing with the tutorial, ensure the following:
 
 1. Copy the source video to the created directory:
    ```
-   $ cp -i <current_video_path>/testvideo.mkv "${UVAP_HOME}"/videos/testvideo.mkv
+   $ cp -i <current_video_path>/testvideo.mkv \
+     "${UVAP_HOME}"/videos/testvideo.mkv
    ```
 
    >**Note:**  
@@ -59,29 +60,31 @@ Before continuing with the tutorial, ensure the following:
 List available arguments of video annotation command with the following command:
 
 ```
-$ "${UVAP_HOME}/scripts/video_annotation.sh --help
+$ "${UVAP_HOME}"/scripts/video_annotation.sh --help
 ```
 Expected output:
 ```
 Usage: ./video_annotation.sh [OPTION]...
 Options (those, that do not have a default value, are mandatory options):
-	--demo-name                               	<head_detection|head_pose|demography|tracker|skeleton|basic_reidentification>
-	--video-dir                               	directory path of the input and output videos - default: /home/ultinous/uvap/scripts/../videos
-	--video-file-name                         	basename of the input video file inside the --video-dir directory
-	--fps-number                              	the FPS number of the input video
-	--width-number                            	the width in pixels of the input video
-	--height-number                           	the height in pixels of the input video
-	--demo-applications-dir                   	directory path of demo applications scripts - default: /home/ultinous/uvap/scripts/../demo_applications
-	--templates-dir                           	directory path of configuration templates - default: /home/ultinous/uvap/scripts/../templates
-	--config-ac-dir                           	directory path of configuration files - will be created if not existent - default: /home/ultinous/uvap/scripts/../config
-	--models-dir                              	directory path of AI models - default: /home/ultinous/uvap/scripts/../models
-	--license-data-file                       	data file of your UVAP license - default: /home/ultinous/uvap/scripts/../license/license.txt
-	--license-key-file                        	key file of your UVAP license - default: /home/ultinous/uvap/scripts/../license/license.key
-	--uvap-mgr-docker-image-name              	tag of docker image to use - default: will be determined by git tags
-	--uvap-demo-applications-docker-image-name	tag of docker image to use - default: will be determined by git tags
-	--uvap-kafka-tracker-docker-image-name    	tag of docker image to use - default: will be determined by git tags
-	--uvap-kafka-reid-docker-image-name       	tag of docker image to use - default: will be determined by git tags
-	--verbose  
+    --demo-name                                    	<head_detection|head_pose|demography|tracker|detection_filter|skeleton|reidentification>
+    --video-dir                                    	directory path of the input and output videos - default: /home/ultinous/uvap/scripts/../videos
+    --video-file-name                              	basename of the input video file inside the --video-dir directory
+    --fps-number                                   	the FPS number of the input video
+    --width-number                                 	the width in pixels of the input video
+    --height-number                                	the height in pixels of the input video
+    --demo-applications-dir                        	directory path of demo applications scripts - default: /home/ultinous/uvap/scripts/../demo_applications
+    --templates-dir                                	directory path of configuration templates - default: /home/ultinous/uvap/scripts/../templates
+    --config-ac-dir                                	directory path of configuration files - will be created if not existent - default: /home/ultinous/uvap/scripts/../config
+    --models-dir                                   	directory path of AI models - default: /home/ultinous/uvap/scripts/../models
+    --license-data-file                            	data file of your UVAP license - default: /home/ultinous/uvap/scripts/../license/license.txt
+    --license-key-file                             	key file of your UVAP license - default: /home/ultinous/uvap/scripts/../license/license.key
+    --uvap-mgr-docker-image-name                   	tag of docker image to use - default: will be determined by git tags
+    --uvap-demo-applications-docker-image-name     	tag of docker image to use - default: will be determined by git tags
+    --uvap-kafka-tracker-docker-image-name         	tag of docker image to use - default: will be determined by git tags
+    --uvap-kafka-detection-filter-docker-image-name	tag of docker image to use - default: will be determined by git tags
+    --uvap-kafka-reid-docker-image-name            	tag of docker image to use - default: will be determined by git tags
+    --display                                      	option to display the video during the annotation
+    --verbose
 ```
 >**Note:**
 Options that do not have a default value are mandatory.
@@ -92,28 +95,29 @@ Use the video writer script to create the output video into `"${UVAP_HOME}"/vide
 with `[IMAGE_TOPIC_NAME].avi` name, overwriting the existing file:
 
 ```
-   $ "${UVAP_HOME}"/scripts/video_annotation.sh \
-   --demo-name [DEMO_NAME] \
-   --video-file-name [INPUT_VIDEO] \
-   --fps-number [FPS] \
-   --width-number [WIDTH] \
-   --height-number [HEIGHT] 
+$ "${UVAP_HOME}"/scripts/video_annotation.sh \
+  --demo-name [DEMO_NAME] \
+  --video-file-name [INPUT_VIDEO] \
+  --fps-number [FPS] \
+  --width-number [WIDTH] \
+  --height-number [HEIGHT] 
 ```
 
 Parameters:
 - `[DEMO_NAME]`: name of the demo. Replace (including the brackets) with a name of the
-demo (string).  
+  demo (string).  
   Valid values of `[DEMO_NAME]` are the following:
   - `head_detection`
   - `head_pose`
   - `demography`
   - `tracker`
+  - `detection_filter`
   - `skeleton`
-  - `basic_reidentification`
+  - `reidentification`
 - `[INPUT_VIDEO]`: name of the input video. Replace parameter with the name of the
-existing video, following the example above: `testvideo.mkv`.
+  existing video, following the example above: `testvideo.mkv`.
 - `[FPS]`, `[WIDTH]`, and `[HEIGHT]`: parameters of output video. Replace with the
-parameters of the original video, see [Preparing Source Video and Containers].
+  parameters of the original video, see [Preparing Source Video and Containers].
 
 Expected console output:
 ```
@@ -129,9 +133,8 @@ Finished writing video.
 
 Default path of result video:
 ```
-$ "${UVAP_HOME}"/videos/[DEMO_MODE].cam.0.[DEMO_NAME].Image.jpg.avi
+"${UVAP_HOME}"/videos/[DEMO_MODE].cam.0.[DEMO_NAME].Image.jpg.avi
 ```
-
 
 [Preparing Source Video and Containers]: #preparing-source-video-and-containers
 [Setting Up UVAP]: ../install/uvap_install_setup.md

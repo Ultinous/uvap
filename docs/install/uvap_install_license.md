@@ -6,7 +6,7 @@ hide_title: true
 
 # License Key
 
-Components of UVAP are protected against illegal access. In order to access the
+Components of UVAP are protected against illegal access. To access the
 components, the collection of some information is necessary.
 
 >Note:  
@@ -25,12 +25,11 @@ To gather the information needed for the access:
    ultinous/licence_data_collector > /tmp/uvap/data.txt
    ```
 
-1. Save `/tmp/uvap/data.txt` file, as it is needed at later step during the
+1. Save `/tmp/uvap/data.txt` file, as it is needed at a later step during the
    installation.
    
-1. Create a Docker account on
+1. To access the docker images of UVAP, a Docker account is required. Create one on
    <a href="https://hub.docker.com/" target="_blank">Docker Hub</a>.
-   In order to access the docker images of UVAP, an account is required.
 
    > **Attention!**  
    The password of the Docker account is stored on the computer in a plain-text
@@ -50,7 +49,7 @@ To request and get access to licensed resources:
 1. Send an email to support@ultinous.com with the following details:
 
    - Subject of email: `UVAP - Requesting access to licensed resources`
-   - The DockerHub account ID, created previously
+   - The Docker Hub account ID, created previously
    - The hardware information, which can be found in the file `/tmp/uvap/data.txt`
 
    Based on the information above, you will receive the following:
@@ -59,7 +58,7 @@ To request and get access to licensed resources:
    - Access to the UVAP Docker repository `ultinous/uvap`
    - A download URL for AI resources
      >Note:  
-	 The download URL is valid for only 72 hours.
+	 The download URL is only valid for 72 hours.
 
 1. Save the license text as `"${UVAP_HOME}/license/license.txt"`
    and the license key as `"${UVAP_HOME}/license/license.key"`.
