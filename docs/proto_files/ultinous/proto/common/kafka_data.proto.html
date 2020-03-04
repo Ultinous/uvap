@@ -1,0 +1,438 @@
+<!DOCTYPE html><html lang=""><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>UVAP · Ultinous Video Analytics Platform</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Ultinous Video Analytics Platform"/><meta property="og:title" content="UVAP · Ultinous Video Analytics Platform"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../../../index.html"/><meta property="og:description" content="Ultinous Video Analytics Platform"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../../../js/code-block-download-button.js"></script><script src="../../../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../../../css/main.css"/><script src="../../../../js/codetabs.js"></script></head><body><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../../../"><img class="logo" src="../../../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer documentContainer postContainer"><div class="wrapper"><div class="post"><div><a target="_blank" class="btnDownload" href="../../../../_src_proto_files/ultinous/proto/common/kafka_data.proto"></a><div class="static-file-code-block"><pre><code class="hljs css language-protobuf codeBlockCopy">/*
+Structures for Kafka streams containing Ultinous video analysis results.
+Copyright (C) 2014,2018 Ultinous Inc.
+*/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This proto describes the Kafka messages created as a result of running video analysis components.
+// They are all outputs of one or more components. Some of them are also input to complex components.
+//
+// Each record below has a time stamp and a key, in addition to the payload described by the proto message.
+// The time and key are documented above each record.
+//
+// Some of the records below are linked by sharing the same key in order to be able to identify one with another.
+// For example, AgeRecord has the same key as ObjectDetectionRecord so that each age can be assigned to
+// the correseponding person when multiple persons are detected in a single frame.
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+syntax = <span class="hljs-string">"proto3"</span>;
+
+<span class="hljs-keyword">import</span> <span class="hljs-string">"ultinous/proto/common/skeleton.proto"</span>;
+
+<span class="hljs-keyword">package</span> ultinous.proto.kafka;
+
+<span class="hljs-keyword">option</span> java_package = <span class="hljs-string">"com.ultinous.proto.kafka"</span>;
+<span class="hljs-keyword">option</span> java_multiple_files = <span class="hljs-literal">true</span>;
+
+<span class="hljs-keyword">import</span> <span class="hljs-string">"ultinous/proto/common/kafka_common.proto"</span>;
+
+/** Output of MGR Object Detection and the Detection Filter.
+
+  One instance of this record is generated for each detected head/face on each frame.
+
+  For each analyzed video frame, a series of detection records are created, corresponding to the number of
+  people detected in that frame. The detection records belonging to a single video frame are indexed sequentially
+  thus these indices are only unique within a single frame. Therefore a combined key is generated from the
+  the timestamp of the source video frame and the detection index to make it unique for the entire video stream.
+
+  The end_of_frame field indicates that no more records for the given input video frame will be inserted into the stream.
+  When this flag is true, all other fields of the record are invalid.
+
+  time: timestamp of the input video frame
+  key: time + "_" + sequential index within frame
+*/
+message ObjectDetectionRecord
+{
+  ObjectType type = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Type of detected object.</span>
+  Rect bounding_box = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Rectangular box containing the head/face.</span>
+  <span class="hljs-built_in">float</span> detection_confidence = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Confidence of the algorithm about a head being detected. Range: [0..1]</span>
+  <span class="hljs-built_in">bool</span> end_of_frame = <span class="hljs-number">4</span>; <span class="hljs-comment">///&lt; When true, no more results will be returned for this frame; all other fields of the record are invalid.</span>
+}
+
+/** <span class="hljs-number">3</span>D rotation coordinates for head pose.
+  See e.g. https://howthingsfly.si.edu/flight-dynamics/roll-pitch-and-yaw
+  Coordinates can be positive or negative as well.
+  (0, 0, 0) degrees means the head directly facing the camera.
+  unit: degrees
+*/
+message Orientation3D {
+  float yaw = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Yaw.</span>
+  <span class="hljs-built_in">float</span> roll = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Roll.</span>
+  <span class="hljs-built_in">float</span> pitch = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Pitch.</span>
+}
+
+/** Output of MGR Head Pose Detection.
+
+  One instance of this record is generated for a detection if its head pose can be determined.
+
+  time: timestamp of the input video frame
+  key: same as the key of the corresponding ObjectDetectionRecord
+*/
+message HeadPose3DRecord
+{
+  Orientation3D pose = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Rotation coordinates.</span>
+  <span class="hljs-built_in">bool</span> end_of_frame = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; When true, no more results will be returned for this frame; all other fields of the record are invalid.</span>
+}
+
+/** Feature vector
+*/
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">FeatureVector</span> </span>{
+  <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">FeatureType</span>
+  </span>{
+    PERSON_FACE = <span class="hljs-number">0</span>; <span class="hljs-comment">///&lt; Face feature calculation result type</span>
+    PERSON_FULL_BODY = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Full-body feature calculation result type</span>
+  }
+  <span class="hljs-built_in">string</span> model_id = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Unique id of the model (neural network) that generated the vector.</span>
+  <span class="hljs-keyword">repeated</span> <span class="hljs-built_in">float</span> feature = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Model specific internal feature representation.</span>
+  FeatureType type = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Type of features represented by the feature vector.</span>
+}
+
+/** Output of MGR Feature Vector Detection.
+  Feature vectors are an internal representation of the characteristics of a specific person's face or full body.
+  This record type is only to be used by other Ultinous software components, e.g. for face recognition.
+
+  One instance of this record is generated for a detection if its feature vector can be determined.
+
+  time: timestamp of the input video frame
+  key: same as the key of the corresponding ObjectDetectionRecord
+*/
+message FeatureVectorRecord
+{
+  FeatureVector features = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Internal representation of the detected face or full body.</span>
+  <span class="hljs-built_in">bool</span> end_of_frame = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; When true, no more results will be returned for this frame; all other fields of the record are invalid.</span>
+}
+
+/** Output of MGR Gender Detection.
+
+  One instance of this record is generated for a detection if its gender can be determined.
+
+  time: timestamp of the input video frame
+  key: same as the key of the corresponding ObjectDetectionRecord
+*/
+message GenderRecord
+{
+  enum Gender {
+    MALE = <span class="hljs-number">0</span>;
+    FEMALE = <span class="hljs-number">1</span>;
+  }
+
+  Gender gender = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Gender of detected person.</span>
+  <span class="hljs-built_in">float</span> confidence = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Confidence of the algorithm about the gender decision. Range: [0..1]</span>
+  <span class="hljs-built_in">bool</span> end_of_frame = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; When true, no more results will be returned for this frame; all other fields of the record are invalid.</span>
+}
+
+/** Output of MGR Age Detection.
+
+  One instance of this record is generated for a detection if its age can be determined.
+
+  time: timestamp of the input video frame
+  key: same as the key of the corresponding ObjectDetectionRecord
+*/
+message AgeRecord
+{
+  uint32 age = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Age of detected person. Unit: years</span>
+  <span class="hljs-built_in">float</span> confidence = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Confidence of the algorithm about the age decision. Range: [0..1]</span>
+  <span class="hljs-built_in">bool</span> end_of_frame = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; When true, no more results will be returned for this frame; all other fields of the record are invalid.</span>
+}
+
+/** Output of MGR Skeleton Detection.
+
+  One instance of this record is generated for each detected person on each frame.
+  A skeleton is a set of points, labelled with a body part label.
+  Points are not connected, a possible way of connecting them is described in skeleton.proto.
+
+  time: timestamp of the input video frame
+  key: time + "_" + sequential index within frame
+*/
+message SkeletonRecord
+{
+  /** A single point in the skeleton.
+  */
+  message SkeletonPoint
+  {
+    float x = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Horizontal coordinate in pixels, sub-pixel precision</span>
+    <span class="hljs-built_in">float</span> y = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Vertical coordinate in pixels, sub-pixel precision</span>
+    common.SkeletonPointType type = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Type corresponding to a specific body part, see skeleton.proto</span>
+    <span class="hljs-built_in">float</span> confidence = <span class="hljs-number">4</span>; <span class="hljs-comment">///&lt; Point detection confidence. Range: [0..1]</span>
+  }
+
+  <span class="hljs-keyword">repeated</span> SkeletonPoint points = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Each point has a different type, i.e. each body part occurs either once or not at all.</span>
+  <span class="hljs-built_in">bool</span> end_of_frame = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; When true, no more results will be returned for this frame; all other fields of the record are invalid.</span>
+}
+
+/** Output of MGR containing frame information.
+
+  One instance of this record is generated for each input video frame.
+
+  time: timestamp of the input video frame
+  key: empty
+*/
+message FrameInfoRecord
+{
+  uint32 columns = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Number of pixels in the horizontal dimension.</span>
+  <span class="hljs-built_in">uint32</span> rows = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Number of pixels in the vertical dimension.</span>
+}
+
+/** Output of kafka_tracker.
+
+  One instance of this record is generated for each new point on each track.
+  New points can be detected or predicted. In either way, a new point is created for each new frame, until the track ends.
+
+  time: time of the frame
+  key: trackStartTime_trackId
+    trackId is a serial number starting from 0 when the application starts.
+    Note that the key is the same for all TrackChangeRecords of a single track.
+*/
+message TrackChangeRecord
+{
+  bool end_of_track = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; When true, no more results will be returned for this track; all other fields of the record are invalid.</span>
+  <span class="hljs-built_in">string</span> detection_key = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Empty for predicted points, otherwise same as the key of the corresponding ObjectDetectionRecord.</span>
+
+  Point point = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Centroid of the detection or predicted point.</span>
+}
+
+/** Identifier structure for a PassEvent
+*/
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">PassEventId</span>
+</span>{
+  <span class="hljs-built_in">string</span> track_key = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Key of the TrackChangeRecord message corresponding to the track crossing the line in this event.</span>
+  <span class="hljs-built_in">uint32</span> serial = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Serial number of the current passage within the same track (starts from 0).</span>
+}
+
+/**  Details of a passage event.
+  Used by PassDetectionRecord and PassCounterRecord.
+*/
+message PassEvent
+{
+  /** Direction of line crossing.
+    The pass line itself is considered to have a direction, from its first point to the last one.
+    The terms 'left' and 'right' are defined by an observer moving along the direction of the pass line.
+    Analogy: left vs. right bank of a river.
+  */
+  enum CrossDirection
+  {
+    LR = <span class="hljs-number">0</span>; <span class="hljs-comment">///&lt; Left to right crossing</span>
+    RL = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Right to left crossing</span>
+  }
+
+  PassEventId id = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Identifier of the current PassEvent.</span>
+  <span class="hljs-built_in">string</span> pass_line_id = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; The 'id' of the PassLine in PassDetConfigRecord being crossed.</span>
+  CrossDirection cross_dir = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Crossing direction.</span>
+  <span class="hljs-built_in">uint32</span> section_idx = <span class="hljs-number">4</span>; <span class="hljs-comment">///&lt; The poly-line segment index that has been crossed, starting from 0.</span>
+  Point cross_point = <span class="hljs-number">5</span>; <span class="hljs-comment">///&lt; Point of intersection of the track and the pass line.</span>
+}
+
+/** Output of kafka_passdet.
+
+  One instance of this record is generated when any of the following events happens:
+  E1. Passage event:
+    A track crosses a pass line. That is, the previous and current TrackChangeRecord points are
+    on opposite sides of the pass line. The last point of the track can be either detected or predicted.
+      Key is pass_line_id.
+      Time is the time of the frame containing the last point of the track, i.e. the first frame after the passage.
+  E2. Passage Realization event:
+    A prediction based passage event is confirmed by a true detection.
+    A single track change input may trigger several Passage Realization Events when the track contained several passages based on prediction.
+      Key is empty.
+      Time is the time of the frame containing the last point of the track, i.e. the frame containing the true detection.
+  E3. End of Track event:
+    A track has ended. It is sent out even if the track didn't generate passage event.
+      Key is empty.
+      Time is the time of the TrackChangeRecord with end_of_track=<span class="hljs-literal">true</span>.
+  E4. Heartbeat event:
+    There is input but no message was sent in the last second.
+      Key is empty.
+      Time is the time of the last input.
+*/
+message PassDetectionRecord
+{
+  enum Type
+  {
+    HEARTBEAT = <span class="hljs-number">0</span>;
+    PASS_CANDIDATE = <span class="hljs-number">1</span>;
+    PASS_REALIZED = <span class="hljs-number">2</span>;
+    END_OF_TRACK= <span class="hljs-number">3</span>;
+  }
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">PassCandidate</span>
+  </span>{
+    PassEvent pass = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Details of the passing event</span>
+    <span class="hljs-built_in">bool</span> is_extrapolated = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; True if pass detected with predicted track, false if detected with real track</span>
+  }
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">PassRealized</span>
+  </span>{
+    PassEventId pass_event_ref = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Identifier of an earlier PassDetectionRecord with type=PASS_CANDIDATE that is realized.</span>
+  }
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">EndOfTrack</span>
+  </span>{
+    <span class="hljs-built_in">string</span> track_key = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; TrackChangeRecord key</span>
+  }
+
+  Type type = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Event type</span>
+
+  <span class="hljs-keyword">oneof</span> details <span class="hljs-comment">///&lt; Not set when type = HEARTBEAT</span>
+  {
+    PassCandidate pass_candidate = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Only for type=PASS_CANDIDATE</span>
+    PassRealized pass_realized = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Only for type=PASS_REALIZED</span>
+    EndOfTrack end_of_track = <span class="hljs-number">4</span>; <span class="hljs-comment">///&lt; Only for type=END_OF_TRACK</span>
+  }
+}
+
+/** Key to feature vector clusters.*/
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">FVClusterId</span>
+</span>{
+  <span class="hljs-built_in">int64</span> first_detection_time = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Time of the feature vector input record at first observation belonging to this cluster.</span>
+  <span class="hljs-built_in">string</span> first_detection_key = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Key of the feature vector input record at first observation belonging to this cluster.</span>
+  <span class="hljs-built_in">string</span> first_detection_stream_id = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Stream id of first observation belonging to this cluster.</span>
+}
+
+/** Feature vector cluster representation */
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">FVCluster</span>
+</span>{
+  FeatureVector representative_fv = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Feature vector representative to the cluster. May be different from any input feature vector.</span>
+  <span class="hljs-built_in">uint32</span> num_observations = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Number of input feature vectors that are aggregated into representative_fv. Must be positive.</span>
+  /** Shows if cluster has been realized.
+  If cluster_realization in the configuration is null, this value will always be true.
+  Clusters are not meant to be used until is_realized is true.
+  While false, outputs are only saved to keep track of input keys and their clusters.
+  */
+  bool is_realized = <span class="hljs-number">3</span>;
+}
+
+/** Event of adding a new feature vector to a cluster system.
+  Happens for each feature vector input of kafka_feature_vector_clustering.
+  Happens for each feature vector input from a registration stream of kafka_reid.
+    The feature vector input is either registered as a new cluster or updates the feature a stored cluster.
+*/
+message FVRegistrationEvent
+{
+  FVClusterId cluster_id = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Stored id after registration. Can be new or updated.</span>
+  FVCluster cluster = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Stored cluster after registration.</span>
+  <span class="hljs-built_in">string</span> input_stream_id = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Stream id of the current input record.</span>
+}
+
+/** Event of merging some clusters into one. */
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">FVClusterMergingEvent</span>
+</span>{
+  FVClusterId cluster_id = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Stored id after merging.</span>
+  FVCluster cluster = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Stored cluster after merging.</span>
+  <span class="hljs-keyword">repeated</span> FVClusterId merged_clusters = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; List of merged clusters.</span>
+}
+
+/** Event of deleting a cluster when its retention period expires.
+  Provides the reason of deleting:
+  1. EXPIRED: Deleted because the expiration period has reached.
+  2. REMOVED: Deleted by deletion message.
+  3. REALIZED: Deleted because the cluster has been successfully realized.
+*/
+message FVClusterDeletedEvent
+{
+  enum DeletionReason
+  {
+    EXPIRED = <span class="hljs-number">0</span>;
+    REMOVED = <span class="hljs-number">1</span>;
+    REALIZED = <span class="hljs-number">2</span>;
+  }
+
+  FVClusterId deleted_cluster = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Id of deleted cluster.</span>
+  DeletionReason reason = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Deletion reason.</span>
+}
+
+/** Output of kafka_feature_vector_clustering.
+
+  One instance of this record is generated when any of the following happens:
+  1. reg_event: The feature vector input is either registered as a new cluster or updates a stored cluster.
+  2. merge_event: Some of the clusters are merged into one cluster.
+  3. delete_event: A cluster is deleted because its retention period expired.
+  4. end_of_input_record: There will be no more events for this input. This is denoted by an empty message.
+
+  time: Time of the current input record.
+  key: Key of the current input record.
+*/
+message FVClusterUpdateRecord
+{
+  enum Type
+  {
+    END_OF_INPUT_RECORD = <span class="hljs-number">0</span>;
+    REG_EVENT = <span class="hljs-number">1</span>;
+    MERGE_EVENT = <span class="hljs-number">2</span>;
+    DELETE_EVENT = <span class="hljs-number">3</span>;
+  }
+
+  Type type = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">oneof</span> event
+  {
+    FVRegistrationEvent reg_event = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Given when input is either registered as a new cluster or updates a stored cluster.</span>
+    FVClusterMergingEvent merge_event = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Given when some of the clusters are merged into one cluster.</span>
+    FVClusterDeletedEvent delete_event = <span class="hljs-number">4</span>; <span class="hljs-comment">///&lt; Given when a cluster is deleted because its retention period expired.</span>
+  }
+}
+
+/** Output of kafka_reid.
+
+  kafka_reid has an internal database of feature vector clusters. Each cluster corresponds to a separate identity (person).
+
+  One instance of this record is generated when any of the following happens:
+  1. reid_event: The input from a reidentification stream is matched by a list of stored clusters.
+  2. reg_event: The input from a registration stream is either registered as a new cluster or updates a stored cluster.
+  3. merge_event: Some of the clusters are merged into one cluster.
+  4. delete_event: A cluster is deleted because its retention period expired.
+  5. end_of_input_record: There will be no more events for this input. This is denoted by an empty message.
+
+  time: Time of the current input record.
+  key: Key of the current input record.
+*/
+message ReidRecord
+{
+  enum Type
+  {
+    END_OF_INPUT_RECORD = <span class="hljs-number">0</span>;
+    REID_EVENT = <span class="hljs-number">1</span>;
+    REG_EVENT = <span class="hljs-number">2</span>;
+    MERGE_EVENT = <span class="hljs-number">3</span>;
+    DELETE_EVENT = <span class="hljs-number">4</span>;
+  }
+
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">ScoredFVClusterId</span>
+  </span>{
+    FVClusterId id = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; See FVClusterId</span>
+    <span class="hljs-built_in">float</span> score = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Score of matching. Range: [0..1]</span>
+  }
+
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">ReidEvent</span>
+  </span>{
+    <span class="hljs-keyword">repeated</span> ScoredFVClusterId match_list = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; List of matching identities, in decreasing order of scores.</span>
+    <span class="hljs-built_in">string</span> input_stream_id = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Stream id of the current input record.</span>
+  }
+
+  Type type = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">oneof</span> event
+  {
+    ReidEvent reid_event = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Given when input from a reidentification stream is matched by a list of stored clusters.</span>
+    FVRegistrationEvent reg_event = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Given when input from a registration stream is either registered as a new cluster or updates a stored cluster.</span>
+    FVClusterMergingEvent merge_event = <span class="hljs-number">4</span>; <span class="hljs-comment">///&lt; Given when some of the clusters are merged into one cluster.</span>
+    FVClusterDeletedEvent delete_event = <span class="hljs-number">5</span>; <span class="hljs-comment">///&lt; Given when a cluster is deleted because its retention period expired.</span>
+  }
+}
+
+</code></pre>
+</div></div></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../../../docs/help/uvap_gloss.html">Glossary</a><a href="../../../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../../../docs/feat/feat_overview.html">Key Features</a><a href="../../../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

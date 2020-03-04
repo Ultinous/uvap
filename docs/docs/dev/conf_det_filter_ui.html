@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Configuring Detection Filter Areas · UVAP</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Configuring Detection Filter Areas"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Configuring Detection Filter Areas · UVAP"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../index.html"/><meta property="og:description" content="# Configuring Detection Filter Areas"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../js/code-block-download-button.js"></script><script src="../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../css/main.css"/><script src="../../js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../"><img class="logo" src="../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="configuring-detection-filter-areas"></a><a href="#configuring-detection-filter-areas" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring Detection Filter Areas</h1>
+<p>Configuring detection filter areas in the Stream Configurator UI allows for
+quick and easy area creation and management.</p>
+<p>For information on the Stream Configurator UI, see the <a href="../../docs/dev/conf_sc_ui.html">Stream Configurator UI Guide</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="creating-a-new-filter-area"></a><a href="#creating-a-new-filter-area" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating a New Filter Area</h2>
+<p>A detection filter area is a chain of coordinates (joints). At least three
+joints are needed to define an area.</p>
+<p>To create a detection filter area:</p>
+<blockquote>
+<p><strong>Note:</strong>  <br>
+Until the element is finished, any step can be undone with a <strong>right-click</strong>,
+automatically jumping back to the previous action.</p>
+</blockquote>
+<ol>
+<li><p>Enter <strong>Detection Filter Areas</strong> mode by selecting <strong>Detection Filter Areas</strong>
+in the new element drop-down menu.</p>
+<p><img src="../assets/sc_ui/add_dropdown.png" alt="Add Detection Filter Area" /></p></li>
+<li><p>Start a detection filter area with a <strong>left-click</strong> anywhere on the canvas
+to place its first joint.</p></li>
+<li><p>Add a joint with a <strong>left-click</strong> anywhere on the canvas.<br>
+Any number of joints can be added to a detection filter area.</p>
+<blockquote>
+<p><strong>Note:</strong>  <br>
+While in Detection Filter Area mode, parity of the area can be toggled by
+pressing <code>T</code>.</p>
+</blockquote></li>
+<li><p>Finish the area with a <strong>double-click</strong> on the first joint or to place the
+last joint where the cursor is.</p></li>
+<li><p>Exit the <strong>Detection Filter Areas</strong> mode by clicking the detection filter area icon.</p></li>
+</ol>
+<blockquote>
+<p><strong>Note:</strong>  <br>
+Exiting the <strong>Detection Filter Areas</strong> mode automatically completes unfinished
+areas if at least three joints are defined.</p>
+</blockquote>
+<p><a name="new_area"></a>
+<img src="../assets/sc_ui/new_area.png" alt="New Detection Filter Area">  <br>
+<strong><em>New Detection Filter Area</em></strong></p>
+<h2><a class="anchor" aria-hidden="true" id="importing-detection-filter-areas"></a><a href="#importing-detection-filter-areas" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Importing Detection Filter Areas</h2>
+<p><strong>Stream Configurator</strong> provides an import function, to make <strong>Detection Filter</strong>
+configuration easier. From the <strong>Detection Filter</strong> configuration under
+<code>ultinous.service.kafka.detection.filter.config</code>, the vertices snippet can be
+copied and imported into <strong>Stream Configurator</strong> for easier graphical management.
+For more information on <strong>Detection Filter</strong> configuration, see <a href="../../docs/dev/conf_det_filter.html">Configuring Detection Filter</a>.</p>
+<blockquote>
+<p><strong>Attention!</strong>  <br>
+For this feature to work as intended the Stream Configuration UI needs to
+access the clipboard. Make sure clipboard access is not blocked by the browser.</p>
+</blockquote>
+<p>To import a detection filter snippet:</p>
+<ol>
+<li><p>Open the <strong>Source</strong> window.</p></li>
+<li><p>Ensure that the format is set to <code>UVAP Det.Filter</code>. Select it from the drop-down
+menu if necessary.</p></li>
+<li><p>From an external source — such as the <strong>Detection Filter</strong> configuration — copy
+a valid detection filter snippet configuration to the clipboard.</p></li>
+<li><p>Select <strong>Import From Det. Filter</strong>. Approve clipboard access if the window pops up.<br>
+Importing invalid configurations results in an error.</p></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="exporting-detection-filter-areas"></a><a href="#exporting-detection-filter-areas" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Exporting Detection Filter Areas</h2>
+<p><strong>Stream Configurator</strong> provides an export function, to make <strong>Detection Filter</strong>
+configuration easier. The created detection filter snippet can be copied to the
+clipboard, then pasted into the <strong>Detection Filter</strong> configuration file
+under <code>ultinous.service.kafka.detection.filter.config</code>. For more information on
+<strong>Detection Filter</strong> configuration, see <a href="../../docs/dev/conf_det_filter.html">Configuring Detection Filter</a>.</p>
+<p>To export a detection filter snippet:</p>
+<ol>
+<li><p>Open the <strong>Source</strong> window.</p></li>
+<li><p>Make sure that the format is set to <code>UVAP Det.Filter</code>. Select it from the drop-down
+menu if necessary.</p></li>
+<li><p>Select <strong>Copy Source</strong>.
+The detection filter configuration is copied to the clipboard.</p></li>
+<li><p>Paste the clipboard content into a the <strong>Detection Filter</strong> configuration
+file (as a value for <code>ultinous.service.kafka.detection.filter.config</code>) or to a
+separate file to store the detection filter configuration.</p></li>
+</ol>
+<p><a name="example_filter"></a>
+<img src="../assets/sc_ui/example_filter.png" alt="Example Detection Filter">  <br>
+<strong><em>Example Detection Filter</em></strong></p>
+<h2><a class="anchor" aria-hidden="true" id="managing-existing-detection-filter-areas"></a><a href="#managing-existing-detection-filter-areas" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Managing Existing Detection Filter Areas</h2>
+<h3><a class="anchor" aria-hidden="true" id="removing-a-detection-filter-area"></a><a href="#removing-a-detection-filter-area" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Removing a Detection Filter Area</h3>
+<p>To remove a detection filter area:</p>
+<ol>
+<li><p>Open the <strong>Elements</strong> window.</p></li>
+<li><p>Enter <strong>Edit</strong> mode by clicking the name of the detection filter area.</p></li>
+<li><p>Select <strong>Delete</strong>
+(<img src="../assets/sc_ui/button_delete_15.png" alt="Delete" />)
+to delete the detection filter area.</p></li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="removing-all-elements"></a><a href="#removing-all-elements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Removing All Elements</h3>
+<p>To remove all elements:</p>
+<blockquote>
+<p><strong>Attention!</strong>  <br>
+This option removes both passlines and detection filter areas!</p>
+</blockquote>
+<ol>
+<li><p>Open the <strong>Elements</strong> window.</p></li>
+<li><p>Select <strong>Remove all</strong>.
+A window pops up.</p></li>
+<li><p>Select <strong>OK</strong>.</p></li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="cloning-a-detection-filter-area"></a><a href="#cloning-a-detection-filter-area" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Cloning a Detection Filter Area</h3>
+<p>Cloning a detection filter area creates a new object with the same joint coordinates.
+The joints and parity can be modified later.</p>
+<p>To clone a detection filter area:</p>
+<ol>
+<li><p>Open the <strong>Elements</strong> window.</p></li>
+<li><p>Enter <strong>Edit</strong> mode by clicking the name of the detection filter area.</p></li>
+<li><p>Select <strong>Clone Object</strong>.</p></li>
+<li><p>Select <strong>Save</strong>.</p></li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="hiding-or-revealing-a-detection-filter-area"></a><a href="#hiding-or-revealing-a-detection-filter-area" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hiding or Revealing a Detection Filter Area</h3>
+<p>To hide or reveal a detection filter area:</p>
+<ol>
+<li><p>Open the <strong>Elements</strong> window.</p></li>
+<li><p>Select <strong>Toggle Visibility</strong>
+(<img src="../assets/sc_ui/button_visibility_15.png" alt="Toggle Visibility" /> or <img src="../assets/sc_ui/button_visibility2.png" alt="Toggle Visibility" />)
+for the detection filter area to be hidden or revealed.</p></li>
+</ol>
+<p>Additionally, <strong>Toggle Visibility</strong> can be clicked to reverse the visibility of
+all elements.</p>
+<h3><a class="anchor" aria-hidden="true" id="adding-a-joint"></a><a href="#adding-a-joint" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding a Joint</h3>
+<p>To add a detection filter area joint:</p>
+<ol>
+<li><p>Open the <strong>Elements</strong> window.</p></li>
+<li><p>Enter <strong>Edit</strong> mode by clicking the name of the detection filter area.</p></li>
+<li><p>Click on the midpoint to add a joint.</p></li>
+<li><p>Select <strong>Save</strong>.</p></li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="moving-a-joint"></a><a href="#moving-a-joint" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Moving a Joint</h3>
+<p>To move a detection filter area joint:</p>
+<ol>
+<li><p>Open the <strong>Elements</strong> window.</p></li>
+<li><p>Enter <strong>Edit</strong> mode by clicking the name of the detection filter area.</p></li>
+<li><p><strong>Left-drag</strong> an existing joint to move it.</p></li>
+<li><p>Select <strong>Save</strong>.</p></li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="removing-a-joint"></a><a href="#removing-a-joint" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Removing a Joint</h3>
+<p>To remove a detection filter area joint:</p>
+<ol>
+<li><p>Open the <strong>Elements</strong> window.</p></li>
+<li><p>Enter <strong>Edit</strong> mode by clicking the name of the detection filter area.</p></li>
+<li><p><strong>Right-click</strong> an existing joint to remove it.</p></li>
+<li><p>Select <strong>Save</strong>.</p></li>
+</ol>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#creating-a-new-filter-area">Creating a New Filter Area</a></li><li><a href="#importing-detection-filter-areas">Importing Detection Filter Areas</a></li><li><a href="#exporting-detection-filter-areas">Exporting Detection Filter Areas</a></li><li><a href="#managing-existing-detection-filter-areas">Managing Existing Detection Filter Areas</a><ul class="toc-headings"><li><a href="#removing-a-detection-filter-area">Removing a Detection Filter Area</a></li><li><a href="#removing-all-elements">Removing All Elements</a></li><li><a href="#cloning-a-detection-filter-area">Cloning a Detection Filter Area</a></li><li><a href="#hiding-or-revealing-a-detection-filter-area">Hiding or Revealing a Detection Filter Area</a></li><li><a href="#adding-a-joint">Adding a Joint</a></li><li><a href="#moving-a-joint">Moving a Joint</a></li><li><a href="#removing-a-joint">Removing a Joint</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

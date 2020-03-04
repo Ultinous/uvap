@@ -1,0 +1,457 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Configuring Reidentifier · UVAP</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Configuring Reidentifier"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Configuring Reidentifier · UVAP"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../index.html"/><meta property="og:description" content="# Configuring Reidentifier"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../js/code-block-download-button.js"></script><script src="../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../css/main.css"/><script src="../../js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../"><img class="logo" src="../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class="siteNavGroupActive"><a href="../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Microservice Configuration</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Developer Guide<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_architect.html">Architecture</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_data_model.html">Data Model</a></li><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Microservices</h4><ul><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_mgr.html">Multi-Graph Runner</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_track.html">Tracker</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_passdet.html">Pass Detector</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_reid.html">Reidentifier</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_cluster.html">Feature Vector Clustering</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_det_filter.html">Detection Filter</a></li></ul></div><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Microservice Configuration</h4><ul><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_mgr.html">Configuring Multi-Graph Runner</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_track.html">Configuring Tracker</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_passdet.html">Configuring Pass Detector</a></li><li class="navListItem navListItemActive"><a class="navItem" href="../../docs/dev/conf_reid.html">Configuring Reidentifier</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_cluster.html">Configuring Feature Vector Clustering</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_det_filter.html">Configuring the Detection Filter</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_superconfig.html">Microservice Superconfiguration</a></li></ul></div><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_extend.html">Extending UVAP</a></li><li class="navListItem"><a class="navItem" href="../../docs/operation/op_opguide.html">UVAP Operation Guide</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="configuring-reidentifier"></a><a href="#configuring-reidentifier" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring Reidentifier</h1>
+<p>This microservice does not require GPU resources.</p>
+<p><strong>Basic Reidentifier</strong> can be run in <em>batch mode</em>. When running in batch mode,
+the microservice stops after processing the last record.
+Otherwise it keeps running and waits for more records.</p>
+<h2><a class="anchor" aria-hidden="true" id="environment-variables"></a><a href="#environment-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Environment Variables</h2>
+<ul>
+<li><code>KAFKA_REID_MS_PROPERTY_FILE_PATHS</code>: property files path list.</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="properties"></a><a href="#properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Properties</h2>
+<blockquote>
+<p><strong>Attention!</strong>  <br>
+Setting <code>.data</code> and <code>.file</code> properties are exclusive to each other, meaning
+setting both <code>ultinous.service.kafka.reid.config.data</code> and
+<code>ultinous.service.kafka.reid.config.file</code> results in an error.</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkareidauthdefsdata"></a><a href="#ultinousservicekafkareidauthdefsdata" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.reid.auth.defs.data</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.reid.auth.defs.data</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Authentication definition data in one-liner JSON format corresponding to the definitions described in <a href="../../docs/dev/conf_superconfig.html#authentication-definition">Superconfig Authentication Definitions</a>.</td></tr>
+<tr><td>Required</td><td>Optional</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkareidauthdefsfile"></a><a href="#ultinousservicekafkareidauthdefsfile" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.reid.auth.defs.file</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.reid.auth.defs.file</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Authentication definition file path. Content of the file should be in JSON format described described in <a href="../../docs/dev/conf_superconfig.html#authentication-definition">Superconfig Authentication Definitions</a>.</td></tr>
+<tr><td>Required</td><td>Optional</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkareidmsconfigdata"></a><a href="#ultinousservicekafkareidmsconfigdata" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.reid.ms.config.data</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.reid.ms.config.data</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td><strong>Reidentifier</strong> microservice configuration of source and target topics in one-liner JSON format corresponding to the definitions described in <a href="../../docs/dev/conf_superconfig.html#topic-definitions">Superconfig Topic Definitions</a>.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+<tr><td>Notes</td><td>Required if no other reidentification configuration is set.<br> One configuration fits all.</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkareidmsconfigfile"></a><a href="#ultinousservicekafkareidmsconfigfile" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.reid.ms.config.file</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.reid.ms.config.file</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td><strong>Reidentifier</strong> microservice configuration file path. Content must be in one-liner JSON format described in <a href="../../docs/dev/conf_superconfig.html#topic-definitions">Superconfig Topic Definitions</a>.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+<tr><td>Notes</td><td>Required if no other reidentification configuration is set.<br> One configuration fits all.</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkareidconfigdata"></a><a href="#ultinousservicekafkareidconfigdata" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.reid.config.data</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.reid.config.data</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td><strong>Reidentifier</strong> configurations of input streams defined in JSON format.</td></tr>
+<tr><td>Required</td><td>Optional</td></tr>
+<tr><td>Notes</td><td>Should only be set if the <code>ReidMSConfig</code> contains no <code>config_data</code> global reidentification configuration.</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkareidconfigfile"></a><a href="#ultinousservicekafkareidconfigfile" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.reid.config.file</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.reid.config.file</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td><strong>Reidentifier</strong> configuration file path. File content must be in one-liner JSON format same as described at <code>ultinous.service.kafka.reid.config.data</code> above.</td></tr>
+<tr><td>Required</td><td>Optional</td></tr>
+<tr><td>Notes</td><td>Should only be set if the <code>ReidMSConfig</code> contains no <code>config_data</code> global reidentification configuration.</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkareidmonitoringport"></a><a href="#ultinousservicekafkareidmonitoringport" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.reid.monitoring.port</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.reid.monitoring.port</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Monitoring server port.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+<tr><td>Value Type</td><td><code>uint16</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkareidmonitoringthreads"></a><a href="#ultinousservicekafkareidmonitoringthreads" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.reid.monitoring.threads</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.reid.monitoring.threads</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Monitoring server thread pool size.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+<tr><td>Value Type</td><td><code>uint16</code></td></tr>
+</tbody>
+</table>
+<p><a name="reidRecord"></a></p>
+<h2><a class="anchor" aria-hidden="true" id="output-schemas"></a><a href="#output-schemas" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Output Schemas</h2>
+<p>Configuration records are separated into the following three values:</p>
+<ul>
+<li><code>ReidMSConfig</code> specified in <a href="../../proto_files/ultinous/proto/common/kafka_superconfig.proto.html">Kafka superconfiguration proto</a></li>
+<li><code>ReidConfigRecord</code> specified in <a href="../../proto_files/ultinous/proto/common/kafka_config.proto.html">Kafka configuration proto</a></li>
+<li><code>ReidRecord</code> specified in <a href="../../proto_files/ultinous/proto/common/kafka_data.proto.html">Kafka data proto</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="example-of-a-reidmsconfig-from-kafka"></a><a href="#example-of-a-reidmsconfig-from-kafka" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example of a ReidMSConfig from Kafka</h3>
+<pre><code class="hljs css language-json5 codeBlockCopy">{
+  <span class="hljs-attr">"source_options"</span>:
+  {
+    <span class="hljs-attr">"start"</span>:<span class="hljs-string">"START_DATETIME"</span>,
+    <span class="hljs-attr">"start_date_time"</span>: <span class="hljs-string">"2019-05-31T10:30:00.000 +02:00"</span>,
+    <span class="hljs-attr">"end"</span>:<span class="hljs-string">"END_NEVER"</span>
+  },
+  <span class="hljs-attr">"sources"</span>:
+  [  
+    {
+      <span class="hljs-attr">"broker_list"</span>:<span class="hljs-string">"demoserver:9092"</span>,
+      <span class="hljs-attr">"name"</span>:<span class="hljs-string">"staff.FeatureVectorRecord.json"</span>,
+      <span class="hljs-attr">"auth_ref"</span>:<span class="hljs-string">"srcAuth"</span>
+    },
+    {
+      <span class="hljs-attr">"broker_list"</span>:<span class="hljs-string">"demoserver:9092"</span>,
+      <span class="hljs-attr">"name"</span>:<span class="hljs-string">"cam.entrance.FeatureVectorRecord.json"</span>
+    },
+    {
+      <span class="hljs-attr">"broker_list"</span>:<span class="hljs-string">"demoserver:9092"</span>,
+      <span class="hljs-attr">"name"</span>:<span class="hljs-string">"cam.exit.FeatureVectorRecord.json"</span>
+    }
+  ],
+  <span class="hljs-attr">"target_options"</span>:
+  {
+    <span class="hljs-attr">"handling"</span>:<span class="hljs-string">"REPLACE"</span>
+  },
+  <span class="hljs-attr">"target"</span>:
+  {
+    <span class="hljs-attr">"broker_list"</span>:<span class="hljs-string">"localhost:9092"</span>,
+    <span class="hljs-attr">"name"</span>:<span class="hljs-string">"sample.ReidRecord.json"</span>
+  }
+}
+</code></pre>
+<p>In this example, the sources are set to be read from the given date and never
+stop reading them. Two feature vector sources are defined with broker list and
+name. The target stream is being replaced.</p>
+<h3><a class="anchor" aria-hidden="true" id="example-of-a-reidconfigrecord-from-kafka"></a><a href="#example-of-a-reidconfigrecord-from-kafka" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example of a ReidConfigRecord from Kafka</h3>
+<pre><code class="hljs css language-json5 codeBlockCopy">{
+  <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>,
+  <span class="hljs-attr">"config_data"</span>: {
+   <span class="hljs-attr">"clustering_config"</span>: {
+     <span class="hljs-attr">"method"</span>: <span class="hljs-string">"USE_LAST"</span>
+   },
+   <span class="hljs-attr">"input_stream_configs"</span>: [  
+      {
+       <span class="hljs-attr">"stream_id"</span>: <span class="hljs-string">"person"</span>,
+       <span class="hljs-attr">"fv_field_selector"</span>: {
+         <span class="hljs-attr">"feature_vector_path"</span>: <span class="hljs-string">"features"</span>
+       },
+       <span class="hljs-attr">"person_stream_config"</span>: 
+        {
+         <span class="hljs-attr">"cluster_retention_period_ms"</span>: <span class="hljs-number">3600000</span>
+        }
+     },
+     {
+       <span class="hljs-attr">"stream_id"</span>: <span class="hljs-string">"entranceCamera"</span>,
+       <span class="hljs-attr">"fv_field_selector"</span>: {
+         <span class="hljs-attr">"fv_cluster_path"</span>: <span class="hljs-string">"reg_event.cluster"</span>
+       },
+       <span class="hljs-attr">"camera_stream_config"</span>: {
+         <span class="hljs-attr">"reg_stream_config"</span>: {
+           <span class="hljs-attr">"reg_threshold"</span>: <span class="hljs-number">0.9</span>,
+           <span class="hljs-attr">"cluster_retention_period_ms"</span>: <span class="hljs-number">3600000</span>
+         }
+       }
+     },
+     {
+       <span class="hljs-attr">"stream_id"</span>: <span class="hljs-string">"exitCamera"</span>,
+       <span class="hljs-attr">"fv_field_selector"</span>: {
+         <span class="hljs-attr">"fv_cluster_path"</span>: <span class="hljs-string">"reg_event.cluster"</span>
+       },
+       <span class="hljs-attr">"camera_stream_config"</span>: {
+         <span class="hljs-attr">"reid_stream_config"</span>: {
+           <span class="hljs-attr">"min_similarity"</span>: <span class="hljs-number">0.8</span>,
+           <span class="hljs-attr">"max_num_matches"</span>: <span class="hljs-number">1</span>
+         }
+       }
+     }
+   ]
+  }
+}
+</code></pre>
+<p>The <code>clustering_config</code> field contains information of clustering configuration.
+Here, <code>method</code> defines the clustering method. The only valid entry is
+<code>USE_LAST</code>, which means that if an observed feature vector is recognized to
+belong to a previously stored cluster, its representative feature vector is
+replaced by the new observation.</p>
+<p>The <code>input_stream_configs</code> field has to contain the exact same amount of records
+as the number of input streams defined in <code>ReidMSConfig</code> (the i<sup>th</sup>
+input stream is assigned to the i<sup>th</sup> configuration record).
+See the table below for the field descriptions:</p>
+<table>
+<thead>
+<tr><th>Input</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>stream_id</code></td><td>An arbitrary but application-unique name for the input stream. This is later referenced in the results.</td></tr>
+<tr><td><code>fv_field_selector</code></td><td>Selects a feature vector or cluster field in the input record. See <code>feature_vector_path</code> and <code>fv_cluster_path</code> child parameters.</td></tr>
+<tr><td><code>feature_vector_path</code></td><td>Child parameter of <code>fv_field_selector</code>. Specifies the path to a field of type <code>FeatureVector</code> within the input record.</td></tr>
+<tr><td><code>fv_cluster_path</code></td><td>Child parameter of <code>fv_field_selector</code>. Specifies the path to a field of type <code>FVCluster</code> within the input record.</td></tr>
+<tr><td><code>camera_stream_config</code></td><td>Indicates that the input is a camera stream.</td></tr>
+<tr><td><code>reg_stream_config</code></td><td>Child parameter of <code>camera_stream_config</code>. Indicates that the stream is used for registration.</td></tr>
+<tr><td><code>reg_threshold</code></td><td>Child parameter of <code>reg_stream_config</code>. If the similarity between the input feature vector and any stored cluster is less than this value, a new cluster is registered. Otherwise, the cluster with the highest similarity score is updated. <br>Must be in the <code>[0.0..1.0]</code> interval, default is <code>0.0</code>. The value <code>1.0</code> means that every feature vector is stored.</td></tr>
+<tr><td><code>cluster_retention_period_ms</code></td><td>Child parameter of <code>reg_stream_config</code>. Time interval in milliseconds; clusters stored for longer time than this period are deleted from the registration database. <code>0</code> means nothing is deleted.<br>Default is <code>0</code>.</td></tr>
+<tr><td><code>reid_stream_config</code></td><td>Child parameter of <code>camera_stream_config</code>. Indicates that the stream is used for reidentification.</td></tr>
+<tr><td><code>min_similarity</code></td><td>Child parameter of <code>reid_stream_config</code>. Similarity value. If the similarity score (see <code>score</code> under <a href="#reidentification-reidrecord-example"><code>ReidRecord</code></a>) between the input and a stored cluster reaches this value, a reidentification event takes place. <br> Must be in the <code>[0.0..1.0]</code> interval, default is <code>0.0</code>. <br> Match count can still be limited, see <code>max_num_matches</code>.</td></tr>
+<tr><td><code>max_num_matches</code></td><td>Child parameter of <code>reid_stream_config</code>. Defines the maximum number of the returned matching clusters (with a score above <code>min_similarity</code>). <br>Must be positive.</td></tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note:</strong>  <br>
+If the input is a cluster topic, <code>fv_field_selector</code> must contain <code>fv_cluster_path</code>
+instead of <code>feature_vector_path</code>.</p>
+</blockquote>
+<p>In this example, the <code>exitCamera</code> stream has a minimum
+reidentification score of <code>0.8</code> set by <code>min_similarity</code>,
+which means the result produced from this
+stream contains hits that have at least this score value.</p>
+<p>The <code>max_num_matches</code> is set to <code>1</code>, meaning one
+reidentification result is produced from this stream at the most. This means that
+the stream corresponds to the final reidentification result with its most
+similar feature vector (if the similarity score reaches <code>0.8</code>).</p>
+<p>The <code>reg_threshold</code> of <code>entranceCamera</code> stream is set to <code>0.9</code>. This means that
+— from this stream — only those feature vectors are stored that reach the similarity
+score of <code>0.9</code>.</p>
+<p>The <code>cluster_retention_period_ms</code> of the example stream is 1 hour in milliseconds.
+That means that a newly stored cluster is forgotten after one hour. The
+retention period is counted from the last update of a cluster — either it
+is a newly set or an updated one.</p>
+<h3><a class="anchor" aria-hidden="true" id="examples-of-a-reidrecord-from-kafka"></a><a href="#examples-of-a-reidrecord-from-kafka" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples of a ReidRecord from Kafka</h3>
+<p><code>ReidRecord</code> can have the following events indicated by the <code>type</code> field:</p>
+<ul>
+<li><p><code>REG_EVENT</code>: the event is a registration or a cluster update</p></li>
+<li><p><code>REID_EVENT</code>: the event is a reidentification</p></li>
+<li><p><code>DELETE_EVENT</code>: the event is a cluster removal</p></li>
+<li><p><code>END_OF_INPUT_RECORD</code>: the input is processed and there are no more messages:</p>
+<pre><code class="hljs">{"type":"END_OF_INPUT_RECORD"}
+</code></pre></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="registration-reidrecord-example"></a><a href="#registration-reidrecord-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Registration ReidRecord Example</h4>
+<pre><code class="hljs css language-json5">{<span class="hljs-attr">"type"</span>:<span class="hljs-string">"REG_EVENT"</span>,
+ <span class="hljs-attr">"reg_event"</span>:
+  {
+    <span class="hljs-attr">"cluster_id"</span>:
+      {
+        <span class="hljs-attr">"first_detection_time"</span>:<span class="hljs-string">"1571138183912"</span>,
+        <span class="hljs-attr">"first_detection_key"</span>:<span class="hljs-string">"1571138183912_0"</span>,
+        <span class="hljs-attr">"first_detection_stream_id"</span>:<span class="hljs-string">"entranceCamera"</span>
+      },
+    <span class="hljs-attr">"cluster"</span>:
+      {
+        <span class="hljs-attr">"representative_fv"</span>:
+          {
+            <span class="hljs-attr">"model_id"</span>:<span class="hljs-string">"face_rec_v6"</span>,
+            <span class="hljs-attr">"feature"</span>:[<span class="hljs-number">-0.884964168</span>,<span class="hljs-number">-0.394254386</span>, ... ,<span class="hljs-number">0.100110188</span>,<span class="hljs-number">0.529844344</span>],
+            <span class="hljs-attr">"type"</span>:<span class="hljs-string">"PERSON_FACE"</span>
+          },
+        <span class="hljs-attr">"num_observations"</span>:<span class="hljs-number">1</span>,
+        <span class="hljs-attr">"is_realized"</span>:<span class="hljs-literal">true</span>
+      },
+    <span class="hljs-attr">"input_stream_id"</span>:<span class="hljs-string">"entranceCamera"</span>,
+  }
+}
+</code></pre>
+<p>This example shows a <code>reg_event</code> event, which refers to one of the following
+cases:</p>
+<ul>
+<li><p>The recognized feature vector or cluster is not found in the database, so a
+new cluster is created.</p></li>
+<li><p>The recognized feature vector or cluster is found in the database,
+so an already stored cluster is updated.</p></li>
+</ul>
+<p>The record shows the same information in both cases.</p>
+<p>The <code>input_stream_id</code> field of event shows that the feature vector comes from
+the source which has the ID <code>entranceCamera</code>.</p>
+<p>The <code>cluster_id</code> field contains the time, key and stream information of the
+detection.</p>
+<p>The <code>cluster</code> field contains information about the stored cluster.</p>
+<p>The <code>representative_fv</code> field is a representation of all feature vectors in
+this cluster. It is not necessarily equal to any input feature vector.</p>
+<p><code>num_observations</code> shows the number of input feature vectors belonging
+to this cluster.</p>
+<p><code>is_realized</code> shows if a cluster is ready to be used for further processing
+(see <code>ClusterRealizationConfig</code> in the <a href="../../proto_files/ultinous/proto/common/kafka_config.proto.html">Kafka configuration proto</a>.)
+If it has the value <code>false</code>, outputs are only saved to keep track of input
+keys and their clusters.</p>
+<h4><a class="anchor" aria-hidden="true" id="reidentification-reidrecord-example"></a><a href="#reidentification-reidrecord-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reidentification ReidRecord Example</h4>
+<pre><code class="hljs css language-json5">{<span class="hljs-attr">"type"</span>:<span class="hljs-string">"REID_EVENT"</span>,
+ <span class="hljs-attr">"reid_event"</span>:
+  {
+    <span class="hljs-attr">"match_list"</span>:
+      [
+        {
+          <span class="hljs-attr">"id"</span>:
+            {
+              <span class="hljs-attr">"first_detection_time"</span>:<span class="hljs-string">"1571138183912"</span>,
+              <span class="hljs-attr">"first_detection_key"</span>:<span class="hljs-string">"1571138183912_0"</span>,
+              <span class="hljs-attr">"first_detection_stream_id"</span>:<span class="hljs-string">"entranceCamera"</span>
+            },
+          <span class="hljs-attr">"score"</span>:<span class="hljs-number">0.988238931</span>
+        }
+      ],
+    <span class="hljs-attr">"input_stream_id"</span>:<span class="hljs-string">"exitCamera"</span>
+  }
+}
+</code></pre>
+<p>This example shows a <code>reid_event</code> event, meaning that the recognized feature
+vector is similar to a stored cluster, so it is reidentified.</p>
+<p>The <code>match_list</code> field contains a list of the stored culsters
+that are similar to the input feature vector. The <code>id</code> field contains the time,
+key, and stream information of the first detection of a feature vector belonging
+to the matching cluster; while <code>score</code> measures the similarity between the input
+feature vector and the matching cluster (<code>0.0 ≤ score ≤ 1.0</code>). The higher the
+score, the greater the similarity.</p>
+<p>The <code>input_stream_id</code> of the event shows that the feature vector comes from
+the source which has the ID <code>exitCamera</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="deletion-reidrecord-example"></a><a href="#deletion-reidrecord-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deletion ReidRecord Example</h4>
+<pre><code class="hljs css language-json5">{<span class="hljs-attr">"type"</span>:<span class="hljs-string">"DELETE_EVENT"</span>,
+  <span class="hljs-attr">"delete_event"</span>:
+    {
+      <span class="hljs-attr">"deleted_cluster"</span>:
+        {
+          <span class="hljs-attr">"first_detection_time"</span>:<span class="hljs-string">"1571138183912"</span>,
+          <span class="hljs-attr">"first_detection_key"</span>:<span class="hljs-string">"1571138183912_0"</span>,
+          <span class="hljs-attr">"first_detection_stream_id"</span>:<span class="hljs-string">"entranceCamera"</span>
+        }
+      }
+}
+</code></pre>
+<p>This example shows a <code>delete_event</code> event, meaning that a cluster is deleted
+because its retention period expired. For information on cluster retention
+period, see <code>cluster_retention_period</code> in <a href="#example-of-a-reidconfigrecord-from-kafka"><code>ReidConfigRecord</code></a>.</p>
+<p>The <code>deleted_cluster</code> field contains the first detection time, key and stream
+information of the deleted cluster.</p>
+<h2><a class="anchor" aria-hidden="true" id="person-stream-configuration"></a><a href="#person-stream-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Person Stream Configuration</h2>
+<p>The person stream can be used to add, update, or delete clusters in the internal
+database of the Reidentifier.</p>
+<p>The Reidentifier reads the Person Stream if <code>person_stream_config</code> is specified
+in the <code>input_stream_configs</code>, see the <a href="../../proto_files/ultinous/proto/common/kafka_config.proto.html">Kafka configuration proto</a>. The topic
+settings of person streams may differ from those of camera streams, see
+<code>ReidMSConfig</code> in the <a href="../../proto_files/ultinous/proto/common/kafka_superconfig.proto.html">Kafka superconfiguration proto</a>.</p>
+<p>In the person stream, the <code>key</code> of the individual records can be changed to any
+desired string (for example the name of the person or a unique ID). In addition
+to the key, the record must contain a payload that has a feature vector or cluster field.</p>
+<h3><a class="anchor" aria-hidden="true" id="managing-the-person-stream"></a><a href="#managing-the-person-stream" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Managing the Person Stream</h3>
+<p>To modify a feature vector cluster in the internal reidentification database, add a
+record to the person stream where the key is the key of the cluster to be modified
+and the payload contains the new feature vector.</p>
+<p>To delete a feature vector from the person stream, add a record to the person
+stream where the key is the key of the cluster to be deleted and the payload is
+empty.</p>
+<h3><a class="anchor" aria-hidden="true" id="example-person-stream-record"></a><a href="#example-person-stream-record" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Person Stream Record:</h3>
+<pre><code class="hljs css language-json5">{
+  <span class="hljs-attr">"key"</span>: <span class="hljs-string">"employee_1"</span>,
+  <span class="hljs-attr">"payload"</span>: {
+    <span class="hljs-attr">"features"</span>: {
+      <span class="hljs-attr">"model_id"</span>: <span class="hljs-string">"face_rec_v6"</span>,
+      <span class="hljs-attr">"feature"</span>: [<span class="hljs-number">-0.974957268</span>,<span class="hljs-number">-0.414262786</span>, ... ,<span class="hljs-number">0.200180188</span>,<span class="hljs-number">0.489824344</span>],
+      <span class="hljs-attr">"type"</span>: <span class="hljs-string">"PERSON_FACE"</span>
+    },
+    <span class="hljs-attr">"end_of_frame"</span>: <span class="hljs-literal">false</span>
+  }
+}
+</code></pre>
+<p>In this example the unique key is <code>&quot;employee_1&quot;</code> and the corresponding payload is the
+1024 byte long feature vector contained in <code>feature: [-0.974957268,-0.414262786, ... ,0.200180188,0.489824344]</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="feature-demo"></a><a href="#feature-demo" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Feature Demo</h2>
+<p>For the reidentification feature demos, see
+<a href="../../docs/demo/demo_reid_1.html#reidentification-demo-with-one-camera">Single-Camera Reidentification Demo with Pre-clustering</a> and
+<a href="../../docs/demo/demo_reid_with_name.html">Reidentification Demo with Person Names</a>.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="../../docs/dev/conf_passdet.html"><span class="arrow-prev">← </span><span>Configuring Pass Detector</span></a><a class="docs-next button" href="../../docs/dev/conf_cluster.html"><span>Configuring Feature Vector Clustering</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#environment-variables">Environment Variables</a></li><li><a href="#properties">Properties</a><ul class="toc-headings"><li><a href="#ultinousservicekafkareidauthdefsdata">ultinous.service.kafka.reid.auth.defs.data</a></li><li><a href="#ultinousservicekafkareidauthdefsfile">ultinous.service.kafka.reid.auth.defs.file</a></li><li><a href="#ultinousservicekafkareidmsconfigdata">ultinous.service.kafka.reid.ms.config.data</a></li><li><a href="#ultinousservicekafkareidmsconfigfile">ultinous.service.kafka.reid.ms.config.file</a></li><li><a href="#ultinousservicekafkareidconfigdata">ultinous.service.kafka.reid.config.data</a></li><li><a href="#ultinousservicekafkareidconfigfile">ultinous.service.kafka.reid.config.file</a></li><li><a href="#ultinousservicekafkareidmonitoringport">ultinous.service.kafka.reid.monitoring.port</a></li><li><a href="#ultinousservicekafkareidmonitoringthreads">ultinous.service.kafka.reid.monitoring.threads</a></li></ul></li><li><a href="#output-schemas">Output Schemas</a><ul class="toc-headings"><li><a href="#example-of-a-reidmsconfig-from-kafka">Example of a ReidMSConfig from Kafka</a></li><li><a href="#example-of-a-reidconfigrecord-from-kafka">Example of a ReidConfigRecord from Kafka</a></li><li><a href="#examples-of-a-reidrecord-from-kafka">Examples of a ReidRecord from Kafka</a></li></ul></li><li><a href="#person-stream-configuration">Person Stream Configuration</a><ul class="toc-headings"><li><a href="#managing-the-person-stream">Managing the Person Stream</a></li><li><a href="#example-person-stream-record">Example Person Stream Record:</a></li></ul></li><li><a href="#feature-demo">Feature Demo</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

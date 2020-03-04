@@ -157,6 +157,7 @@ parse_argument_with_value() {
 	if test_string_ends_with "${1}" "_dir"; then
 		if test_string_ends_with "${1}" "_ac_dir"; then
 			validate_not_zero_length "${argument_name}" "${1}"
+			test "${!1}" = "-" && return
 			mkdir -p "${!1}" || print_help
 		fi
 		validate_directory "${argument_name}" "${1}"

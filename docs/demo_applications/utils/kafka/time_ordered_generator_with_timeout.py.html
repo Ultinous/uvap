@@ -1,0 +1,386 @@
+<!DOCTYPE html><html lang=""><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>UVAP · Ultinous Video Analytics Platform</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Ultinous Video Analytics Platform"/><meta property="og:title" content="UVAP · Ultinous Video Analytics Platform"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../../index.html"/><meta property="og:description" content="Ultinous Video Analytics Platform"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../../js/code-block-download-button.js"></script><script src="../../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../../css/main.css"/><script src="../../../js/codetabs.js"></script></head><body><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../../"><img class="logo" src="../../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer documentContainer postContainer"><div class="wrapper"><div class="post"><div><a target="_blank" class="btnDownload" href="../../../_src_demo_applications/utils/kafka/time_ordered_generator_with_timeout.py"></a><div class="static-file-code-block"><pre><code class="hljs css language-python codeBlockCopy"><span class="hljs-keyword">import</span> logging
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">from</span> collections <span class="hljs-keyword">import</span> deque
+<span class="hljs-keyword">from</span> enum <span class="hljs-keyword">import</span> Enum
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> List, Deque
+
+<span class="hljs-keyword">from</span> confluent_kafka.cimpl <span class="hljs-keyword">import</span> Consumer, TopicPartition, OFFSET_END, OFFSET_BEGINNING, OFFSET_STORED, KafkaError
+
+<span class="hljs-keyword">from</span> utils.generator.generator_interface <span class="hljs-keyword">import</span> GeneratorInterface
+<span class="hljs-keyword">from</span> utils.generator.heartbeat <span class="hljs-keyword">import</span> HeartBeat
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BeginFlag</span><span class="hljs-params">(Enum)</span>:</span>
+    <span class="hljs-string">""" Start consuming messages from the beginnig of the steams."""</span>
+    BEGINNING = <span class="hljs-number">0</span>
+    <span class="hljs-string">""" Continue from the last committed offset. If there is no committed it will run from the end of the stream."""</span>
+    CONTINUE = <span class="hljs-number">1</span>
+    <span class="hljs-string">""" It will start reading from the end of the streams."""</span>
+    LIVE = <span class="hljs-number">2</span>
+    <span class="hljs-string">""" Continue from the last committed offset. If there is no committed it will run from the beginning of the stream."""</span>
+    CONTINUE_OR_BEGINNING = <span class="hljs-number">3</span>
+
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EndFlag</span><span class="hljs-params">(Enum)</span>:</span>
+    <span class="hljs-string">""" The generator will never stop. Will work on live streams. """</span>
+    NEVER = <span class="hljs-number">0</span>
+    <span class="hljs-string">""" The generator will stop at the end of the stream. """</span>
+    END_OF_PARTITION = <span class="hljs-number">1</span>
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getSystemTimestamp</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-keyword">return</span> int(time.time() * <span class="hljs-number">1000</span>)
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MessageExtension</span>:</span>
+    <span class="hljs-string">"""
+    Technical wrapper around kafka message. Stores the system timestamp for each kafka message when it was received.
+    """</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, msg)</span>:</span>
+        self.message = msg
+        self.ts = getSystemTimestamp()
+        logging.debug(
+            <span class="hljs-string">'New message added to queue {} at system time {} with event time: {} diff: {}'</span>
+                .format(self.message.topic(), self.ts, self.message.timestamp()[<span class="hljs-number">1</span>],
+                        self.ts - self.message.timestamp()[<span class="hljs-number">1</span>])
+        )
+
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TopicInfo</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, topic, partition=<span class="hljs-number">0</span>, drop=True)</span>:</span>
+        <span class="hljs-string">"""
+      :param topic: Name of the topic.
+      :param partition: Partition number.
+      :param drop: False: we do not drop any message. True: we drop messages arrived after the timestamp was served.
+      """</span>
+        <span class="hljs-keyword">if</span> len(topic) &gt; <span class="hljs-number">200</span>:
+            <span class="hljs-keyword">raise</span> Exception(<span class="hljs-string">'Kafka does not support topic names longer then 255 char.Topic provided: '</span> + topic)
+        self.topic = topic
+        self.partition = partition
+        self.drop = drop
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Topic</span>:</span>
+    <span class="hljs-string">"""
+    Wrapper around the topics. Stores a queue for the messages read from the kafka broker.
+    Invariants: A topics is paused only when exceeds the number if max limits.
+                The topics will be restarted (unpaused) when the number of messages are below min_limit.
+                The topics will be stopped:
+                    1) END_OF_PARTITION: if they reach the highest offset taken at construction time.
+                    2) TIMESTAMP: if the generator reached the given timestamp.
+                The self.stopped is false if and only if the TopicPartition for this topic is paused for this consumer.
+                self.last_message_ts stored the last emitted message timestamp.
+                self.end_of_partition is true if and only if the last message was EOF.
+    """</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, topic, consumer, partition, end_offset=None, drop=True, min_limit=<span class="hljs-number">100</span>, max_limit=<span class="hljs-number">1000</span>,
+                 is_live=False)</span>:</span>
+        self.paused = <span class="hljs-literal">False</span>
+        self.partition = partition
+        self.min_limit = min_limit
+        self.max_limit = max_limit
+        self.queue: Deque[MessageExtension] = deque()
+        self.end_offset = end_offset
+        self.last_message_ts = <span class="hljs-literal">None</span>
+        self.drop = drop
+        self.consumer_ref = consumer
+        self.topic_name = topic
+        self.stopped = <span class="hljs-literal">False</span>
+        self.end_of_partition = <span class="hljs-literal">False</span>
+        self.first_eop_reached = <span class="hljs-literal">False</span>
+        self.is_live = is_live
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">add_message</span><span class="hljs-params">(self, msg)</span>:</span>
+        <span class="hljs-keyword">if</span> self.stopped:
+            logging.info(<span class="hljs-string">'Topic {} stopped. We will not add more messages.'</span>.format(self.topic_name))
+            <span class="hljs-keyword">return</span>
+        <span class="hljs-keyword">if</span> self.last_message_ts <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> self.drop <span class="hljs-keyword">and</span> msg.timestamp()[<span class="hljs-number">1</span>] &lt;= self.last_message_ts:
+            logging.info(
+                <span class="hljs-string">'Drop from topic {} at system time {} for the event time {}. Last timestamp for this topic was {}.'</span>
+                <span class="hljs-string">'If you wish not to drop messages turn drop=False in the constructor.'</span>
+                    .format(self.topic_name, getSystemTimestamp(), msg.timestamp()[<span class="hljs-number">1</span>], self.last_message_ts)
+            )
+        <span class="hljs-keyword">else</span>:
+            self.queue.append(MessageExtension(msg))
+        <span class="hljs-keyword">if</span> self.end_offset <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> msg.offset() == self.end_offset:
+            logging.info(<span class="hljs-string">'On topic {} we reached the end offset {}.'</span>.format(self.topic_name, self.end_offset))
+            self.stop_topic()
+        <span class="hljs-keyword">if</span> len(self.queue) &gt; self.max_limit <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> self.paused:
+            self.pause_topic()
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">pause_topic</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> self.paused:
+            logging.info(<span class="hljs-string">'Topic {} paused. Last event timestamp: {}'</span>
+                         .format(self.topic_name, self.queue[<span class="hljs-number">-1</span>].message.timestamp() <span class="hljs-keyword">if</span> len(self.queue) &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> <span class="hljs-literal">None</span>))
+            self.paused = <span class="hljs-literal">True</span>
+            self.consumer_ref.pause([TopicPartition(topic=self.topic_name, partition=self.partition)])
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">stop_topic</span><span class="hljs-params">(self)</span>:</span>
+        self.stopped = <span class="hljs-literal">True</span>
+        self.pause_topic()
+        logging.info(<span class="hljs-string">'Topic {} stopped.'</span>.format(self.topic_name))
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_messages</span><span class="hljs-params">(self, timestamp)</span>:</span>
+        ret = []
+        <span class="hljs-keyword">while</span> len(self.queue) &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> self.queue[<span class="hljs-number">0</span>].message.timestamp()[<span class="hljs-number">1</span>] &lt;= timestamp:
+            ret.append(self.queue.popleft().message)
+        <span class="hljs-keyword">if</span> len(self.queue) &lt; self.min_limit <span class="hljs-keyword">and</span> self.paused <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> self.stopped:
+            logging.info(<span class="hljs-string">'Resume reading on topic: {}'</span>.format(self.topic_name))
+            self.paused = <span class="hljs-literal">False</span>
+            self.consumer_ref.resume([TopicPartition(topic=self.topic_name, partition=self.partition)])
+        self.last_message_ts = timestamp
+        <span class="hljs-keyword">return</span> ret
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">can_be_emitted</span><span class="hljs-params">(self, event_ts)</span>:</span>
+        <span class="hljs-keyword">if</span> self.paused <span class="hljs-keyword">or</span> self.end_of_partition:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+        <span class="hljs-keyword">if</span> len(self.queue) == <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">if</span> event_ts &lt; self.queue[<span class="hljs-number">0</span>].message.timestamp()[<span class="hljs-number">1</span>]:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+        <span class="hljs-keyword">elif</span> event_ts == self.queue[<span class="hljs-number">0</span>].message.timestamp()[<span class="hljs-number">1</span>]:
+            <span class="hljs-keyword">return</span> self.first_eop_reached <span class="hljs-keyword">or</span> self.is_live
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># This shouldn't happen but who knows.</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TimeOrderedGeneratorWithTimeout</span><span class="hljs-params">(GeneratorInterface)</span>:</span>
+    <span class="hljs-string">"""
+    A general generator which can read multiple topics and merge their messages in time order.
+    A message must be emitted at (arrival_system_time + latency_ms).
+    In batch mode (until reaching the first EOP on each stream) the generator will not discard any messages.
+    """</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(
+            self
+            , broker
+            , groupid
+            , topics_infos: List[TopicInfo]
+            , latency_ms
+            , commit_interval_sec=None
+            , group_by_time=False
+            , begin_timestamp=None
+            , begin_flag=None
+            , end_timestamp=None
+            , end_flag=None
+            , heartbeat_interval_ms=<span class="hljs-number">-1</span>
+    )</span>:</span>
+        <span class="hljs-string">"""
+        :param broker: Broker to connect to.
+        :param groupid: Group id of the consumer.
+        :param topics_infos: [TopicInfo()] - list of TopicInfo objects.
+        :param latency_ms: (integer &gt;=0) Latency to wait before serving a message.
+                            After this messages with lower or equal timestamps will be discarded.
+        :param commit_interval_sec: How many seconds to wait between commits.-1 does not commit with the given group id.
+        :param group_by_time: Group messages with the same timestamp. This will yield a list of messages.
+        :param begin_timestamp: Timestamp of the kafka messages where the generator will start.
+        :param begin_flag: BEGINNING, CONTINUE, LIVE - CONTINUE will continue from the last committed offset.
+                            If there was no committed offset will start from the end of the stream.
+        :param end_timestamp: Timestamp where to end the reading.
+        :param end_flag: NEVER, END_OF_PARTITION
+        :param heartbeat_interval_ms: -1 does not produce heartbeat. After every interval will produce a HeartBeat typed
+                                        message with the timestamp.
+        """</span>
+        <span class="hljs-keyword">if</span> begin_timestamp <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> begin_flag <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">raise</span> Exception(<span class="hljs-string">'You can not set the begin timestamp and a flag in the same time.'</span>)
+        <span class="hljs-keyword">if</span> end_timestamp <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> end_flag <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">raise</span> Exception(<span class="hljs-string">'You can not set the end timestamp and a flag in the same time.'</span>)
+        <span class="hljs-keyword">if</span> begin_timestamp <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> end_timestamp <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> begin_timestamp &gt;= end_timestamp:
+            <span class="hljs-keyword">raise</span> Exception(<span class="hljs-string">'The begin timestamp is larger then the end timestamp.'</span>)
+        <span class="hljs-keyword">if</span> begin_flag <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> end_flag <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> \
+                begin_flag == BeginFlag.LIVE <span class="hljs-keyword">and</span> end_flag == EndFlag.END_OF_PARTITION:
+            <span class="hljs-keyword">raise</span> Exception(<span class="hljs-string">'You can not start in live and process until the end of the streams.'</span>)
+        <span class="hljs-keyword">if</span> end_flag <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> (end_flag == EndFlag.END_OF_PARTITION <span class="hljs-keyword">or</span> end_flag == EndFlag.NEVER):
+            <span class="hljs-keyword">raise</span> Exception(<span class="hljs-string">'Unknow end flag: {} . Please use the given enum to use proper end flag.'</span>.format(end_flag))
+        self.end_ts = end_timestamp
+        self.end_flag = end_flag
+        self.commit_interval_sec = commit_interval_sec
+        self.latency_ms = latency_ms
+        self.group_by_time = group_by_time
+        self.max_poll_interval_ms = <span class="hljs-number">5</span> * <span class="hljs-number">60</span> * <span class="hljs-number">1000</span>
+        self.consumer = Consumer(
+            {<span class="hljs-string">'bootstrap.servers'</span>: broker,
+             <span class="hljs-string">'group.id'</span>: groupid,
+             <span class="hljs-string">'enable.auto.commit'</span>: <span class="hljs-literal">False</span>,
+             <span class="hljs-string">'auto.offset.reset'</span>: <span class="hljs-string">'earliest'</span> <span class="hljs-keyword">if</span> begin_flag == BeginFlag.CONTINUE_OR_BEGINNING <span class="hljs-keyword">else</span> <span class="hljs-string">'latest'</span>,
+             <span class="hljs-string">'fetch.wait.max.ms'</span>: <span class="hljs-number">20</span>,
+             <span class="hljs-string">'max.poll.interval.ms'</span>: self.max_poll_interval_ms,
+             <span class="hljs-string">'enable.partition.eof'</span>: <span class="hljs-literal">True</span>})
+        self.last_poll = <span class="hljs-literal">None</span>
+
+        self.tps = []
+        self.queues = {}
+        self.messages_to_be_committed = {}
+        self.begin_timestamp = begin_timestamp
+        <span class="hljs-keyword">for</span> ti <span class="hljs-keyword">in</span> topics_infos:
+            topic_name = ti.topic
+            self.messages_to_be_committed[topic_name] = {<span class="hljs-string">'last_msg'</span>: <span class="hljs-literal">None</span>, <span class="hljs-string">'committed'</span>: <span class="hljs-literal">True</span>}
+            <span class="hljs-keyword">if</span> begin_timestamp <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                self.tps.extend(self.consumer.offsets_for_times(
+                    [TopicPartition(topic_name, partition=ti.partition, offset=begin_timestamp)]))
+            <span class="hljs-keyword">elif</span> begin_flag <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                <span class="hljs-keyword">if</span> begin_flag == BeginFlag.BEGINNING:
+                    self.tps.append(TopicPartition(topic_name, partition=ti.partition, offset=OFFSET_BEGINNING))
+                <span class="hljs-keyword">elif</span> begin_flag <span class="hljs-keyword">in</span> (BeginFlag.CONTINUE, BeginFlag.CONTINUE_OR_BEGINNING):
+                    self.tps.append(TopicPartition(topic_name, partition=ti.partition, offset=OFFSET_STORED))
+                <span class="hljs-keyword">elif</span> begin_flag == BeginFlag.LIVE:
+                    self.tps.append(TopicPartition(topic_name, partition=ti.partition, offset=OFFSET_END))
+                <span class="hljs-keyword">else</span>:
+                    <span class="hljs-keyword">raise</span> Exception(<span class="hljs-string">'Unknown begin flag. Please use the enum to provide proper begin flag.'</span>)
+            <span class="hljs-keyword">else</span>:
+                self.tps.append(TopicPartition(topic_name, partition=ti.partition, offset=OFFSET_END))
+            end_offset = <span class="hljs-literal">None</span>
+            <span class="hljs-keyword">if</span> end_flag <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> end_flag == EndFlag.END_OF_PARTITION:
+                end_offset = self.consumer.get_watermark_offsets(TopicPartition(topic_name, <span class="hljs-number">0</span>))[<span class="hljs-number">1</span>] - <span class="hljs-number">1</span>
+            <span class="hljs-keyword">if</span> end_offset <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> end_offset &gt;= <span class="hljs-number">0</span>:
+                self.queues[topic_name] = Topic(
+                    topic_name
+                    , self.consumer
+                    , end_offset=end_offset
+                    , partition=ti.partition
+                    , drop=ti.drop
+                    , is_live=(begin_timestamp <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> begin_flag <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>) <span class="hljs-keyword">or</span> begin_flag == BeginFlag.LIVE
+                )
+        self.consumer.assign(self.tps)
+        self.last_commit = time.time()
+        self.running = <span class="hljs-literal">True</span>
+        self.heartbeat_interval_ms = heartbeat_interval_ms
+        self.next_hb = <span class="hljs-literal">None</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">stopGenerator</span><span class="hljs-params">(self)</span>:</span>
+        self.running = <span class="hljs-literal">False</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">_serve_messages</span><span class="hljs-params">(self, message_to_serve)</span>:</span>
+        <span class="hljs-keyword">if</span> self.commit_interval_sec <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> self.group_by_time:
+            <span class="hljs-keyword">for</span> msg <span class="hljs-keyword">in</span> message_to_serve:
+                self.messages_to_be_committed[msg.topic()][<span class="hljs-string">'last_msg'</span>] = msg
+                self.messages_to_be_committed[msg.topic()][<span class="hljs-string">'committed'</span>] = <span class="hljs-literal">False</span>
+
+        <span class="hljs-comment"># serve messages</span>
+        <span class="hljs-keyword">if</span> self.group_by_time:
+            <span class="hljs-keyword">yield</span> message_to_serve
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">for</span> msg <span class="hljs-keyword">in</span> message_to_serve:
+                self.messages_to_be_committed[msg.topic()][<span class="hljs-string">'last_msg'</span>] = msg
+                self.messages_to_be_committed[msg.topic()][<span class="hljs-string">'committed'</span>] = <span class="hljs-literal">False</span>
+                <span class="hljs-keyword">yield</span> msg
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> self.running:
+                    <span class="hljs-keyword">break</span>
+
+        <span class="hljs-comment"># commit messages when they were delivered</span>
+        current_time = time.time()
+        <span class="hljs-keyword">if</span> self.commit_interval_sec <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> (
+                current_time - self.last_commit) &gt; self.commit_interval_sec:
+            <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> self.messages_to_be_committed.keys():
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> self.messages_to_be_committed[k][<span class="hljs-string">'committed'</span>]:
+                    self.consumer.commit(self.messages_to_be_committed[k][<span class="hljs-string">'last_msg'</span>])
+                    self.messages_to_be_committed[k][<span class="hljs-string">'committed'</span>] = <span class="hljs-literal">True</span>
+            self.last_commit = current_time
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">_serve_heartbeat</span><span class="hljs-params">(self, current_timestamp_ms)</span>:</span>
+        <span class="hljs-keyword">if</span> self.next_hb <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">if</span> self.begin_timestamp <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                self.next_hb = self.begin_timestamp
+            <span class="hljs-keyword">else</span>:
+                self.next_hb = current_timestamp_ms
+        <span class="hljs-keyword">while</span> self.next_hb &lt;= current_timestamp_ms:
+            <span class="hljs-keyword">yield</span> HeartBeat(self.next_hb)
+            self.next_hb += self.heartbeat_interval_ms
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">_can_serve</span><span class="hljs-params">(self)</span>:</span>
+        min_ets = min([q.queue[<span class="hljs-number">0</span>].message.timestamp()[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> q <span class="hljs-keyword">in</span> self.queues.values() <span class="hljs-keyword">if</span> len(q.queue) &gt; <span class="hljs-number">0</span>], default=<span class="hljs-number">-1</span>)
+        <span class="hljs-keyword">if</span> min_ets == <span class="hljs-number">-1</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+        deadline = getSystemTimestamp() - self.latency_ms
+        <span class="hljs-keyword">if</span> all([q.can_be_emitted(min_ets) <span class="hljs-keyword">for</span> q <span class="hljs-keyword">in</span> self.queues.values()]) <span class="hljs-keyword">and</span> \
+                any([q.queue[<span class="hljs-number">0</span>].ts &lt; deadline <span class="hljs-keyword">for</span> q <span class="hljs-keyword">in</span> self.queues.values()
+                     <span class="hljs-keyword">if</span> len(q.queue) &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> q.queue[<span class="hljs-number">0</span>].message.timestamp()[<span class="hljs-number">1</span>] == min_ets]):
+            <span class="hljs-keyword">return</span> min_ets
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getMessages</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">while</span> self.running:
+            <span class="hljs-keyword">if</span> all([v.stopped <span class="hljs-keyword">for</span> v <span class="hljs-keyword">in</span> self.queues.values()]):
+                message_to_serve = []
+                <span class="hljs-keyword">for</span> q <span class="hljs-keyword">in</span> self.queues.values():
+                    message_to_serve.extend(q.queue)
+                message_to_serve = [m.message <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> message_to_serve]
+                message_to_serve.sort(key=<span class="hljs-keyword">lambda</span> x: x.timestamp()[<span class="hljs-number">1</span>])
+                <span class="hljs-keyword">while</span> len(message_to_serve) &gt; <span class="hljs-number">0</span>:
+                    ts = message_to_serve[<span class="hljs-number">0</span>].timestamp()[<span class="hljs-number">1</span>]
+                    serve_it = []
+                    <span class="hljs-keyword">while</span> len(message_to_serve) &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> message_to_serve[<span class="hljs-number">0</span>].timestamp()[<span class="hljs-number">1</span>] == ts:
+                        serve_it.append(message_to_serve.pop(<span class="hljs-number">0</span>))
+                    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> self.heartbeat_interval_ms == <span class="hljs-number">-1</span>:
+                        <span class="hljs-keyword">yield</span> <span class="hljs-keyword">from</span> self._serve_heartbeat(ts)
+                    <span class="hljs-keyword">yield</span> <span class="hljs-keyword">from</span> self._serve_messages(serve_it)
+                logging.info(<span class="hljs-string">'Exiting from generator.'</span>)
+                <span class="hljs-keyword">break</span>
+            self.last_poll = getSystemTimestamp()
+            msg = self.consumer.poll(<span class="hljs-number">0.001</span>)
+            <span class="hljs-keyword">if</span> msg <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                <span class="hljs-keyword">if</span> msg.error():
+                    <span class="hljs-keyword">if</span> msg.error().code() == KafkaError._PARTITION_EOF:
+                        <span class="hljs-keyword">if</span> msg.topic() <span class="hljs-keyword">in</span> self.queues:
+                            self.queues[msg.topic()].first_eop_reached = <span class="hljs-literal">True</span>
+                            self.queues[msg.topic()].end_of_partition = <span class="hljs-literal">True</span>
+                    <span class="hljs-keyword">else</span>:
+                        logging.error(<span class="hljs-string">'Unhandle error: {}'</span>.format(msg.error()))
+                        <span class="hljs-keyword">break</span>
+                <span class="hljs-keyword">else</span>:
+                    self.queues[msg.topic()].end_of_partition = <span class="hljs-literal">False</span>
+                    <span class="hljs-keyword">if</span> self.end_ts <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> msg.timestamp()[<span class="hljs-number">1</span>] &gt; self.end_ts:
+                        self.queues[msg.topic()].stop_topic()
+                    <span class="hljs-keyword">else</span>:
+                        self.queues[msg.topic()].add_message(msg)
+            <span class="hljs-keyword">while</span> self.running:
+                event_ts_to_serve = self._can_serve()
+                <span class="hljs-keyword">if</span> event_ts_to_serve <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> \
+                        self.max_poll_interval_ms - (getSystemTimestamp() - self.last_poll) &lt; <span class="hljs-number">30000</span>:
+                    <span class="hljs-keyword">if</span> self.end_flag == EndFlag.NEVER <span class="hljs-keyword">and</span> self.heartbeat_interval_ms != <span class="hljs-number">-1</span> \
+                            <span class="hljs-keyword">and</span> any([q.end_of_partition <span class="hljs-keyword">for</span> q <span class="hljs-keyword">in</span> self.queues.values()]):
+                        <span class="hljs-keyword">if</span> self.next_hb <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+                            self.next_hb = min(getSystemTimestamp() - self.latency_ms,
+                                               min([q.queue[<span class="hljs-number">0</span>].message.timestamp()[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> q <span class="hljs-keyword">in</span> self.queues.values()
+                                                    <span class="hljs-keyword">if</span> len(q.queue) &gt; <span class="hljs-number">0</span>], default=sys.maxsize))
+                        <span class="hljs-keyword">if</span> self.next_hb &lt; min(getSystemTimestamp() - self.latency_ms,
+                                              min([q.queue[<span class="hljs-number">0</span>].message.timestamp()[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> q <span class="hljs-keyword">in</span> self.queues.values()
+                                                   <span class="hljs-keyword">if</span> len(q.queue) &gt; <span class="hljs-number">0</span>], default=sys.maxsize)):
+                            <span class="hljs-keyword">yield</span> <span class="hljs-keyword">from</span> self._serve_heartbeat(self.next_hb)
+                    <span class="hljs-keyword">break</span>
+                <span class="hljs-keyword">if</span> self.heartbeat_interval_ms != <span class="hljs-number">-1</span>:
+                    <span class="hljs-keyword">yield</span> <span class="hljs-keyword">from</span> self._serve_heartbeat(event_ts_to_serve)
+                message_to_serve = []
+                <span class="hljs-keyword">for</span> q <span class="hljs-keyword">in</span> self.queues.values():
+                    message_to_serve.extend(q.get_messages(event_ts_to_serve))
+                <span class="hljs-keyword">yield</span> <span class="hljs-keyword">from</span> self._serve_messages(message_to_serve)
+                <span class="hljs-keyword">if</span> self.end_ts <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> self.end_ts &lt;= event_ts_to_serve:
+                    self.running = <span class="hljs-literal">False</span>
+        self.consumer.close()
+
+</code></pre>
+</div></div></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../../docs/help/uvap_gloss.html">Glossary</a><a href="../../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../../docs/feat/feat_overview.html">Key Features</a><a href="../../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

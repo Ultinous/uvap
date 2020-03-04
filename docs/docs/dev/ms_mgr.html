@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Multi-Graph Runner · UVAP</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Multi-Graph Runner"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Multi-Graph Runner · UVAP"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../index.html"/><meta property="og:description" content="# Multi-Graph Runner"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../js/code-block-download-button.js"></script><script src="../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../css/main.css"/><script src="../../js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../"><img class="logo" src="../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class="siteNavGroupActive"><a href="../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Microservices</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Developer Guide<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_architect.html">Architecture</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_data_model.html">Data Model</a></li><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Microservices</h4><ul><li class="navListItem navListItemActive"><a class="navItem" href="../../docs/dev/ms_mgr.html">Multi-Graph Runner</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_track.html">Tracker</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_passdet.html">Pass Detector</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_reid.html">Reidentifier</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_cluster.html">Feature Vector Clustering</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_det_filter.html">Detection Filter</a></li></ul></div><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Microservice Configuration</h4><ul><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_mgr.html">Configuring Multi-Graph Runner</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_track.html">Configuring Tracker</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_passdet.html">Configuring Pass Detector</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_reid.html">Configuring Reidentifier</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_cluster.html">Configuring Feature Vector Clustering</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_det_filter.html">Configuring the Detection Filter</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_superconfig.html">Microservice Superconfiguration</a></li></ul></div><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_extend.html">Extending UVAP</a></li><li class="navListItem"><a class="navItem" href="../../docs/operation/op_opguide.html">UVAP Operation Guide</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="multi-graph-runner"></a><a href="#multi-graph-runner" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Multi-Graph Runner</h1>
+<p><strong>Multi-Graph Runner (MGR)</strong> uses the image processing algorithm to turn video
+streams into lightweight data streams, such as a detection stream, or a face
+feature vector stream. <strong>MGR</strong> has various built-in image processing algorithms
+that can be combined in a flexible way to produce the desired output.</p>
+<p>There are two types of algorithms:</p>
+<ul>
+<li><p>Deep learning models (such as; face detection, face recognition, and full
+body pose)</p></li>
+<li><p>Traditional image processing algorithms (such as; image resize, image
+rotation, cropping, and drawing)</p></li>
+</ul>
+<p>Output of the <strong>MGR</strong> are typically lightweight data streams written to Kafka.
+However, <strong>MGR</strong> can also produce image sequences or video streams for debugging
+or presentation purposes. These streams need to be compressed before being sent
+towards Kafka, because the bandwidth of uncompressed video streams is typically
+close to or over disk and network I/O limits, so they cannot be handled by Kafka
+otherwise. Modern video compression algorithms (such as H256) have a compression
+ratio better than 1:100.</p>
+<blockquote>
+<p><strong>Note:</strong>  <br>
+<strong>MGR</strong> uses Nvidia GPUs to do most of the data processing. One <strong>MGR</strong> instance
+can process multiple video streams in real-time. One MGR can handle only one
+GPU, so for each GPU, a separate <strong>MGR</strong> instance has to be run.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="deployment"></a><a href="#deployment" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deployment</h2>
+<p>To run MGR, the server must have an Nvidia 1060 GPU with 6GB GPU memory or
+better. MGR is has to be executed with <code>nvidia-docker</code>. If the server
+has more GPUs, a separate MGR instance is needed for each GPU for optimal
+performance.</p>
+<h2><a class="anchor" aria-hidden="true" id="runtime-performance"></a><a href="#runtime-performance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Runtime Performance</h2>
+<p>One MGR instance can process multiple video streams but the load of the system
+has to be carefully calculated. If the MGR has more tasks than it is able to
+handle, it throws away input frames without processing or  queues them. This
+can be controlled with the drop mode in the <code>environment</code> section:</p>
+<pre><code class="hljs css language-protobuf codeBlockCopy">environment:
+{
+  debug_level: <span class="hljs-number">4</span>
+  profile: <span class="hljs-literal">true</span>
+  gui: NORMAL
+  #drop_off: {}    # do not drop frames, instead queue them up
+  drop_on: {}    # if the system gets overloaded drop frames
+  kafka_broker_list: <span class="hljs-string">"localhost:9092"</span>
+}
+</code></pre>
+<p>Using the <code>nvidia-smi</code> tool to monitor GPU load is recommended.</p>
+<p>Though runtime performance depends on various factors, the following operations
+are the most demanding:</p>
+<ul>
+<li>Running deep learning models</li>
+<li>Encoding video</li>
+<li>Decoding video</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="detector"></a><a href="#detector" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Detector</h3>
+<p>The first deep learning model is typically a detector (for example, head
+detector). This is one of the most demanding operations. Cost of the detector
+is a complex function but the most important factors are the following:</p>
+<ul>
+<li><p><strong>FPS</strong>: cost of the detector is linear with the frame rate. If the system
+is overloaded one of the easiest way to decrease is to decrease the frame rate.
+It can be done on the camera or by using the <code>keep_rate</code> and <code>frame_period_ms</code>
+parameter. The <code>keep_rate</code> is an optional parameter for changing the frequency of
+analysis on frames. By default, UVAP uses all frames for the analysis. If you set
+the <code>keep_rate</code> to e.g. <code>3</code>, UVAP will use every 3rd frame for analysis,
+so it will be faster. Emphasize that <code>frame_period_ms</code> is about camera frame rate.
+The <code>keep_rate</code> is applied after that.<br>
+Example:<br>
+frame_period_ms = 40 # 25 FPS<br>
+keep_rate = 3<br>
+It means that process every 3rd frame from a camera that expected to give 25 frames per seconds.</p></li>
+<li><p><strong>Resolution</strong>: cost of the detector is directly proportional to the number
+of pixels (and quadratically to the image size). The resolution can be set
+with the <code>scaling_factor</code> parameter. Halving <code>scaling_factor</code> decreases the
+cost of the detector four times.</p></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="skeleton"></a><a href="#skeleton" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Skeleton</h3>
+<p>Skeleton models have the same cost characteristics as the detector. It does not
+support scale factor (it rescales the input image to a fixed resolution). FPS
+is the only option to control the load of this model.</p>
+<h3><a class="anchor" aria-hidden="true" id="other-models"></a><a href="#other-models" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Other Models</h3>
+<p>The cost of head pose, face recognition, demographics are all proportional to
+the number of crops. The load can increase significantly in crowded environments.</p>
+<!--TODO: use object filter to limit the number of crops. */-->
+<h3><a class="anchor" aria-hidden="true" id="saving-video"></a><a href="#saving-video" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Saving Video</h3>
+<p>Saving video always involves video encoding, which is a computation heavy
+operation.</p>
+<!--TODO: write to avi, write to kafka.-->
+<p><em>Further reading:</em></p>
+<ul>
+<li><a href="../../docs/dev/conf_mgr.html">Configuring Multi-Graph Runner</a></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="../../docs/dev/uvap_data_model.html"><span class="arrow-prev">← </span><span>Data Model</span></a><a class="docs-next button" href="../../docs/dev/ms_track.html"><span>Tracker</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#deployment">Deployment</a></li><li><a href="#runtime-performance">Runtime Performance</a><ul class="toc-headings"><li><a href="#detector">Detector</a></li><li><a href="#skeleton">Skeleton</a></li><li><a href="#other-models">Other Models</a></li><li><a href="#saving-video">Saving Video</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

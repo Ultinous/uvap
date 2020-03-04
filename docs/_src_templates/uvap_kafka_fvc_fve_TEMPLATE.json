@@ -1,0 +1,41 @@
+{
+  "sources":[
+    {
+      "broker_list":"{{ KAFKA_BROKER_LIST }}",
+      "name":"{{ KAFKA_TOPIC_PREFIX }}.cam.{{ INDEX }}.fvecs.FeatureVectorRecord.json"
+    }
+  ],
+  "source_options":{
+    "start":"START_NOW",
+    "end":"END_NEVER"
+  },
+  "target_options":{
+    "handling":"REPLACE"
+  },
+  "target":{
+    "broker_list":"{{ KAFKA_BROKER_LIST }}",
+    "name":"{{ KAFKA_TOPIC_PREFIX }}.cam.{{ INDEX }}.fvc.FVClusterUpdateRecord.json"
+  },
+  "config_data":{
+    "clustering_config": {
+      "method": "SIMPLE_AVERAGE",
+      "cluster_realization": {
+        "num_samples": 5,
+        "time_limit_ms": 10000,
+        "realized_cluster_action": "KEEP_REALIZED"
+      },
+      "save_internal_state": false,
+      "start_from_internal_state": false
+    },
+    "input_stream_configs": [{
+      "stream_id": "uvap{{ INDEX }}",
+      "fv_field_selector": {
+        "feature_vector_path": "features"
+      },
+      "reg_stream_config": {
+        "reg_threshold": 0.8,
+        "cluster_retention_period_ms": 35000
+      }
+    }]
+  }
+}

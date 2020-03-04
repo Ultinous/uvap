@@ -1,0 +1,291 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Configuring Tracker · UVAP</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Configuring Tracker"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Configuring Tracker · UVAP"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../index.html"/><meta property="og:description" content="# Configuring Tracker"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../js/code-block-download-button.js"></script><script src="../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../css/main.css"/><script src="../../js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../"><img class="logo" src="../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class="siteNavGroupActive"><a href="../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Microservice Configuration</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Developer Guide<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_architect.html">Architecture</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_data_model.html">Data Model</a></li><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Microservices</h4><ul><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_mgr.html">Multi-Graph Runner</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_track.html">Tracker</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_passdet.html">Pass Detector</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_reid.html">Reidentifier</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_cluster.html">Feature Vector Clustering</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_det_filter.html">Detection Filter</a></li></ul></div><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Microservice Configuration</h4><ul><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_mgr.html">Configuring Multi-Graph Runner</a></li><li class="navListItem navListItemActive"><a class="navItem" href="../../docs/dev/conf_track.html">Configuring Tracker</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_passdet.html">Configuring Pass Detector</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_reid.html">Configuring Reidentifier</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_cluster.html">Configuring Feature Vector Clustering</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_det_filter.html">Configuring the Detection Filter</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_superconfig.html">Microservice Superconfiguration</a></li></ul></div><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_extend.html">Extending UVAP</a></li><li class="navListItem"><a class="navItem" href="../../docs/operation/op_opguide.html">UVAP Operation Guide</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="configuring-tracker"></a><a href="#configuring-tracker" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring Tracker</h1>
+<p>This microservice does not require GPU resources.</p>
+<p>The <strong>Tracker</strong> microservice processes the record from a source topic and writes
+the result to its target topic.</p>
+<p><strong>Tracker</strong> can run in <em>batch mode</em>. When running in batch mode,
+the microservice stops after processing the last record.
+Otherwise it keeps running and waits for more records.</p>
+<h2><a class="anchor" aria-hidden="true" id="environment-variables"></a><a href="#environment-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Environment Variables</h2>
+<ul>
+<li><code>KAFKA_TRACKER_MS_PROPERTY_FILE_PATHS</code>: property file list</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="properties"></a><a href="#properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Properties</h2>
+<p>For an example of <strong>Tracker</strong> properties,
+see <a href="../../templates/uvap_kafka_tracker_base_TEMPLATE.properties.html">Tracker Template Properties</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackersourcebrokerlist"></a><a href="#ultinousservicekafkatrackersourcebrokerlist" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.source.broker.list</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.source.broker.list</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Broker list of the source.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+<tr><td>Value Type</td><td><code>string</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackersourceconsumergroup"></a><a href="#ultinousservicekafkatrackersourceconsumergroup" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.source.consumer.group</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.source.consumer.group</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Source consumer group.</td></tr>
+<tr><td>Required</td><td>Optional</td></tr>
+<tr><td>Value Type</td><td><code>string</code></td></tr>
+<tr><td>Default Value</td><td><code>default.consumer</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackersourcetopic"></a><a href="#ultinousservicekafkatrackersourcetopic" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.source.topic</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.source.topic</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Source topic name, see <a href="../../docs/dev/uvap_data_model.html#topic-naming-convention">Topic Naming Convention</a>.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+<tr><td>Value Type</td><td><code>string</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackersourceusername"></a><a href="#ultinousservicekafkatrackersourceusername" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.source.username</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.source.username</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>SASL authentication username of the source.</td></tr>
+<tr><td>Required</td><td>Required if source SASL authentication is enabled.</td></tr>
+<tr><td>Value Type</td><td><code>string</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackersourcepassword"></a><a href="#ultinousservicekafkatrackersourcepassword" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.source.password</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.source.password</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>SASL authentication password of the source.</td></tr>
+<tr><td>Required</td><td>Required if source username is set.</td></tr>
+<tr><td>Value Type</td><td><code>string</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackersourcestartts"></a><a href="#ultinousservicekafkatrackersourcestartts" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.source.startTS</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.source.startTS</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Starting time of source processing.</td></tr>
+<tr><td>Required</td><td>Optional</td></tr>
+<tr><td>Value Type</td><td><strong>N/A</strong></td></tr>
+<tr><td>Default Value</td><td><code>0</code></td></tr>
+<tr><td>Available values</td><td><ul><li><code>0</code>: start from the first record.</li><li><code>NOW</code>: start from the current timestamp.</li><li>ISO-8601 (millisecond and time zone are optional): start from a specific timestamp.</br>Example: <code>2019-04-08 10:10:24.123 +01:00</code></li></ul></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackersourceendts"></a><a href="#ultinousservicekafkatrackersourceendts" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.source.endTS</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.source.endTS</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Ending time of source processing.</td></tr>
+<tr><td>Required</td><td>Optional</td></tr>
+<tr><td>Value Type</td><td><strong>N/A</strong></td></tr>
+<tr><td>Default Value</td><td><code>NEVER</code></td></tr>
+<tr><td>Available values</td><td><ul><li><code>NEVER</code>: the microservice will not stop after the last record has been processed, will wait for new input records.</li><li><code>END</code>: the microservice stops after processing the last source record.</li><li>ISO-8601 (millisecond and time zone are optional): end at a specific timestamp.</br>Example: <code>2019-04-08 10:10:24.123 +01:00</li></ul></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackertargetbrokerlist"></a><a href="#ultinousservicekafkatrackertargetbrokerlist" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.target.broker.list</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.target.broker.list</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Broker list of the target.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+<tr><td>Value Type</td><td><code>string</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackertargettopic"></a><a href="#ultinousservicekafkatrackertargettopic" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.target.topic</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.target.topic</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Target topic name, see <a href="../../docs/dev/uvap_data_model.html#topic-naming-convention">Topic Naming Convention</a>.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+<tr><td>Value Type</td><td><code>string</code></td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackertargetusername"></a><a href="#ultinousservicekafkatrackertargetusername" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.target.username</h4>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.target.username</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>SASL authentication username of the target.</td></tr>
+<tr><td>Required</td><td>Required if target SASL authentication is enabled.</td></tr>
+<tr><td>Value Type</td><td><code>string</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackertargetpassword"></a><a href="#ultinousservicekafkatrackertargetpassword" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.target.password</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.target.password</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>SASL authentication password of the target.</td></tr>
+<tr><td>Required</td><td>Required if target username is set.</td></tr>
+<tr><td>Value Type</td><td><code>string</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackertargethandling"></a><a href="#ultinousservicekafkatrackertargethandling" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.target.handling</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.target.handling</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>The target's topic handling option.</td></tr>
+<tr><td>Required</td><td><strong>N/A</strong></td></tr>
+<tr><td>Value Type</td><td><strong>N/A</strong></td></tr>
+<tr><td>Default Value</td><td><code>CHECK_TS</code></td></tr>
+<tr><td>Available values</td><td><ul><li><code>REPLACE</code>: Delete target topic.</li><li><code>CHECK_TS</code>: Raise error if topic exists with more recent <b>latest timestamp</b>.</li><li><code>SKIP_TS</code>: Skip events up to the latest timestamp in target topic.</li></ul></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackerconfig"></a><a href="#ultinousservicekafkatrackerconfig" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.config</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.config</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Tracking configuration file path.</br>The <code>TrackingConfigRecord</code> definition should be in JSON format as defined in the <a href="../../proto_files/ultinous/proto/common/kafka_config.proto.html">Kafka configuration proto</a>.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+<tr><td>Value Type</td><td><code>string</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackermonitoringport"></a><a href="#ultinousservicekafkatrackermonitoringport" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.monitoring.port</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.monitoring.port</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Monitoring server port.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+<tr><td>Value Type</td><td><code>uint16</code></td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="ultinousservicekafkatrackermonitoringthreads"></a><a href="#ultinousservicekafkatrackermonitoringthreads" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>ultinous.service.kafka.tracker.monitoring.threads</h3>
+<table>
+<thead>
+<tr><th>Property</th><th><code>ultinous.service.kafka.tracker.monitoring.threads</code></th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Monitoring server thread pool size.</td></tr>
+<tr><td>Required</td><td><strong>N/A</strong></td></tr>
+<tr><td>Value Type</td><td><code>uint16</code></td></tr>
+<tr><td>Default Value</td><td><code>1</code></td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="output-schemas"></a><a href="#output-schemas" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Output Schemas</h2>
+<p>The schema definition of <code>ObjectDetectionRecord</code> and <code>TrackChangeRecord</code> can be
+found in the <a href="../../proto_files/ultinous/proto/common/kafka_data.proto.html">Kafka data proto</a>.</p>
+<p>Example of a <code>TrackChangeRecord</code> from Kafka:</p>
+<pre><code class="hljs css language-json5">{
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-number">1558509708748</span>,
+  <span class="hljs-attr">"key"</span>: <span class="hljs-string">"1558509707748_0"</span>,
+  <span class="hljs-attr">"value"</span>: {
+    <span class="hljs-attr">"end_of_track"</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">"detection_key"</span>: <span class="hljs-string">"1558509708748_0"</span>,
+    <span class="hljs-attr">"point"</span>: {
+      <span class="hljs-attr">"x"</span>: <span class="hljs-number">1487</span>,
+      <span class="hljs-attr">"y"</span>: <span class="hljs-number">503</span>
+    }
+  },
+  <span class="hljs-attr">"headers"</span>: <span class="hljs-string">"[\n  ('type', b'TrackChange'),\n  ('format', b'json')\n]"</span>
+}
+</code></pre>
+<p><a name="empty_detection_key"></a></p>
+<blockquote>
+<p><strong>Empty Detection Key</strong>  <br>
+The <code>detection_key</code> is empty if there is no real detection and the
+change is a prediction of the next track position (or an end of a track).<br>
+This means that there is no reference to any video frames or detections
+in another Kafka topic but these records are necessary for processing the
+whole &quot;lifecycle&quot; of a track.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="feature-demo"></a><a href="#feature-demo" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Feature Demo</h2>
+<p>For the <strong>Tracker</strong> feature demo, see <a href="../../docs/demo/demo_track.html">Tracker Demo</a>.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="../../docs/dev/conf_mgr.html"><span class="arrow-prev">← </span><span>Configuring Multi-Graph Runner</span></a><a class="docs-next button" href="../../docs/dev/conf_passdet.html"><span>Configuring Pass Detector</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#environment-variables">Environment Variables</a></li><li><a href="#properties">Properties</a><ul class="toc-headings"><li><a href="#ultinousservicekafkatrackersourcebrokerlist">ultinous.service.kafka.tracker.source.broker.list</a></li><li><a href="#ultinousservicekafkatrackersourceconsumergroup">ultinous.service.kafka.tracker.source.consumer.group</a></li><li><a href="#ultinousservicekafkatrackersourcetopic">ultinous.service.kafka.tracker.source.topic</a></li><li><a href="#ultinousservicekafkatrackersourceusername">ultinous.service.kafka.tracker.source.username</a></li><li><a href="#ultinousservicekafkatrackersourcepassword">ultinous.service.kafka.tracker.source.password</a></li><li><a href="#ultinousservicekafkatrackersourcestartts">ultinous.service.kafka.tracker.source.startTS</a></li><li><a href="#ultinousservicekafkatrackersourceendts">ultinous.service.kafka.tracker.source.endTS</a></li><li><a href="#ultinousservicekafkatrackertargetbrokerlist">ultinous.service.kafka.tracker.target.broker.list</a></li><li><a href="#ultinousservicekafkatrackertargettopic">ultinous.service.kafka.tracker.target.topic</a></li><li><a href="#ultinousservicekafkatrackertargetpassword">ultinous.service.kafka.tracker.target.password</a></li><li><a href="#ultinousservicekafkatrackertargethandling">ultinous.service.kafka.tracker.target.handling</a></li><li><a href="#ultinousservicekafkatrackerconfig">ultinous.service.kafka.tracker.config</a></li><li><a href="#ultinousservicekafkatrackermonitoringport">ultinous.service.kafka.tracker.monitoring.port</a></li><li><a href="#ultinousservicekafkatrackermonitoringthreads">ultinous.service.kafka.tracker.monitoring.threads</a></li></ul></li><li><a href="#output-schemas">Output Schemas</a></li><li><a href="#feature-demo">Feature Demo</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

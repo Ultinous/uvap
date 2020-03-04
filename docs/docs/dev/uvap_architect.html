@@ -1,0 +1,160 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Architecture · UVAP</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Architecture"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Architecture · UVAP"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../index.html"/><meta property="og:description" content="# Architecture"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../js/code-block-download-button.js"></script><script src="../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../css/main.css"/><script src="../../js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../"><img class="logo" src="../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class="siteNavGroupActive siteNavItemActive"><a href="../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Developer Guide</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Developer Guide<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem navListItemActive"><a class="navItem" href="../../docs/dev/uvap_architect.html">Architecture</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_data_model.html">Data Model</a></li><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Microservices</h4><ul><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_mgr.html">Multi-Graph Runner</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_track.html">Tracker</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_passdet.html">Pass Detector</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_reid.html">Reidentifier</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_cluster.html">Feature Vector Clustering</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_det_filter.html">Detection Filter</a></li></ul></div><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Microservice Configuration</h4><ul><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_mgr.html">Configuring Multi-Graph Runner</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_track.html">Configuring Tracker</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_passdet.html">Configuring Pass Detector</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_reid.html">Configuring Reidentifier</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_cluster.html">Configuring Feature Vector Clustering</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_det_filter.html">Configuring the Detection Filter</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_superconfig.html">Microservice Superconfiguration</a></li></ul></div><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_extend.html">Extending UVAP</a></li><li class="navListItem"><a class="navItem" href="../../docs/operation/op_opguide.html">UVAP Operation Guide</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="architecture"></a><a href="#architecture" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Architecture</h1>
+<p>UVAP implements a dataflow programming model. This way data is processed by
+multiple simple processors (potentially running on different hosts) connected
+by channels. This model is widely used in the video processing domain, for
+example in
+<a href="https://ffmpeg.org" target="_blank">ffmpeg</a> or
+<a href="https://gstreamer.freedesktop.org" target="_blank">gstreamer</a>.
+UVAP uses
+<a href="https://kafka.apache.org" target="_blank">Apache Kafka®</a>
+for data channels and
+<a href="https://www.docker.com" target="_blank">Docker</a>
+to run the processors. These technologies provide a generic and
+flexible framework to build various stream processing applications.</p>
+<p>The term <em>microservice</em> is used hereafter for processors. The main use case of
+UVAP is real-time video analysis, where all microservices run
+continuously, processing potentially never ending data. A microservice can take
+zero or more Kafka topics as input, and produce zero or more Kafka topics as
+output. In Kafka terminology, they are <em>consumers</em>, <em>producers</em> or <em>stream processors</em>.
+Microservices are packaged and run in Docker containers.
+Microservices typically process data in real-time, however it is possible to
+run them on historical data.</p>
+<p>The data channels between microservices are Kafka Topics. Head of the topics
+are kept in a persistent storage for configurable time or size. For example,
+the user can configure to keep the last two weeks of video data and keep all
+object detentions for a year.</p>
+<p><a name="fig_dataflow_architect"></a>
+<img src="../assets/fig_dataflow_architecture_of_UVAP.png" alt="Dataflow Architecture of UVAP">
+<strong><em>Dataflow Architecture of UVAP</em></strong>  <br>
+Rectangles are data channels, ellipses are processing units.</p>
+<blockquote>
+<p><strong>Note:</strong>  <br>
+Node labels in this figure are not technical names. Actual topic names can be listed with
+UVAP <a href="../../docs/install/uvap_install_setup.html#downloading-helper-scripts">helper scripts</a>.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="multi-graph-runner"></a><a href="#multi-graph-runner" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Multi-Graph Runner</h2>
+<p><strong>Multi-Graph Runner (MGR)</strong> runs all deep-learning-based image processing models
+(for example, head detection or face recognition) on the video streams. <strong>MGR</strong>
+outputs only lightweight data, such as head detection streams or face
+recognition feature vectors. The uncompressed video data is never transferred
+over Kafka, as it is only used to exchange lightweight data. All low-level
+image processing is done inside <strong>MGR</strong>.</p>
+<p>For further information, see the following topics:</p>
+<ul>
+<li><a href="../../docs/dev/ms_mgr.html">Multi-Graph Runner microservice description</a></li>
+<li><a href="../../docs/dev/conf_mgr.html">Configuring Multi-Graph Runner</a></li>
+<li><a href="../../docs/dev/start_mgr.html">Starting Multi-Graph Runner</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="tracker"></a><a href="#tracker" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tracker</h2>
+<p><strong>Tracker</strong> microservice uses the <strong><code>Head Detections</code></strong> topic produced by
+<strong>MGR</strong> and produces the <strong><code>Track Changes</code></strong> topic. A track is a sequence of head
+detections of an individual on a video stream from the first detection to the
+disappearance. Besides the path of movement, a track can help to calculate how
+long an individual stays in an area of interest.
+<strong>Tracker</strong> is a key feature for using <strong>Pass Detector</strong>.</p>
+<p>For further information, see the following topics:</p>
+<ul>
+<li><a href="../../docs/dev/ms_track.html">Tracker microservice description</a></li>
+<li><a href="../../docs/dev/conf_track.html">Configuring Tracker</a></li>
+<li><a href="../../docs/dev/start_track.html">Starting Tracker</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="pass-detector"></a><a href="#pass-detector" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Pass Detector</h2>
+<p><strong>Pass Detector</strong> microservice uses <strong><code>Track Changes</code></strong> topic produced by the
+<strong>Tracker</strong> microservice and produces the <strong><code>Pass Detections</code></strong> topic. If one or
+more directed polylines (pass lines) are specified in the microservice
+configuration, the service detects and produces records whenever a track
+intersects a pass line. <strong>Pass Detector</strong> helps to detect if an individual enters
+or leaves an area of interest, for example; the queue area in a store.</p>
+<p>For further information, see the following topics:</p>
+<ul>
+<li><a href="../../docs/dev/ms_passdet.html">Pass Detector microservice description</a></li>
+<li><a href="../../docs/dev/conf_passdet.html">Configuring Pass Detector</a></li>
+<li><a href="../../docs/dev/start_passdet.html">Starting Pass Detector</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="reidentifier"></a><a href="#reidentifier" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reidentifier</h2>
+<p><strong>Reidentifier</strong> microservice uses <strong><code>Face Feature Vectors</code></strong> topics
+produced by <strong>MGR</strong> and produces <strong><code>Reidentification Events</code></strong> topic. An individual can
+be registered at the first appearance on a camera stream and can be reidentified
+later, even on a different camera stream. This can be very helpful at waiting
+time estimation.</p>
+<p>For further information, see the following topics:</p>
+<ul>
+<li><a href="../../docs/dev/ms_reid.html">Reidentifier microservice description</a></li>
+<li><a href="../../docs/dev/conf_reid.html">Configuring Reidentifier</a></li>
+<li><a href="../../docs/dev/start_reid.html">Starting Reidentifier</a></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-next button" href="../../docs/dev/uvap_data_model.html"><span>Data Model</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#multi-graph-runner">Multi-Graph Runner</a></li><li><a href="#tracker">Tracker</a></li><li><a href="#pass-detector">Pass Detector</a></li><li><a href="#reidentifier">Reidentifier</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

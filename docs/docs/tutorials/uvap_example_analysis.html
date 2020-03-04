@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Example Analysis Results · UVAP</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Example Analysis Results"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Example Analysis Results · UVAP"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../index.html"/><meta property="og:description" content="# Example Analysis Results"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../js/code-block-download-button.js"></script><script src="../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../css/main.css"/><script src="../../js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../"><img class="logo" src="../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class="siteNavGroupActive siteNavItemActive"><a href="../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Tutorials</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tutorials<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem navListItemActive"><a class="navItem" href="../../docs/tutorials/uvap_example_analysis.html">Example Analysis Results</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="example-analysis-results"></a><a href="#example-analysis-results" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Analysis Results</h1>
+<h2><a class="anchor" aria-hidden="true" id="introduction"></a><a href="#introduction" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Introduction</h2>
+<p>This document provides an example for the analysis results
+you can create with UVAP.
+You can check the syntax and contents of the resulting Kafka® topics even without
+installing a camera.
+Developers working on their own applications can start testing them on these topics,
+in parallel with setting up their own UVAP instance to produce similar results.</p>
+<p>Two video streams were recorded and analyzed and the following results are provided:</p>
+<ul>
+<li>head detection</li>
+<li>3D head pose</li>
+<li>age</li>
+<li>gender</li>
+<li>facial feature vectors</li>
+<li>people tracking</li>
+<li>pass detection</li>
+</ul>
+<p>In addition, anonymization for one stream and skeleton key points for the other are also provided.</p>
+<p>We have packed these results into two Docker images.</p>
+<p>For the notations used in this document, see <a href="../../docs/help/uvap_notations.html">Typographic Conventions</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="requirements"></a><a href="#requirements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements</h2>
+<h3><a class="anchor" aria-hidden="true" id="system"></a><a href="#system" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>System</h3>
+<p>To have a Kafka instance and the UVAP Kafka topics in it, the
+following system requirements must be met:</p>
+<ul>
+<li>Operating system: Ubuntu Linux 18.04 LTS</li>
+<li>A unix account that can gain root privileges with <code>sudo</code></li>
+<li>Free disk space for Docker images: ~2.3 GiB</li>
+<li>Free disk space for Docker volumes: ~1 GiB</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="docker"></a><a href="#docker" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Docker</h3>
+<p>We use a containerized solution provided by Docker.</p>
+<ol>
+<li><p>Install the following packages:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt install curl adduser software-properties-common jq
+</code></pre></li>
+<li><p>Add Docker source to the apt repositories</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+  sudo apt-key add -
+$ sudo add-apt-repository "deb [arch=amd64] \
+  https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+$ sudo apt-get install docker-ce
+</code></pre></li>
+<li><p>Add your unix user to the Docker unix group<br>
+Replace <code>[USER]</code> with your logged in user name:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo adduser [USER] docker
+</code></pre></li>
+<li><p>Log out from the graphical environment (or TTY) and log in again to make
+the previous step take effect.</p></li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="permissions"></a><a href="#permissions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Permissions</h3>
+<p>If you completed the <a href="../../docs/install/uvap_install_setup.html">Installation Guide</a>, you should
+already have access to the <code>ultinous/kafka_demo</code> DockerHub repository and you
+can skip this section to continue with the <a href="#starting-docker-containers">Starting Docker Containers</a>.</p>
+<h4><a class="anchor" aria-hidden="true" id="requesting-access-to-the-dockerhub-repository"></a><a href="#requesting-access-to-the-dockerhub-repository" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requesting Access to the DockerHub Repository</h4>
+<p>DockerHub access:</p>
+<ol>
+<li><p>Create a Docker account on
+<a href="https://hub.docker.com/" target="_blank">Docker Hub</a>.</p>
+<blockquote>
+<p><strong>Attention!</strong>  <br>
+The password of the Docker account is stored on the computer in a plain-text
+format, so it is recommended to choose a strong auto-generated password that
+is not used anywhere else.</p>
+</blockquote></li>
+<li><p>Log in to your Docker account</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker login
+</code></pre></li>
+<li><p>Send an email to <a href="mailto:support@ultinous.com">support@ultinous.com</a> with the following details:</p>
+<ul>
+<li>Subject of email: <code>UVAP - Requesting access to ultinous/kafka_demo DockerHub repository</code></li>
+<li>The DockerHub account ID, created previously</li>
+</ul></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="starting-docker-containers"></a><a href="#starting-docker-containers" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Starting Docker Containers</h2>
+<p>All the Docker images needed can be pulled from the Ultinous DockerHub
+repositories, so no extra Docker credentials are needed.
+Create and start the necessary Docker containers from these Docker images with the following shell commands:</p>
+<ol>
+<li><p>Create a separate internal Docker network:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker network create uvap
+</code></pre></li>
+<li><p>Create the Docker container with the data of Zookeeper:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker create --name=zookeeper-data \
+  ultinous/kafka_demo:zookeeper_latest :
+</code></pre></li>
+<li><p>Start / restart a Zookeeper container:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker rm -f zookeeper # Not necessary if not running
+$ docker run --net=uvap -d \
+  --name=zookeeper -e ZOOKEEPER_CLIENT_PORT=2181 \
+  --volumes-from zookeeper-data confluentinc/cp-zookeeper:4.1.0
+</code></pre></li>
+<li><p>Increase the retention time of the topics (i.e. infinite):</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ for topic in $(docker exec zookeeper kafka-topics --list \
+  --zookeeper zookeeper:2181) ; do docker exec zookeeper \
+  kafka-configs --zookeeper zookeeper:2181 --alter --entity-type \
+  topics --entity-name ${topic} --add-config \
+  retention.ms=-1 ; done
+</code></pre></li>
+<li><p>Create the Docker container with the data of Kafka:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker create --name=kafka-data ultinous/kafka_demo:kafka_latest :
+</code></pre></li>
+<li><p>Start / restart a Kafka container:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker rm -f kafka # Not necessary if not running
+$ docker run --net=uvap -d -p 9092:9092 --name=kafka \
+  --volumes-from kafka-data \
+  -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 \
+  -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+  -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-kafka:4.1.0
+</code></pre></li>
+<li><p>Remove the data containers, since those are not necessary anymore:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker rm zookeeper-data kafka-data
+</code></pre></li>
+<li><p>Check if the containers are still running:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker container inspect --format '{{.State.Status}}' kafka zookeeper
+</code></pre>
+<p>Expected output:</p>
+<pre><code class="hljs">running
+running
+</code></pre></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="listing-analysis-result-topics"></a><a href="#listing-analysis-result-topics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Listing Analysis Result Topics</h2>
+<p>After the necessary Docker containers are created and started, the Kafka topics included in this example can be listed.</p>
+<h3><a class="anchor" aria-hidden="true" id="list-topics"></a><a href="#list-topics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>List Topics</h3>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker exec kafka kafka-topics --list --zookeeper zookeeper:2181
+</code></pre>
+<p>Expected output:</p>
+<pre><code class="hljs">__confluent.support.metrics
+__consumer_offsets
+uvapdemo.cam.117.ages.AgesRecord.json
+uvapdemo.cam.117.dets.ObjectDetectionRecord.json
+uvapdemo.cam.117.frameinfo.FrameInfoRecord.json
+uvapdemo.cam.117.fvecs.FeatureVectorRecord.json
+uvapdemo.cam.117.genders.GendersRecord.json
+uvapdemo.cam.117.lowres.Image.jpg
+uvapdemo.cam.117.passes.PassDetectionRecord.json
+uvapdemo.cam.117.poses.HeadPose3DRecord.json
+uvapdemo.cam.117.tracks.TrackRecord.json
+uvapdemo.cam.118.ages.AgesRecord.json
+uvapdemo.cam.118.dets.ObjectDetectionRecord.json
+uvapdemo.cam.118.frameinfo.FrameInfoRecord.json
+uvapdemo.cam.118.fvecs.FeatureVectorRecord.json
+uvapdemo.cam.118.genders.GendersRecord.json
+uvapdemo.cam.118.lowres.Image.jpg
+uvapdemo.cam.118.lowres_anonymized.Image.jpg
+uvapdemo.cam.118.passes.PassDetectionRecord.json
+uvapdemo.cam.118.poses.HeadPose3DRecord.json
+uvapdemo.cam.118.skeletons.SkeletonRecord.json
+uvapdemo.cam.118.tracks.TrackRecord.json
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="list-messages-from-a-topic"></a><a href="#list-messages-from-a-topic" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>List Messages from a Topic</h3>
+<p>Example of message listing:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker exec kafka kafka-console-consumer \
+  --bootstrap-server kafka:9092 \
+  --topic uvapdemo.cam.117.fvecs.FeatureVectorRecord.json \
+  --from-beginning
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="cleaning-up"></a><a href="#cleaning-up" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Cleaning Up</h2>
+<p>When they are no longer needed, the Kafka topics can be removed with the following commands:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker container inspect --format '{{json .Mounts}}' kafka zookeeper \
+  | jq --raw-output '.[].Name' &gt; /tmp/kafka_volumes_list.txt
+$ docker container stop kafka zookeeper
+$ docker container rm kafka zookeeper
+$ for volume in $(cat /tmp/kafka_volumes_list.txt); do docker volume \
+  rm ${volume}; done
+$ rm /tmp/kafka_volumes_list.txt
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#introduction">Introduction</a></li><li><a href="#requirements">Requirements</a><ul class="toc-headings"><li><a href="#system">System</a></li><li><a href="#docker">Docker</a></li><li><a href="#permissions">Permissions</a></li></ul></li><li><a href="#starting-docker-containers">Starting Docker Containers</a></li><li><a href="#listing-analysis-result-topics">Listing Analysis Result Topics</a><ul class="toc-headings"><li><a href="#list-topics">List Topics</a></li><li><a href="#list-messages-from-a-topic">List Messages from a Topic</a></li></ul></li><li><a href="#cleaning-up">Cleaning Up</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

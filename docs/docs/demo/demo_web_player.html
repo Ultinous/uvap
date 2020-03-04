@@ -1,0 +1,137 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Starting Web Player · UVAP</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Web Display"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Starting Web Player · UVAP"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../index.html"/><meta property="og:description" content="# Web Display"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../js/code-block-download-button.js"></script><script src="../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../css/main.css"/><script src="../../js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../"><img class="logo" src="../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="web-display"></a><a href="#web-display" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Web Display</h1>
+<h2><a class="anchor" aria-hidden="true" id="starting-web-player"></a><a href="#starting-web-player" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Starting Web Player</h2>
+<ol>
+<li><p>Start the web player:</p>
+<blockquote>
+<p><strong>Attention!</strong>  <br>
+Before starting this microservice, the command below silently stops and
+removes the Docker container named <code>uvap_web_player</code>, if such already exists.</p>
+</blockquote>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ "${UVAP_HOME}"/scripts/run_uvap_web_player.sh -- --net uvap
+</code></pre>
+<p>The output of the above command should be:</p>
+<ul>
+<li>some information about pulling the required Docker image</li>
+<li>the ID of the Docker container created</li>
+<li>the name of the Docker container created: <code>uvap_web_player</code></li>
+</ul>
+<p>There are more optional parameters for the <code>run_uvap_web_player.sh</code>
+script to override defaults. Use the <code>--help</code> parameter to get more
+details.</p></li>
+<li><p>Test status:</p>
+<p>a.) Check the log of the Docker container:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker logs uvap_web_player
+</code></pre>
+<p>Expected output example:</p>
+<pre><code class="hljs">2019-07-16T10:38:12.043161Z INFO    [main]{com.ultinous.util.jmx.JmxUtil}(startConnectorServer/063) JMXConnectorServer listening on localhost:6666
+Jul 16, 2019 10:38:12 AM io.netty.handler.logging.LoggingHandler channelRegistered
+INFO: [id: 0xa3704b61] REGISTERED
+Jul 16, 2019 10:38:12 AM io.netty.handler.logging.LoggingHandler bind
+INFO: [id: 0xa3704b61] BIND: /0.0.0.0:9999
+Jul 16, 2019 10:38:12 AM io.netty.handler.logging.LoggingHandler channelActive
+INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] ACTIVE
+2019-07-16T10:38:12.130916Z INFO    [main]{com.ultinous.uvap.web.player.MjpegPlayerServer}(start/075) Video Player listening on 0.0.0.0:9,999
+Jul 16, 2019 10:39:15 AM io.netty.handler.logging.LoggingHandler channelRead
+INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] READ: [id: 0x9a81e318, L:/0:0:0:0:0:0:0:1%0:9999 - R:/0:0:0:0:0:0:0:1%0:59966]
+Jul 16, 2019 10:39:15 AM io.netty.handler.logging.LoggingHandler channelRead
+INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] READ: [id: 0x56df1d95, L:/0:0:0:0:0:0:0:1%0:9999 - R:/0:0:0:0:0:0:0:1%0:59968]
+Jul 16, 2019 10:39:15 AM io.netty.handler.logging.LoggingHandler channelReadComplete
+INFO: [id: 0xa3704b61, L:/0:0:0:0:0:0:0:0%0:9999] READ COMPLETE
+</code></pre>
+<p>b.) Check the service:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ wget --save-headers --content-on-error --output-document=- \
+  --show-progress=no --quiet 'http://localhost:9999/' | head -n1
+</code></pre>
+<p>Expected output example:</p>
+<pre><code class="hljs">HTTP/1.1 200 OK
+</code></pre></li>
+<li><p>Navigate to the following URL in the browser:</p>
+<blockquote>
+<p><strong>Attention!</strong>  <br>
+This tool is intended for demo and debug purposes only.<br>
+It only has real time playing capability and it has no authorization or
+authentication.<br>
+It should only be used in a private network, because it provides a direct
+access for Kafka (<code>*.Image.jpg</code>) topics.</p>
+</blockquote>
+<pre><code class="hljs">http://localhost:9999#&lt;KAFKA_IMAGE_TOPIC_NAME&gt;
+</code></pre>
+<p>Where <code>&lt;KAFKA_IMAGE_TOPIC_NAME&gt;</code> is the topic name. For more information
+on values, see [<code>basic</code>], [<code>fve</code>] or [<code>skeleton</code>] demo descriptions.</p>
+<blockquote>
+<p><strong>Note:</strong>  <br>
+Refresh web display (press <strong>F5</strong>) after giving a new topic name.</p>
+</blockquote>
+<p>Full screen mode:</p>
+<ul>
+<li>Activate: Click on the video to activate full screen mode.</li>
+<li>Exit: Press <strong>Esc</strong> to exit full screen mode.</li>
+</ul></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="general-web-player-functions"></a><a href="#general-web-player-functions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>General Web Player Functions</h2>
+<h3><a class="anchor" aria-hidden="true" id="live-image-display"></a><a href="#live-image-display" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Live Image Display</h3>
+<p>The web player can play the live image sequence video of a Kafka topic.</p>
+<p>To play an image sequence, use the following link:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">http://localhost:9999#[topic]
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>localhost</code> is the value of <code>com.ultinous.uvap.web.player.advertised.host</code></li>
+<li><code>9999</code> is the value of <code>com.ultinous.uvap.web.player.port</code></li>
+<li><code>[topic]</code> is the name of target topic from the
+given Kafka broker (<code>com.ultinous.uvap.web.player.kafka.broker</code>)</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="listing-topics"></a><a href="#listing-topics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Listing Topics</h3>
+<p>A list of topics can be requested from the player server.</p>
+<p>To request the topics, call the HTTP method <code>GET</code> with the following URL:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">http://localhost:9999/topics
+</code></pre>
+<p>The content type of given response is <code>application/json</code>.
+The content of response contains the list of available <code>image.josn</code> topics.</p>
+<h3><a class="anchor" aria-hidden="true" id="display-historical-images"></a><a href="#display-historical-images" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Display Historical Images</h3>
+<p>Historical images can also be viewed in the web player.</p>
+<p>To request historical images, call the HTTP method <code>GET</code> with the following URL:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">http://localhost:9999/single?topic=base.cam.0.head_detection.Image.jpg&amp;timestamp=1570183573000
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>topic</code> is the name of target Kafka topic</li>
+<li><code>timestamp</code> is the UTC timestamp</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="uvap-web-player-access-from-client-machine"></a><a href="#uvap-web-player-access-from-client-machine" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>UVAP Web Player Access from Client Machine</h2>
+<p>To use the web player from a client machine
+(different from the processing node), modify
+the default configuration of the web player:</p>
+<ol>
+<li><p>Open the configuration file:</p>
+<pre><code class="hljs">~/uvap/config/uvap_web_player/uvap_web_player.properties
+</code></pre></li>
+<li><p>Modify the <code>com.ultinous.uvap.web.player.advertised.host</code> parameter to the
+<code>&lt;HOST_MACHINE_IP&gt;</code> (default: <code>localhost</code>)</p></li>
+<li><p>Restart web player with the following command:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker restart uvap_web_player  
+</code></pre></li>
+</ol>
+<blockquote>
+<p>Attention!<br>
+<code>config.sh</code> overrides this configuration file.</p>
+</blockquote>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#starting-web-player">Starting Web Player</a></li><li><a href="#general-web-player-functions">General Web Player Functions</a><ul class="toc-headings"><li><a href="#live-image-display">Live Image Display</a></li><li><a href="#listing-topics">Listing Topics</a></li><li><a href="#display-historical-images">Display Historical Images</a></li></ul></li><li><a href="#uvap-web-player-access-from-client-machine">UVAP Web Player Access from Client Machine</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

@@ -1,0 +1,325 @@
+//
+// UVAP MGR configuration format
+//
+
+syntax = "proto2";
+
+import "ultinous/proto/imageproc/common_pub.proto";
+
+package ultinous.proto.dataflow;
+
+// Complete configuration for a multi graph runner instance.
+message DataFlowGraphRunnerConfig
+{
+  optional imageproc.EnginesConfig engines = 1; // specifies the engine set usable by the graph
+  optional string engines_file = 2; // specifies the engines file if engines is not present
+  optional EnvironmentConfig environment = 3; // specifies the environment of the runner
+  optional string environment_file = 4; // specifies the environment file if the environment is not present
+  repeated DataFlowGraphRunConfig data_run = 5; // specifies the graph and input pairs
+  repeated string data_run_file = 6; // specifies the file names for graph -- input pairs
+}
+
+// Options that are common for the graph execution system.
+message EnvironmentConfig
+{
+  // Profiling. If true then statistics will be printed periodically to standard output and at shutdown.
+  optional bool profile = 3 [default = false];
+  // Log level. From 0: fatal, error, warning, info, debug, trace
+  optional int32 debug_level = 4 [default = 2];
+  // Timeout for a single task. Will issue a warning if exceeded. Will issue an error if the double
+  // of it is exceeded. Will abort the whole program if the limit is exceeded 4 times unless
+  // abort_on_hangup (see below) is set to false.
+  // A 0 value means no timeout for individual tasks.
+  optional uint32 analysis_hangup_timeout_ms = 19 [default = 4000];
+  // See analysis_hangup_timeout_ms documentation above.
+  optional bool abort_on_long_hangup = 20 [default = true];
+
+  // Drop behavior
+  oneof drop_mode
+  {
+    DropOffMode drop_off = 12;
+    DropOnMode drop_on = 13;
+  }
+
+  optional string kafka_broker_list = 15 [ default = "" ]; // Example "localhost:1234,example.com:4321"
+  optional string kafka_topic_prefix = 16 [ default = "" ]; // Example "account.1337."
+  optional string kafka_sasl_username = 17 [ default = "" ]; // Enables SASL authentication when set.
+  optional string kafka_sasl_password = 18 [ default = "" ];
+}
+
+// Frame dropping disabled. Use this mode for batch video processing.
+message DropOffMode
+{
+  optional uint64 packet_queue_size = 1 [default = 8, jstype=JS_STRING]; ///< max packet queue size, cannot be 0
+  optional uint64 gpu_task_queue_size = 2 [default = 8, jstype=JS_STRING]; ///< max gpu task queue size, cannot be 0
+}
+
+// Frame dropping enabled. Use this mode for real time operation.
+message DropOnMode
+{
+  // Max packet age in ms, cannot be 0. If limit exceeded then packets will be dropped for that stream
+  // until the next keyframe.
+  optional uint32 packet_time_drop_threshold = 1 [default = 9000];
+  // Max packet age in ms, cannot be 0. When exceeded the oldest 10% (time) will be dropped from
+  // the common processing queue which belongs to all streams.
+  optional uint32 gpu_task_time_drop_threshold = 2 [default = 9000];
+  // Max memory used by gpu task queue, cannot be 0. If exceeded then the oldest 15% (count) will be
+  // dropped from the common processing queue which belongs to all streams.
+  optional uint64 gpu_task_queue_max_memory = 3 [default = 2147483648, jstype=JS_STRING];
+}
+
+// An input coupled with a data flow graph.
+message DataFlowGraphRunConfig
+{
+  required Input input = 1; ///< Specifies the input (frame source) for the graph
+  optional DataFlowGraphConfig data_flow = 2; ///< Specifies the data flow graph
+  optional string data_flow_file = 3; ///< Specifies the data flow graph file if data flow graph is not present
+}
+
+// Configuration of a frame source
+message Input
+{
+  // Input file/stream/device name. Can be one of the following:
+  //  - video file (eg.: avi, mp4)
+  //  - rtsp url (eg.: "rtsp://user:pwd@10.99.99.99:554/live1.sdp")
+  //  - device id (eg.: 0 [which refers to "/dev/video0"])
+  required string file_name = 1;
+  // A preliminary filter on input frames.
+  // Must be at least one. Means that one of every keep_rate frame will be kept, other will be
+  // dropped. The frame_period_ms related logic is applied after that.
+  optional uint32 keep_rate = 16 [default = 1];
+  // Expected delta t (elapsed time) between frames.
+  // If frames are more frequent then they will be dropped. If more than 5% is dropped then a
+  // warning will be issued in every hour.
+  // If frames are less frequent then missing frames will be counted. If more than 5% is missing
+  // then a warning will be issued in every hour.
+  // Drop and miss statistics are logged in every minute with info severity.
+  optional uint32 frame_period_ms = 3; // Forces to ignore excess frames (overload protection)
+
+  // For local devices (eg USB camera) the capture_width and capture_height will be set.
+  // If not successful then an error will be issued but the processing will not be aborted.
+  optional uint32 capture_width = 13 [default = 0];
+  optional uint32 capture_height = 14 [default = 0]; ///< See capture_width
+}
+
+// A data flow graph
+message DataFlowGraphConfig
+{
+  repeated DataNodeConfig data_node = 2; ///< The data nodes
+  repeated ProcessNodeConfig process_node = 3; ///< The process nodes
+}
+
+message DataNodeConfig
+{
+  enum Type
+  {
+    FRAME = 0; ///< A video frame represented as an uncompressed RGB image. Kafka output is supported.
+    // List of feature vectors. One feature vector is typically 1024 float numbers and represent the
+    // features of an object (e.g.: human face). Kafka output is supported.
+    FEATURE_VECTORS = 6;
+    GENDERS = 7; ///< List of gender predictions. Can be male or female. Kafka output is supported.
+    AGES = 8; ///< List of age predictions. Kafka output is supported.
+    // List of 3D head positions. One head position is 3 angles: yaw, pitch, roll in degrees giving
+    // the exact 3D orientation of a human head. Kafka output is supported.
+    HEAD_POSE_3DS = 9;
+    // List of object detections for a frame. Object detections are represented as a rectangular
+    // bounding box. Kafka output is supported.
+    DETECTIONS = 11;
+    FRAME_INFO = 13; ///< Frame attributes (eg.: dimensions) Kafka output is supported.
+    SKELETONS = 14; ///< List of human body poses. Kafka output is supported.
+  }
+  required Type type = 1;
+  required string name = 2;
+}
+
+message ProcessNodeConfig
+{
+  enum Type
+  {
+    DISPLAY = 1;
+    ROI = 2;
+    OBJ_DETECTOR = 3;
+    DRAW_RECTS = 4;
+    RESIZE = 8;
+    WRITE_VIDEO = 9;
+    OBJ_FILTER = 30;
+    HEAD_POSE_FILTER = 38;
+    KAFKA_OUTPUT = 44;
+    HEAD_POSE_CALC = 51;
+    FACE_FEATURE_CALC = 52;
+    FACE_DEMOGRAPHY_CALC = 53;
+    FRAME_INFO_EXTRACTOR = 57;
+    SKELETON_ESTIMATOR = 58;
+  }
+
+  required Type type = 1;
+  required string name = 2;
+  optional bool logging = 3 [default = false];
+
+  // Polymorphism is implemented with optional process specific fields.
+  // Exactly one of these must be specified based on the type.
+  optional ROIConfig roi_config = 6;
+  optional ObjDetectorConfig obj_det_config = 7;
+  optional DrawRectsConfig draw_rects_config = 8;
+  optional ResizeConfig resize_config = 12;
+  optional WriteVideoConfig writevideo_config = 13;
+  optional ObjFilterNodeConfig obj_filter_config = 37;
+  optional HeadPoseFilterConfig head_pose_filter_config = 45;
+  optional KafkaOutputConfig kafka_output_config = 51;
+  optional HeadPoseCalcConfig head_pose_calc_config = 60;
+  optional FaceFeatureCalcConfig face_feature_calc_config = 61;
+  optional FaceDemographyCalcConfig face_demography_calc_config = 62;
+  optional FrameInfoExtractorConfig frame_info_extractor_config = 66;
+  optional SkeletonEstimatorNodeConfig skeleton_estimator_config = 67;
+}
+
+// Object detector. Find objects on a frame. Objects are returned as bounding boxes.
+message ObjDetectorConfig {
+  enum Type {
+    FACE = 1; // Requires face detection engine.
+    HEAD = 2; // Requires head detection engine.
+  }
+
+  required Type type = 1; // Detector type, see above.
+  required string input = 2; // Input data node (type: FRAME)
+  required string bounding_boxes = 4; // Output data node for detections (type: DETECTIONS)
+
+  // Size of the smallest square that fully contains the object. Detection performance and accuracy drops as the size gets smaller.
+  // Size below 30-40 pixels are not suggested in real-world applications.
+  optional int32 min_height_in_pixels = 5 [default = 160]; // Please specify because it will be required in the future
+  optional int32 max_height_in_pixels = 6 [default = 160]; // Please specify because it will be required in the future
+
+  optional float confidence_threshold = 7 [default = 0.95]; // Confidence is a real value from 0-1.
+  optional float image_scale_factor = 11 [default = 1.0]; // This parameter explicitly resize the input frame.
+}
+
+// Resizes a frame
+message ResizeConfig {
+  enum Interpolation {
+    INTER_NEAREST = 1; // Fastest, worst quality
+    INTER_LINEAR = 2; // Medium speed, medium quality
+    INTER_CUBIC = 3; // Slow, good quality
+  }
+  required string input = 2; // Input data node (type: FRAME)
+  required string output = 3; // Output data node (type: FRAME)
+  optional bool lock_ar = 4 [default = true]; // Lock aspect ratio. If set then set only one of width or height.
+  optional int32 width = 5; // Desired width
+  optional int32 height = 6; // Desired height
+  optional Interpolation interpol = 7 [default = INTER_LINEAR]; // Interpolation method.
+
+  // if set to true, a warning is logged in case resize actually happens.
+  // Will raise an error and stop processing if aspect ration changes.
+  optional bool resizeWarning = 10 [default = false];
+}
+
+
+// Calculates age and gender for a head detection
+message FaceDemographyCalcConfig
+{
+  required string input_frame = 1; // Input data node (type: FRAME)
+  required string input_detections = 2; // Input data node (type: DETECTIONS)
+  required string output_genders = 3; // Output data node (type: GENDERS)
+  required string output_ages = 4; // Output data node (type: AGES)
+  optional bool use_multicrop = 5 [default = false]; // Higher cost, better quality.
+  // Filtering on incoming detections for vertical size.
+  // Default is the input size of the demography model. See model documentation for details.
+  optional uint32 valid_box_min_size = 6;
+}
+
+// Finds human bodies and parts on image.
+message SkeletonEstimatorNodeConfig
+{
+  required string input_frame = 1; // Input data node (type: FRAME)
+  required string skeletons = 2; // Output data node (type: SKELETONS)
+}
+
+// Filters data from a DETECTIONS typed data node
+message ObjFilterNodeConfig
+{
+  required string input_bounding_boxes = 5; ///< Input data node (type: DETECTIONS)
+  required string output_bounding_boxes = 1; ///< Output data node (type: DETECTIONS)
+
+  optional int32 filter_roi_x = 6; ///< x coordinate of the top left corner in pixels
+  optional int32 filter_roi_y = 7; ///< y coordinate of the top left corner in pixels
+  optional int32 filter_roi_width = 8; ///< in pixels
+  optional int32 filter_roi_height = 9; ///< in pixels
+
+  optional int32 filter_detection_min_height_in_pixels = 10 [default = 160]; ///< Minimum head size
+  optional int32 filter_detection_max_height_in_pixels = 11 [default = 160]; ///< Maximum head size
+
+  optional float filter_detection_confidence_threshold = 12 [default = 0.95]; ///< Confidence is a real value from 0-1.
+
+  // Input data node (type: DETECTIONS)
+  // If specified and there is no detection from that data node then all detection get discarded (cashier/queue problem).
+  optional string conditional_and_input_bounding_boxes = 13;
+
+  repeated Rect2D excluded_roi = 14; ///< Excluded area(s) from the frame
+
+  // Strategy for decreasing the number of results
+  enum Strategy
+  {
+    NONE = 1; // Don't reorder detections
+    HEIGHT = 2; // Order detections by height
+    CONF = 5; // Order detections by confidence
+    RANDOM = 6; // Randomize detections
+  }
+  // Maximum number of results to produce (if set)
+  optional uint32 max_det_num = 30;
+  // See above. Used only when max_det_num is set.
+  optional Strategy selection_strategy = 31 [default = NONE];
+  // Should the ordering of the top list be descending? Only used for HEIGHT and CONF.
+  optional bool descending = 32 [default = true];
+}
+
+message Rect2D {
+  required int32 x = 1;
+  required int32 y = 2;
+  required int32 w = 3;
+  required int32 h = 4;
+}
+
+// Filters detections according to their associated head poses
+message HeadPoseFilterConfig
+{
+  required string input_bounding_boxes = 2; ///< Input data node (type: DETECTIONS)
+  optional string input_poses = 8; ///< Required. Input data note (type: HEAD_POSE_3DS)
+  required string output_bounding_boxes = 3; ///< Output data node (type: DETECTIONS)
+
+  // Required. Acceptable range of head pose.
+  optional imageproc.HeadPose3DThreshold head_pose_3d_threshold = 7;
+}
+
+// Type sensitive kafka output stream. Please refer to data node types for availability.
+message KafkaOutputConfig {
+  // Output topic name. EnvironmentConfig.kafka_topic_prefix will be added to the beginning if set.
+  required string topic_name = 1;
+  // Input data node
+  required string input_node = 2;
+}
+
+// Calculates head poses from input frame and detections
+message HeadPoseCalcConfig {
+  required string input_frame = 1; ///< Input data node (type: FRAME)
+  required string input_bounding_boxes = 2; ///< Input data node (type: DETECTIONS)
+  required string output_poses = 3; ///< Output data nde (type: HEAD_POSE_3DS)
+  // Filtering on incoming detections for vertical size.
+  // Default is the input size of the head pose estimator model. See model documentation for details.
+  optional uint32 valid_box_min_size = 4;
+}
+
+// Calculates face feature vectors from input frame and detections
+message FaceFeatureCalcConfig {
+  required string input_frame = 1; ///< Input data node (type: FRAME)
+  required string input_dets = 2; ///< Input data node (type: DETECTIONS)
+  required string output_features = 3; ///< Output data nde (type: FEATURE_VECTORS)
+  // Filtering on incoming detections for vertical size.
+  // Default is the input size of the face feature extractor model. See model documentation for details.
+  optional uint32 valid_box_min_size = 4;
+}
+
+// Extract frame information from input frame
+message FrameInfoExtractorConfig
+{
+  required string input_frame = 1; ///< Input data node (type: FRAME)
+  required string output_info = 2; ///< Output data node (type: FRAME_INFO)
+}

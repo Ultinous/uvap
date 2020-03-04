@@ -1,0 +1,331 @@
+<!DOCTYPE html><html lang=""><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>UVAP · Ultinous Video Analytics Platform</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Ultinous Video Analytics Platform"/><meta property="og:title" content="UVAP · Ultinous Video Analytics Platform"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../../../index.html"/><meta property="og:description" content="Ultinous Video Analytics Platform"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../../../js/code-block-download-button.js"></script><script src="../../../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../../../css/main.css"/><script src="../../../../js/codetabs.js"></script></head><body><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../../../"><img class="logo" src="../../../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer documentContainer postContainer"><div class="wrapper"><div class="post"><div><a target="_blank" class="btnDownload" href="../../../../_src_proto_files/ultinous/proto/common/kafka_config.proto"></a><div class="static-file-code-block"><pre><code class="hljs css language-protobuf codeBlockCopy">/*
+Configuration for UVAP Microservices.
+Copyright (C) 2014,2018 Ultinous Inc.
+*/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This proto describes the functional configuration of the building blocks of video analysis.
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+syntax = <span class="hljs-string">"proto3"</span>;
+
+<span class="hljs-keyword">package</span> ultinous.proto.kafka;
+
+<span class="hljs-keyword">option</span> java_package = <span class="hljs-string">"com.ultinous.proto.kafka"</span>;
+<span class="hljs-keyword">option</span> java_multiple_files = <span class="hljs-literal">true</span>;
+
+<span class="hljs-keyword">import</span> <span class="hljs-string">"ultinous/proto/common/kafka_common.proto"</span>;
+
+/** Configuration for kafka_tracker
+*/
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">TrackingConfigRecord</span>
+</span>{
+  /** Confidence threshold for filtering input ObjectDetectionRecords.
+  Records whose detection_confidence value is above this threshold will be kept.
+  range: [0..1); 0 means no filtering
+  default: 0
+  */
+  float detection_threshold = <span class="hljs-number">1</span>;
+
+  /** Maximum distance of track points in subsequent frames for track to be connected.
+  unit: bounding box width
+  range: (<span class="hljs-number">0</span>..+inf)
+  default: <span class="hljs-number">2</span>
+  */
+  <span class="hljs-built_in">float</span> distance_threshold = <span class="hljs-number">2</span>;
+
+  /** Maximum lifetime of a track without new detection.
+  unit: msec
+  range: [<span class="hljs-number">0</span>..+inf)
+  default: <span class="hljs-number">1000</span>
+  */
+  <span class="hljs-built_in">uint32</span> time_passed_threshold = <span class="hljs-number">3</span>;
+}
+
+/** Configuration for kafka_passdet
+*/
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">PassDetConfigRecord</span>
+</span>{
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">PassLine</span>
+  </span>{
+    /** Identifier of the polygonal chain 'poly'
+    It can be anything that is unique within a PassDetConfigRecord.
+    */
+    string id = <span class="hljs-number">1</span>;
+
+    /** Polygonal chain (broken line)
+    Must consist of at least two points
+    The direction from the first point to the last one is important: it determines the passage direction in the result.
+    */
+    repeated Point poly = <span class="hljs-number">2</span>;
+  }
+
+  /** Lines through which passage will be detected.
+  Must contain at least one line.
+  Each detection event is associated with exactly one of these lines and the result record will contain its id.
+  */
+  repeated PassLine pass_lines = <span class="hljs-number">1</span>;
+}
+
+/** Configuration of a single area for detection filter
+*/
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">DetectionArea</span>
+</span>{
+  /** A (closed) polygon that a defines an area. Decisions are made depending
+  on which area(s) detection centroids are inside of.
+  Must contain at least three points, corresponding to polygon vertices
+  */
+  repeated Point vertices = <span class="hljs-number">1</span>;
+}
+
+/** Configuration for the detection filter microservice
+This MS can filter ObjectDetectionRecords by any combination of
+- detection type
+- detection confidence
+- location
+A detection must pass each and every configured criteria to pass the filter itself.
+*/
+message DetectionFilterConfigRecord
+{
+  /** Minimum confidence of detection for passing the filter
+  Compared to the 'detection_confidence' value of ObjectDetectionRecord.
+  range: [0..1); 0 means no confidence based filtering
+  default: 0
+  */
+  float min_confidence = <span class="hljs-number">1</span>;
+
+  /** Set of allowed  detection types for passing the filter
+  Empty set means no detection type based filtering
+  */
+  repeated ObjectType detection_types = <span class="hljs-number">2</span>;
+
+  /** Areas of negative interest.
+  A detection is not going to pass if it is inside any of the negative areas.
+  Empty list means no negative area based filtering
+  */
+  repeated DetectionArea negative_areas = <span class="hljs-number">3</span>;
+
+  /** Areas of positive interest.
+  A detection passes if it is inside any of the positive areas.
+  Empty list means no postive area based filtering.
+  */
+  repeated DetectionArea positive_areas = <span class="hljs-number">4</span>;
+}
+
+/**
+Configuration of feature vector clustering algorithms.
+Clustering is based on a similarity measure between feature vectors and clusters.
+Currently supports trivial algorithms only where a single feature vector represents a cluster.
+The representative feature vector can be the last one belonging to this cluster, or an average of all previous ones.
+*/
+message FVClusteringConfig
+{
+  /** Conditions for clusters to be realized.
+  Clusters are unrealized until either they contain num_samples observations or time_limit_ms is reached.
+  Once they are realized, the action specified by realized_cluster_action is performed.
+  The time until time_limit_ms is measured from the first observation belonging to the cluster, after the previous realization of the same cluster.
+  Registration events are generated for both realized and unrealized clusters. 
+  */
+  message ClusterRealizationConfig
+  {
+    enum RealizedClusterAction
+    {
+      INVALID = <span class="hljs-number">0</span>;
+      REMOVE = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Remove the realized cluster from internal DB. A delete event is triggered.</span>
+      UNREALIZE = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; The realized cluster becomes unrealized until num_samples new observations arrive again.</span>
+      KEEP_REALIZED = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Once realized, the same cluster remains realized until removed.</span>
+    }
+
+    <span class="hljs-built_in">uint32</span> num_samples = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Number of observations in realized clusters.</span>
+    <span class="hljs-built_in">int64</span> time_limit_ms = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Time limit for realization even when the number of observations is too small, zero means infinite.</span>
+    RealizedClusterAction realized_cluster_action = <span class="hljs-number">3</span>;
+  }
+  /** Configuration for Cluster Merging.
+  Merge attempts are triggered by the first input arriving after time_interval_ms since the last attempt.
+  Clusters that are more similar to each other than the current similarity threshold will be merged.
+  current_threshold = max(min_threshold, initial_threshold * threshold_discount_rate^num_inputs)
+  where num_inputs is the sum of the two potentially mergeable clusters.
+
+  Typical values:
+  initial_threshold can be the same as reg_threshold below;
+  min_threshold can be the lowest score to allow merging;
+  threshold_discount rate can be between 0.95 and 0.999, depending on how many observations we require before lowering the threshold to min_threshold.
+  */
+  message ClusterMergingConfig
+  {
+    float initial_threshold = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Initial similarity threshold value. See formula above.</span>
+    <span class="hljs-built_in">float</span> threshold_discount_rate = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Rate of descreasing the similarity threshold. See formula above.</span>
+    <span class="hljs-built_in">float</span> min_threshold = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Minimal value of the similarity threshold. See formula above.</span>
+    <span class="hljs-built_in">int64</span> time_interval_ms = <span class="hljs-number">4</span>; <span class="hljs-comment">///&lt; Minimum time between subsequent merge attempts. Note that merge calculation is expensive.</span>
+  }
+
+  /**
+  Type of clustering algorithm.
+  Has no effect on person streams, they always use USE_LAST.
+  */
+  enum ClusteringMethod
+  {
+    INVALID = <span class="hljs-number">0</span>;
+    USE_LAST = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; The representative feature vector of the matching cluster is always replaced by the new observation.</span>
+    SIMPLE_AVERAGE = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; The representative feature vector of each cluster is a simple average of the matching observations.</span>
+  }
+
+  ClusteringMethod method = <span class="hljs-number">1</span>;
+  ClusterMergingConfig cluster_merging = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Optional, must be null for method=USE_LAST.</span>
+  ClusterRealizationConfig cluster_realization = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Optional, must be null for method=USE_LAST.</span>
+  <span class="hljs-built_in">bool</span> save_internal_state = <span class="hljs-number">4</span>; <span class="hljs-comment">///&lt; When true, internal states are saved to a Kafka topic.</span>
+  <span class="hljs-built_in">bool</span> start_from_internal_state = <span class="hljs-number">5</span>; <span class="hljs-comment">///&lt; When true, the saved internal states are used to rebuild the DB, instead of the input topics.</span>
+}
+
+/**
+  Description of how to extract a specific field from a message.
+  The path to reach the field is denoted by a '.'-separated list of tokens:
+  - find the first token as a top-level field name
+  - find the next token as an embedded field in the previous field
+  - repeat until end of list; the last token is the required field name
+  Messages in which the specified field is not present will be ignored.
+*/
+message FVFieldSelector
+{
+  oneof fv_path
+  {
+    string feature_vector_path = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Path to a FeatureVector field.</span>
+    <span class="hljs-built_in">string</span> fv_cluster_path = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Path to a FVCluster field.</span>
+  }
+}
+
+/** Configuration for a registration-type input stream originating from a camera*/
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">FVRegStreamConfig</span>
+</span>{
+  <span class="hljs-built_in">float</span> reg_threshold = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Similarity threshold for registration: decides whether to create a new cluster or to update an existing one.</span>
+  /** Cluster memory window size [ms]. <span class="hljs-number">0</span> means infinite.
+  Cluster delete events are triggered by the first input after the retention period expires.
+  The same period is used to look back to the previous inputs at startup when start_from_internal_state is false.
+  */
+  int64 cluster_retention_period_ms = <span class="hljs-number">2</span>;
+}
+
+/**
+ Configuration for kafka_feature_vector_clustering.
+ Also applies to the registration part of the kafka_reid microservice below.
+ Inputs: Inputs are streams of feature vectors or clusters that may be extracted from
+ - video camera streams
+ - a previous feature vector clustering algorithm.
+ Inputs can be any record type that contains either a FeatureVector or a FVCluster field.
+ A new cluster is created when the input feature vector is less similar to any stored cluster than a threshold.
+ The most similar cluster (above the threshold) is modified by adding the new input feature vector.
+ New clusters and modifications are only emitted to the output topic when the cluster meets the requirements to be realized.
+ Outputs: FVClusterUpdateRecord, and optionally an undocumented internal state topic
+*/
+message FVClusteringConfigRecord
+{
+  /** Configuration for a single input stream */
+  message InputStreamConfig
+  {
+    string stream_id = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Identifier of input stream.</span>
+    FVFieldSelector fv_field_selector = <span class="hljs-number">2</span>;
+    FVRegStreamConfig reg_stream_config = <span class="hljs-number">3</span>;
+  }
+
+  FVClusteringConfig clustering_config = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">repeated</span> InputStreamConfig input_stream_configs = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Exactly as many configurations as input streams configured for the service.</span>
+}
+
+/**
+ Configuration for kafka_reid.
+ Input:
+   Inputs are streams of feature vectors or clusters that may be extracted from
+   - video camera streams, via feature vector extraction and optionally pre-clustering
+   - person databases containing images
+   Inputs can be any record type that contains either a FeatureVector or a FVCluster field.
+   Camera input streams can be used for registration, reidentification, or both.
+ Reidentification:
+   Feature vectors are reidentified as an existing identity when they are similar enough to
+   a registered feature vector cluster.
+   Each stream that is used for registration will provide a top list of matches, the final result will be
+   the concatenation of these top lists.
+   Each top list has a maximum size configured for that reidentification stream (max_num_matches).
+   A top list can be shorter if there are not enough matches reaching the minimum required score (min_similarity).
+ Registration:
+   The configuration for the clustering algorithm is the same as ClusteringConfig above.
+   Feature vectors from camera streams are registered, i.e. stored as a new identity (cluster) when they are dissimilar
+   to any other stored cluster.
+   Feature vectors from a person database are registered by their kafka message key,
+   which can be e.g. the name of the person.
+ Outputs: ReidRecord and optionally an undocumented internal state topic
+ */
+message ReidConfigRecord
+{
+  /** Configuration for a single reid-type input stream */
+  message FVReidStreamConfig
+  {
+    float min_similarity = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Minimum similarity score for reidentification, i.e. to be included in the list of top matching elements.</span>
+    <span class="hljs-built_in">uint32</span> max_num_matches = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Maximal length of the list of top matching elements from this registration stream.</span>
+  }
+
+  /** The type of each camera stream can be 'reg', 'reid', or both. */
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">CameraStreamConfig</span>
+  </span>{
+    FVRegStreamConfig reg_stream_config = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Only for registration streams.</span>
+    FVReidStreamConfig reid_stream_config = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Only for reid streams.</span>
+  }
+
+  /**
+  Configuration for a person input stream used to add/update/delete/activate/inactivate feature vector clusters.
+  Input message schema for this stream:
+  1. Empty payload: permanently delete cluster that has the same key as the input message key.
+  2. Message contains a non-null feature vector or cluster field (as specified in FVStreamConfig):
+    --&gt; Add or update cluster with the same key as the key of the message.
+        ClusteringMethod has no effect on person streams; the representative feature vector is always replaced by the new observation.
+    --&gt; Activate/inactivate cluster according to the value of the field at is_active_path
+  3. The feature vector/cluster field is NULL
+    --&gt; Activate/inactivate cluster according to the value of the field at is_active_path
+  */
+  message PersonStreamConfig
+  {
+    string is_active_path = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Optional path to a boolean field in the input messages. true means activate cluster, false means inactivate cluster.</span>
+    /** Cluster memory window size [ms]. <span class="hljs-number">0</span> means infinite.
+    Cluster delete events are triggered by the first input after the retention period expired.
+    The same period is used to look back to the previous inputs at startup when start_from_internal_state is false.
+    */
+    int64 cluster_retention_period_ms = <span class="hljs-number">2</span>;
+  }
+
+  /** Configuration for a single input stream */
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">InputStreamConfig</span>
+  </span>{
+    <span class="hljs-built_in">string</span> stream_id = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Identifier of input stream.</span>
+    FVFieldSelector fv_field_selector = <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">oneof</span> stream_config
+    {
+      CameraStreamConfig camera_stream_config = <span class="hljs-number">3</span>;
+      PersonStreamConfig person_stream_config = <span class="hljs-number">4</span>;
+    }
+  }
+
+  FVClusteringConfig clustering_config = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">repeated</span> InputStreamConfig input_stream_configs = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Exactly as many configurations as input streams configured for the service.</span>
+}
+
+</code></pre>
+</div></div></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../../../docs/help/uvap_gloss.html">Glossary</a><a href="../../../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../../../docs/feat/feat_overview.html">Key Features</a><a href="../../../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

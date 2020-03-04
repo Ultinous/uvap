@@ -1,0 +1,188 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Data Model · UVAP</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Data Model"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Data Model · UVAP"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../index.html"/><meta property="og:description" content="# Data Model"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../js/code-block-download-button.js"></script><script src="../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../css/main.css"/><script src="../../js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../"><img class="logo" src="../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class="siteNavGroupActive"><a href="../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Developer Guide</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Developer Guide<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_architect.html">Architecture</a></li><li class="navListItem navListItemActive"><a class="navItem" href="../../docs/dev/uvap_data_model.html">Data Model</a></li><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Microservices</h4><ul><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_mgr.html">Multi-Graph Runner</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_track.html">Tracker</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_passdet.html">Pass Detector</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_reid.html">Reidentifier</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_cluster.html">Feature Vector Clustering</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/ms_det_filter.html">Detection Filter</a></li></ul></div><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Microservice Configuration</h4><ul><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_mgr.html">Configuring Multi-Graph Runner</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_track.html">Configuring Tracker</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_passdet.html">Configuring Pass Detector</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_reid.html">Configuring Reidentifier</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_cluster.html">Configuring Feature Vector Clustering</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_det_filter.html">Configuring the Detection Filter</a></li><li class="navListItem"><a class="navItem" href="../../docs/dev/conf_superconfig.html">Microservice Superconfiguration</a></li></ul></div><li class="navListItem"><a class="navItem" href="../../docs/dev/uvap_extend.html">Extending UVAP</a></li><li class="navListItem"><a class="navItem" href="../../docs/operation/op_opguide.html">UVAP Operation Guide</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="data-model"></a><a href="#data-model" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Data Model</h1>
+<p>As shown below, microservices are connected through Kafka® topics. This
+section provides information about the schema and format of these topics.</p>
+<p><img src="../assets/fig_dataflow_architecture_of_UVAP.png" alt="Dataflow Architecture of UVAP"></p>
+<p>The data model of UVAP is normalized. Every topic contains one piece of
+information; if information from multiple topics is needed, the topics
+have to be joined.</p>
+<h2><a class="anchor" aria-hidden="true" id="topic-naming-convention"></a><a href="#topic-naming-convention" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Topic Naming Convention</h2>
+<p>Kafka topics cannot be structured to hierarchical folders, so UVAP packages most
+information into the topic name to help the users. Topic names use the following
+naming convention:</p>
+<pre><code class="hljs">&lt;domain&gt;.cam.&lt;stream_id&gt;.&lt;data_name&gt;.&lt;schema&gt;.&lt;serialization_format&gt;
+</code></pre>
+<p>Where:</p>
+<table>
+<thead>
+<tr><th>Variable</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>&lt;domain&gt;</code></td><td>User-defined prefix. Can be used to distinguish between topics in different projects, locations, and so on.</td></tr>
+<tr><td><code>&lt;stream_id&gt;</code></td><td>ID of the stream. Can be used to distinguish between topics for different cameras.</td></tr>
+<tr><td><code>&lt;data_name&gt;</code></td><td>Name of the input data. Can be used to distinguish between different instances of analysis type.</td></tr>
+<tr><td><code>&lt;schema&gt;</code></td><td>Record schema name. For further information, see <a href="#topic-schemas">Topic Schemas</a> below.</td></tr>
+<tr><td><code>&lt;serialization_format&gt;</code></td><td>Format of the topic file. Currently only JSON (<code>.json</code>) is supported for structured data. JPEG (<code>.jpeg</code>) is used to save images.</td></tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Attention!</strong>  <br>
+Uncompressed JSON can be prohibitive. It is recommended to turn on LZ4
+compression in the Kafka broker to spare storage and bandwidth.</p>
+</blockquote>
+<p>Although this naming convention is recommended, the topic name is completely
+user-defined.</p>
+<h4><a class="anchor" aria-hidden="true" id="example-topic-name"></a><a href="#example-topic-name" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Topic Name</h4>
+<p>See the following example topic name and its description below:</p>
+<pre><code class="hljs">demo.cam.117.dets.ObjectDetectionRecord.json
+</code></pre>
+<p>This topic is produced by <strong>MGR</strong>, <code>dets</code> refers to the <strong>MGR</strong> data node.</p>
+<p><code>ObjectDetectionRecord</code> refers to the schema of the data described
+in the <a href="../../proto_files/ultinous/proto/common/kafka_data.proto.html">Kafka data proto</a>.</p>
+<p><code>.json</code> describes the serialization format.</p>
+<h2><a class="anchor" aria-hidden="true" id="topic-schemas"></a><a href="#topic-schemas" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Topic Schemas</h2>
+<p>The data model used by UVAP is normalized. The schema of all the structured
+topics are described in the <a href="../../proto_files/ultinous/proto/common/kafka_data.proto.html">Kafka data proto</a> with comments embedded for
+explanation. The schema of the Kafka record values are defined in proto
+messages ending with <code>Record</code>. The comment before the definition describes
+the key as well.</p>
+<p>Microservices emit progress (or heartbeat) records as well to make joining topics
+easier in real-time. Different topics have different progress record
+properties, which are described in the <a href="../../proto_files/ultinous/proto/common/kafka_data.proto.html">Kafka data proto</a>.</p>
+<h4><a class="anchor" aria-hidden="true" id="example-topic-schema"></a><a href="#example-topic-schema" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Topic Schema</h4>
+<p>See the following example topic schema (<code>ObjectDetectionRecord</code>):</p>
+<pre><code class="hljs css language-protobuf"><span class="hljs-comment">// Detection record.</span>
+<span class="hljs-comment">// One instance of this record is generated for each detected head/face on each frame.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// time: timestamp of the input video frame</span>
+<span class="hljs-comment">// key: time + "_" + sequential index within frame</span>
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">ObjectDetectionRecord</span>
+</span>{
+  ObjectType type = <span class="hljs-number">1</span>;            <span class="hljs-comment">// Object type</span>
+  Rect bounding_box = <span class="hljs-number">2</span>;          <span class="hljs-comment">// Rectangular box containing the object (eg.: head/face)</span>
+  <span class="hljs-built_in">float</span> detection_confidence = <span class="hljs-number">3</span>; <span class="hljs-comment">// Detection confidence between 0 and 1</span>
+  <span class="hljs-built_in">bool</span> end_of_frame = <span class="hljs-number">4</span>;          <span class="hljs-comment">// When true, all other fields of the record are invalid.</span>
+}
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="example-output-records"></a><a href="#example-output-records" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Output Records</h4>
+<p>See the following example dump of a JSON detection topic with the
+<code>ObjectDetectionRecord</code> schema:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ kafkacat -C -b localhost -t demo.dets.ObjectDetectionRecord.json -o-1 -f "%k,%s\n"
+</code></pre>
+<p>Expected output:</p>
+<pre><code class="hljs">1561981650053,{"type":"PERSON_HEAD","detection_confidence":0,"end_of_frame":true}
+1561981650303_0,{"type":"PERSON_HEAD","bounding_box":{"x":1009,"y":388,"width":44,"height":52},"detection_confidence":0.978241444,"end_of_frame":false}
+1561981650303_1,{"type":"PERSON_HEAD","bounding_box":{"x":1235,"y":434,"width":68,"height":80},"detection_confidence":0.924045682,"end_of_frame":false}
+1561981650303,{"type":"PERSON_HEAD","detection_confidence":0,"end_of_frame":true}
+1561981650553_0,{"type":"PERSON_HEAD","bounding_box":{"x":1009,"y":388,"width":44,"height":52},"detection_confidence":0.978059471,"end_of_frame":false}
+1561981650553_1,{"type":"PERSON_HEAD","bounding_box":{"x":1236,"y":435,"width":67,"height":79},"detection_confidence":0.928204656,"end_of_frame":false}
+1561981650553,{"type":"PERSON_HEAD","detection_confidence":0,"end_of_frame":true}
+1561981650803,{"type":"PERSON_HEAD","detection_confidence":0,"end_of_frame":true}
+1561981651003,{"type":"PERSON_HEAD","detection_confidence":0,"end_of_frame":true}
+</code></pre>
+<p>There are timestamps (for example: <code>1561981650803</code>) with no detections, only
+a record with <code>end_of_frame</code> set to <code>true</code>.</p>
+<p>If the <code>end_of_frame</code> has the value <code>true</code> when processing detections, the
+microservice can emit all the information for the particular frame.</p>
+<h2><a class="anchor" aria-hidden="true" id="cross-references"></a><a href="#cross-references" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Cross References</h2>
+<p>Records in topics produced by a microservice often contain references to records
+of other topics. A chain of references ensures the possibility to link useful
+data with each other, for example, demographic data with tracks.</p>
+<h4><a class="anchor" aria-hidden="true" id="example-cross-reference"></a><a href="#example-cross-reference" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Cross Reference</h4>
+<p>The <code>detection_key</code> property of <code>TrackChangeRecord</code> produced by the <strong>Tracker</strong>
+microservice refers to an <code>ObjectDetectionRecord</code> key and an <code>AgeRecord</code> key in
+two other topics produced by <strong>MGR</strong>. For more information on these keys, see
+<a href="../../proto_files/ultinous/proto/common/kafka_data.proto.html">Kafka data proto</a>.</p>
+<blockquote>
+<p><strong>Note:</strong>  <br>
+The key in <code>TrackChangeRecord</code> is usually not equal to its
+<code>detection_key</code>, for its key refers to the detection of the first record of the
+track. For further information, see <a href="../../docs/dev/conf_track.html#output-schemas">Tracker Output Schemas</a>.</p>
+</blockquote>
+<p>This simple example is only a sneak peek of UVAP capabilities. For example,
+with <strong>Pass Detection</strong> microservice, even more information can be received
+about a <code>TrackChangeRecord</code> (which can be associated with <code>AgeRecords</code>).</p>
+<h2><a class="anchor" aria-hidden="true" id="consuming-and-producing-messages"></a><a href="#consuming-and-producing-messages" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Consuming and Producing messages</h2>
+<p>While using UVAP it is possible to read the result topics of a particular microservice
+with your own code or to write custom messages, for example when creating your own staff directory using <a href="../../docs/dev/ms_reid.html#person-stream">Person Streams</a>.
+A <a href="../../demo_applications/utils/kafka/kafka-cli.py.html">Python implementation of a simple low- and high level Consumer and Producer</a> is also provided as a part of the
+package. For more details, see the <a href="../../docs/demo/demo_overview.html">Demo Applications</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="join"></a><a href="#join" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Join</h2>
+<p>Because the data model is normalized, it is common to read and join multiple
+topics. Joining Kafka topics is solved in the <strong>Kafka Streams</strong> Java API.
+A <a href="../../demo_applications/utils/kafka/time_ordered_generator_with_timeout.py.html">Python implementation of Join</a> is also provided as a part of the
+package. For more details, see the <a href="../../docs/demo/demo_overview.html">Demo Applications</a>.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="../../docs/dev/uvap_architect.html"><span class="arrow-prev">← </span><span>Architecture</span></a><a class="docs-next button" href="../../docs/dev/ms_mgr.html"><span>Multi-Graph Runner</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#topic-naming-convention">Topic Naming Convention</a></li><li><a href="#topic-schemas">Topic Schemas</a></li><li><a href="#cross-references">Cross References</a></li><li><a href="#consuming-and-producing-messages">Consuming and Producing messages</a></li><li><a href="#join">Join</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

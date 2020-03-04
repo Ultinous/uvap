@@ -1,0 +1,63 @@
+/*
+Structures for Kafka streams containing Ultinous video analysis results.
+Copyright (C) 2014,2018 Ultinous Inc.
+*/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This proto describes helper structures specific to skeleton deteection.
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+syntax = "proto3";
+
+package ultinous.proto.common;
+
+option java_package = "com.ultinous.proto.common";
+option java_multiple_files = true;
+
+/** Skeleton point types corresponding to body parts
+*/
+enum SkeletonPointType
+{
+  NOSE = 0;
+  NECK = 1;
+  RIGHT_SHOULDER = 2;
+  RIGHT_ELBOW = 3;
+  RIGHT_WRIST = 4;
+  LEFT_SHOULDER = 5;
+  LEFT_ELBOW = 6;
+  LEFT_WRIST = 7;
+  RIGHT_HIP = 8;
+  RIGHT_KNEE = 9;
+  RIGHT_ANKLE = 10;
+  LEFT_HIP = 11;
+  LEFT_KNEE = 12;
+  LEFT_ANKLE = 13;
+  RIGHT_EYE = 14;
+  LEFT_EYE = 15;
+  RIGHT_EAR = 16;
+  LEFT_EAR = 17;
+}
+
+/**
+To draw a full skeleton, you can use a common-sense anatomical model for connecting skeleton points.
+ For example, you might want to connect these pairs of points:
+ (NECK, NOSE)
+ (NOSE, RIGHT_EYE)
+ (NOSE, LEFT_EYE)
+ (NECK, RIGHT_SHOULDER)
+ (NECK, LEFT_SHOULDER)
+ (NECK, RIGHT_HIP)
+ (NECK, LEFT_HIP)
+ (RIGHT_SHOULDER, RIGHT_ELBOW)
+ (RIGHT_ELBOW, RIGHT_WRIST)
+ (LEFT_SHOULDER, LEFT_ELBOW)
+ (LEFT_ELBOW, LEFT_WRIST)
+ (RIGHT_HIP, RIGHT_KNEE)
+ (RIGHT_KNEE, RIGHT_ANKLE)
+ (LEFT_HIP, LEFT_KNEE)
+ (LEFT_KNEE, LEFT_ANKLE)
+ (RIGHT_EYE, RIGHT_EAR)
+ (LEFT_EYE, LEFT_EAR)
+*/

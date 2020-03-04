@@ -1,25 +1,20 @@
 # Ultinous Video Analytics Platform
 
-Ultinous Video Analytics Platform (UVAP) is a set of software services that can
-be composed and extended in a flexible way to build scalable, distributed video
-processing applications in multiple domains such as retail, security or elderly
-care.
+Ultinous Video Analytics Platform (UVAP) is a set of modular software services 
+for building custom, scalable and distributed video processing applications for 
+various purposes and products.  
+UVAP provides a rich set of video analysis models that are industry leading in 
+accuracy, along with efficient processing.  
 
-UVAP provides a rich set of deep learning based advanced video analysis models. 
-These models are industry leading in accuracy, along with efficient processing.
+## Documentation
+### Latest Release
+The documentation of the **latest UVAP release** can be viewed
+on the [UVAP Documentation Website](http://docs.ultinous.com/uvap).
+### Currently Viewed Release
+In order to view the documentation belonging to the **currently viewed state of git history**:
+* Clone this repository to your local machine
+* Open `[repository root]/docs/index.html`.
+## Contact
 
-## [Key Features](docs/feat/README.md)
-
-## [Feature Demos](docs/demo/README.md)
-
-## [Installation](docs/install/README.md)
-
-## [Changelog](docs/changelog.md)
-
-## [Upgrade](docs/upgrade/README.md)
-
-## [Developer Guide](docs/dev/README.md)
-
-## [Tutorials](docs/tutorials/README.md)
-
-## [Help](docs/help/README.md)
+* __Ultinous web page__: [https://www.ultinous.com/](https://www.ultinous.com/)
+* __Support__: support@ultinous.com

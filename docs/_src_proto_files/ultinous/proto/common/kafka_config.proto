@@ -1,0 +1,310 @@
+/*
+Configuration for UVAP Microservices.
+Copyright (C) 2014,2018 Ultinous Inc.
+*/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This proto describes the functional configuration of the building blocks of video analysis.
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+syntax = "proto3";
+
+package ultinous.proto.kafka;
+
+option java_package = "com.ultinous.proto.kafka";
+option java_multiple_files = true;
+
+import "ultinous/proto/common/kafka_common.proto";
+
+/** Configuration for kafka_tracker
+*/
+message TrackingConfigRecord
+{
+  /** Confidence threshold for filtering input ObjectDetectionRecords.
+  Records whose detection_confidence value is above this threshold will be kept.
+  range: [0..1); 0 means no filtering
+  default: 0
+  */
+  float detection_threshold = 1;
+
+  /** Maximum distance of track points in subsequent frames for track to be connected.
+  unit: bounding box width
+  range: (0..+inf)
+  default: 2
+  */
+  float distance_threshold = 2;
+
+  /** Maximum lifetime of a track without new detection.
+  unit: msec
+  range: [0..+inf)
+  default: 1000
+  */
+  uint32 time_passed_threshold = 3;
+}
+
+/** Configuration for kafka_passdet
+*/
+message PassDetConfigRecord
+{
+  message PassLine
+  {
+    /** Identifier of the polygonal chain 'poly'
+    It can be anything that is unique within a PassDetConfigRecord.
+    */
+    string id = 1;
+
+    /** Polygonal chain (broken line)
+    Must consist of at least two points
+    The direction from the first point to the last one is important: it determines the passage direction in the result.
+    */
+    repeated Point poly = 2;
+  }
+
+  /** Lines through which passage will be detected.
+  Must contain at least one line.
+  Each detection event is associated with exactly one of these lines and the result record will contain its id.
+  */
+  repeated PassLine pass_lines = 1;
+}
+
+/** Configuration of a single area for detection filter
+*/
+message DetectionArea
+{
+  /** A (closed) polygon that a defines an area. Decisions are made depending
+  on which area(s) detection centroids are inside of.
+  Must contain at least three points, corresponding to polygon vertices
+  */
+  repeated Point vertices = 1;
+}
+
+/** Configuration for the detection filter microservice
+This MS can filter ObjectDetectionRecords by any combination of
+- detection type
+- detection confidence
+- location
+A detection must pass each and every configured criteria to pass the filter itself.
+*/
+message DetectionFilterConfigRecord
+{
+  /** Minimum confidence of detection for passing the filter
+  Compared to the 'detection_confidence' value of ObjectDetectionRecord.
+  range: [0..1); 0 means no confidence based filtering
+  default: 0
+  */
+  float min_confidence = 1;
+
+  /** Set of allowed  detection types for passing the filter
+  Empty set means no detection type based filtering
+  */
+  repeated ObjectType detection_types = 2;
+
+  /** Areas of negative interest.
+  A detection is not going to pass if it is inside any of the negative areas.
+  Empty list means no negative area based filtering
+  */
+  repeated DetectionArea negative_areas = 3;
+
+  /** Areas of positive interest.
+  A detection passes if it is inside any of the positive areas.
+  Empty list means no postive area based filtering.
+  */
+  repeated DetectionArea positive_areas = 4;
+}
+
+/**
+Configuration of feature vector clustering algorithms.
+Clustering is based on a similarity measure between feature vectors and clusters.
+Currently supports trivial algorithms only where a single feature vector represents a cluster.
+The representative feature vector can be the last one belonging to this cluster, or an average of all previous ones.
+*/
+message FVClusteringConfig
+{
+  /** Conditions for clusters to be realized.
+  Clusters are unrealized until either they contain num_samples observations or time_limit_ms is reached.
+  Once they are realized, the action specified by realized_cluster_action is performed.
+  The time until time_limit_ms is measured from the first observation belonging to the cluster, after the previous realization of the same cluster.
+  Registration events are generated for both realized and unrealized clusters. 
+  */
+  message ClusterRealizationConfig
+  {
+    enum RealizedClusterAction
+    {
+      INVALID = 0;
+      REMOVE = 1; ///< Remove the realized cluster from internal DB. A delete event is triggered.
+      UNREALIZE = 2; ///< The realized cluster becomes unrealized until num_samples new observations arrive again.
+      KEEP_REALIZED = 3; ///< Once realized, the same cluster remains realized until removed.
+    }
+
+    uint32 num_samples = 1; ///< Number of observations in realized clusters.
+    int64 time_limit_ms = 2; ///< Time limit for realization even when the number of observations is too small, zero means infinite.
+    RealizedClusterAction realized_cluster_action = 3;
+  }
+  /** Configuration for Cluster Merging.
+  Merge attempts are triggered by the first input arriving after time_interval_ms since the last attempt.
+  Clusters that are more similar to each other than the current similarity threshold will be merged.
+  current_threshold = max(min_threshold, initial_threshold * threshold_discount_rate^num_inputs)
+  where num_inputs is the sum of the two potentially mergeable clusters.
+
+  Typical values:
+  initial_threshold can be the same as reg_threshold below;
+  min_threshold can be the lowest score to allow merging;
+  threshold_discount rate can be between 0.95 and 0.999, depending on how many observations we require before lowering the threshold to min_threshold.
+  */
+  message ClusterMergingConfig
+  {
+    float initial_threshold = 1; ///< Initial similarity threshold value. See formula above.
+    float threshold_discount_rate = 2; ///< Rate of descreasing the similarity threshold. See formula above.
+    float min_threshold = 3; ///< Minimal value of the similarity threshold. See formula above.
+    int64 time_interval_ms = 4; ///< Minimum time between subsequent merge attempts. Note that merge calculation is expensive.
+  }
+
+  /**
+  Type of clustering algorithm.
+  Has no effect on person streams, they always use USE_LAST.
+  */
+  enum ClusteringMethod
+  {
+    INVALID = 0;
+    USE_LAST = 1; ///< The representative feature vector of the matching cluster is always replaced by the new observation.
+    SIMPLE_AVERAGE = 2; ///< The representative feature vector of each cluster is a simple average of the matching observations.
+  }
+
+  ClusteringMethod method = 1;
+  ClusterMergingConfig cluster_merging = 2; ///< Optional, must be null for method=USE_LAST.
+  ClusterRealizationConfig cluster_realization = 3; ///< Optional, must be null for method=USE_LAST.
+  bool save_internal_state = 4; ///< When true, internal states are saved to a Kafka topic.
+  bool start_from_internal_state = 5; ///< When true, the saved internal states are used to rebuild the DB, instead of the input topics.
+}
+
+/**
+  Description of how to extract a specific field from a message.
+  The path to reach the field is denoted by a '.'-separated list of tokens:
+  - find the first token as a top-level field name
+  - find the next token as an embedded field in the previous field
+  - repeat until end of list; the last token is the required field name
+  Messages in which the specified field is not present will be ignored.
+*/
+message FVFieldSelector
+{
+  oneof fv_path
+  {
+    string feature_vector_path = 1; ///< Path to a FeatureVector field.
+    string fv_cluster_path = 2; ///< Path to a FVCluster field.
+  }
+}
+
+/** Configuration for a registration-type input stream originating from a camera*/
+message FVRegStreamConfig
+{
+  float reg_threshold = 1; ///< Similarity threshold for registration: decides whether to create a new cluster or to update an existing one.
+  /** Cluster memory window size [ms]. 0 means infinite.
+  Cluster delete events are triggered by the first input after the retention period expires.
+  The same period is used to look back to the previous inputs at startup when start_from_internal_state is false.
+  */
+  int64 cluster_retention_period_ms = 2;
+}
+
+/**
+ Configuration for kafka_feature_vector_clustering.
+ Also applies to the registration part of the kafka_reid microservice below.
+ Inputs: Inputs are streams of feature vectors or clusters that may be extracted from
+ - video camera streams
+ - a previous feature vector clustering algorithm.
+ Inputs can be any record type that contains either a FeatureVector or a FVCluster field.
+ A new cluster is created when the input feature vector is less similar to any stored cluster than a threshold.
+ The most similar cluster (above the threshold) is modified by adding the new input feature vector.
+ New clusters and modifications are only emitted to the output topic when the cluster meets the requirements to be realized.
+ Outputs: FVClusterUpdateRecord, and optionally an undocumented internal state topic
+*/
+message FVClusteringConfigRecord
+{
+  /** Configuration for a single input stream */
+  message InputStreamConfig
+  {
+    string stream_id = 1; ///< Identifier of input stream.
+    FVFieldSelector fv_field_selector = 2;
+    FVRegStreamConfig reg_stream_config = 3;
+  }
+
+  FVClusteringConfig clustering_config = 1;
+  repeated InputStreamConfig input_stream_configs = 2; ///< Exactly as many configurations as input streams configured for the service.
+}
+
+/**
+ Configuration for kafka_reid.
+ Input:
+   Inputs are streams of feature vectors or clusters that may be extracted from
+   - video camera streams, via feature vector extraction and optionally pre-clustering
+   - person databases containing images
+   Inputs can be any record type that contains either a FeatureVector or a FVCluster field.
+   Camera input streams can be used for registration, reidentification, or both.
+ Reidentification:
+   Feature vectors are reidentified as an existing identity when they are similar enough to
+   a registered feature vector cluster.
+   Each stream that is used for registration will provide a top list of matches, the final result will be
+   the concatenation of these top lists.
+   Each top list has a maximum size configured for that reidentification stream (max_num_matches).
+   A top list can be shorter if there are not enough matches reaching the minimum required score (min_similarity).
+ Registration:
+   The configuration for the clustering algorithm is the same as ClusteringConfig above.
+   Feature vectors from camera streams are registered, i.e. stored as a new identity (cluster) when they are dissimilar
+   to any other stored cluster.
+   Feature vectors from a person database are registered by their kafka message key,
+   which can be e.g. the name of the person.
+ Outputs: ReidRecord and optionally an undocumented internal state topic
+ */
+message ReidConfigRecord
+{
+  /** Configuration for a single reid-type input stream */
+  message FVReidStreamConfig
+  {
+    float min_similarity = 1; ///< Minimum similarity score for reidentification, i.e. to be included in the list of top matching elements.
+    uint32 max_num_matches = 2; ///< Maximal length of the list of top matching elements from this registration stream.
+  }
+
+  /** The type of each camera stream can be 'reg', 'reid', or both. */
+  message CameraStreamConfig
+  {
+    FVRegStreamConfig reg_stream_config = 1; ///< Only for registration streams.
+    FVReidStreamConfig reid_stream_config = 2; ///< Only for reid streams.
+  }
+
+  /**
+  Configuration for a person input stream used to add/update/delete/activate/inactivate feature vector clusters.
+  Input message schema for this stream:
+  1. Empty payload: permanently delete cluster that has the same key as the input message key.
+  2. Message contains a non-null feature vector or cluster field (as specified in FVStreamConfig):
+    --> Add or update cluster with the same key as the key of the message.
+        ClusteringMethod has no effect on person streams; the representative feature vector is always replaced by the new observation.
+    --> Activate/inactivate cluster according to the value of the field at is_active_path
+  3. The feature vector/cluster field is NULL
+    --> Activate/inactivate cluster according to the value of the field at is_active_path
+  */
+  message PersonStreamConfig
+  {
+    string is_active_path = 1; ///< Optional path to a boolean field in the input messages. true means activate cluster, false means inactivate cluster.
+    /** Cluster memory window size [ms]. 0 means infinite.
+    Cluster delete events are triggered by the first input after the retention period expired.
+    The same period is used to look back to the previous inputs at startup when start_from_internal_state is false.
+    */
+    int64 cluster_retention_period_ms = 2;
+  }
+
+  /** Configuration for a single input stream */
+  message InputStreamConfig
+  {
+    string stream_id = 1; ///< Identifier of input stream.
+    FVFieldSelector fv_field_selector = 2;
+    oneof stream_config
+    {
+      CameraStreamConfig camera_stream_config = 3;
+      PersonStreamConfig person_stream_config = 4;
+    }
+  }
+
+  FVClusteringConfig clustering_config = 1;
+  repeated InputStreamConfig input_stream_configs = 2; ///< Exactly as many configurations as input streams configured for the service.
+}

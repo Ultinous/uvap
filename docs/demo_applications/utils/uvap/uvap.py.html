@@ -1,0 +1,141 @@
+<!DOCTYPE html><html lang=""><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>UVAP · Ultinous Video Analytics Platform</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Ultinous Video Analytics Platform"/><meta property="og:title" content="UVAP · Ultinous Video Analytics Platform"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../../index.html"/><meta property="og:description" content="Ultinous Video Analytics Platform"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../../js/code-block-download-button.js"></script><script src="../../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../../css/main.css"/><script src="../../../js/codetabs.js"></script></head><body><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../../"><img class="logo" src="../../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer documentContainer postContainer"><div class="wrapper"><div class="post"><div><a target="_blank" class="btnDownload" href="../../../_src_demo_applications/utils/uvap/uvap.py"></a><div class="static-file-code-block"><pre><code class="hljs css language-python codeBlockCopy"><span class="hljs-keyword">import</span> cv2
+<span class="hljs-keyword">import</span> json
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> confluent_kafka <span class="hljs-keyword">import</span> Message
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> List
+<span class="hljs-keyword">from</span> turbojpeg <span class="hljs-keyword">import</span> TurboJPEG
+
+jpeg = TurboJPEG(<span class="hljs-string">'/usr/lib/x86_64-linux-gnu/libturbojpeg.so.0'</span>)
+turbo = TurboJPEG()
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NoKeyErrorDict</span><span class="hljs-params">(dict)</span>:</span>
+    <span class="hljs-string">"""
+    Dictionary with error handling during KeyError. With this dictionary we can create nested structures more simply.
+    """</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__getitem__</span><span class="hljs-params">(self, item)</span>:</span>
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-keyword">return</span> dict.__getitem__(self, item)
+        <span class="hljs-keyword">except</span> KeyError:
+            value = self[item] = type(self)()
+            <span class="hljs-keyword">return</span> value
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">asdict</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> self.items():
+            <span class="hljs-keyword">if</span> isinstance(v, type(self)):
+                self[k] = v.asdict()
+        <span class="hljs-keyword">return</span> dict(self)
+
+    <span class="hljs-comment"># todo make repr method pls</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">decode_standard_message</span><span class="hljs-params">(msg: Message)</span> -&gt; dict:</span>
+    <span class="hljs-keyword">return</span> json.loads(msg.value().decode(<span class="hljs-string">'utf-8'</span>))
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">decode_image_message</span><span class="hljs-params">(msg: Message)</span> -&gt; np.array:</span>
+    img_mat = np.fromstring(msg.value(), dtype=np.uint8)
+    <span class="hljs-keyword">return</span> turbo.decode(img_mat)
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">encode_image_to_message</span><span class="hljs-params">(img: np.array)</span>:</span>
+    <span class="hljs-keyword">return</span> turbo.encode(img)
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">_get_message_type</span><span class="hljs-params">(message_topic)</span> -&gt; str:</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-string">'.jpg'</span> <span class="hljs-keyword">in</span> message_topic:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'image'</span>
+    <span class="hljs-keyword">elif</span> <span class="hljs-string">'.ObjectDetectionRecord'</span> <span class="hljs-keyword">in</span> message_topic:
+        <span class="hljs-keyword">if</span> <span class="hljs-string">'.filtered_dets.'</span> <span class="hljs-keyword">in</span> message_topic:
+            <span class="hljs-keyword">return</span> <span class="hljs-string">'filtered_bounding_box'</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'bounding_box'</span>
+    <span class="hljs-keyword">elif</span> <span class="hljs-string">'.HeadPose3DRecord'</span> <span class="hljs-keyword">in</span> message_topic:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'head_pose'</span>
+    <span class="hljs-keyword">elif</span> <span class="hljs-string">'.skeletons'</span> <span class="hljs-keyword">in</span> message_topic:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'skeleton'</span>
+    <span class="hljs-keyword">elif</span> <span class="hljs-string">'.AgeRecord'</span> <span class="hljs-keyword">in</span> message_topic:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'age'</span>
+    <span class="hljs-keyword">elif</span> <span class="hljs-string">'.GenderRecord'</span> <span class="hljs-keyword">in</span> message_topic:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'gender'</span>
+    <span class="hljs-keyword">elif</span> <span class="hljs-string">'.TrackChangeRecord'</span> <span class="hljs-keyword">in</span> message_topic:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'track'</span>
+    <span class="hljs-keyword">elif</span> <span class="hljs-string">'.PassDetectionRecord'</span> <span class="hljs-keyword">in</span> message_topic:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"passdet"</span>
+    <span class="hljs-keyword">elif</span> <span class="hljs-string">'.ReidRecord'</span> <span class="hljs-keyword">in</span> message_topic:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'reid'</span>
+    <span class="hljs-keyword">elif</span> <span class="hljs-string">'.FrameInfoRecord'</span> <span class="hljs-keyword">in</span> message_topic:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'frame_info'</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'unknown'</span>
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">_get_current_stream</span><span class="hljs-params">(message_topic: str)</span> -&gt; str:</span>
+    parts = message_topic.split(<span class="hljs-string">'.'</span>)
+    <span class="hljs-keyword">return</span> parts[<span class="hljs-number">0</span>]
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">_get_current_cam</span><span class="hljs-params">(message_topic: str)</span> -&gt; str:</span>
+    parts = message_topic.split(<span class="hljs-string">'.'</span>)
+    <span class="hljs-keyword">for</span> idx, part <span class="hljs-keyword">in</span> enumerate(parts):
+        <span class="hljs-keyword">if</span> <span class="hljs-string">'cam'</span> <span class="hljs-keyword">in</span> part:
+            <span class="hljs-keyword">return</span> parts[idx + <span class="hljs-number">1</span>]
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'default_cam'</span>
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">message_list_to_frame_structure</span><span class="hljs-params">(messages: List[Message])</span> -&gt; dict:</span>
+    <span class="hljs-string">"""
+    Grouping list of messages into a dictionary. Bounding boxes, age and gender infos, head poses are grouped
+    under "head_detection" key. The points of skeletons are grouped under "skeleton" key. Skeletons and head detections
+    are grouped under the associated camera, which is represented by the camera id. The structure allows us to use
+    multiple cameras from multiple streams so the cameras are merging under the stream key. To use re-identification
+    across multiple streams and cameras, streams and re-identification is grouped together with their common timestamp.
+    :param messages: list of kafka messages
+    :return: dictionary with the grouped values
+    """</span>
+    frame_dict = NoKeyErrorDict()
+    <span class="hljs-keyword">for</span> message <span class="hljs-keyword">in</span> messages:
+        ts = message.timestamp()[<span class="hljs-number">1</span>]
+        topic_name = message.topic()
+        message_key = message.key()
+
+        stream = _get_current_stream(topic_name)
+        cam = _get_current_cam(topic_name)
+        type = _get_message_type(topic_name)
+        detection = message_key.decode(<span class="hljs-string">'utf-8'</span>) <span class="hljs-keyword">if</span> message_key <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">else</span> <span class="hljs-string">'image'</span>
+        value = decode_image_message(message) <span class="hljs-keyword">if</span> <span class="hljs-string">'.jpg'</span> <span class="hljs-keyword">in</span> message.topic() <span class="hljs-keyword">else</span> decode_standard_message(message)
+
+        <span class="hljs-keyword">if</span> type == <span class="hljs-string">'image'</span>:
+            frame_dict[ts][stream][cam][type] = value
+        <span class="hljs-keyword">elif</span> <span class="hljs-keyword">not</span> value.get(<span class="hljs-string">"end_of_frame"</span>, <span class="hljs-literal">False</span>):
+            <span class="hljs-keyword">if</span> type <span class="hljs-keyword">in</span> (<span class="hljs-string">'skeleton'</span>, <span class="hljs-string">'track'</span>, <span class="hljs-string">'passdet'</span>):
+                frame_dict[ts][stream][cam][type][detection] = value
+            <span class="hljs-keyword">elif</span> type == <span class="hljs-string">'reid'</span>:
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> len(frame_dict[ts][stream][cam][type][detection]):
+                    frame_dict[ts][stream][cam][type][detection] = [value]
+                <span class="hljs-keyword">else</span>:
+                    frame_dict[ts][stream][cam][type][detection].append(value)
+            <span class="hljs-keyword">elif</span> type == <span class="hljs-string">'filtered_bounding_box'</span>:
+                frame_dict[ts][stream][cam][<span class="hljs-string">'filtered_head_detection'</span>][detection][type] = value
+            <span class="hljs-keyword">else</span>:
+                frame_dict[ts][stream][cam][<span class="hljs-string">'head_detection'</span>][detection][type] = value
+    <span class="hljs-keyword">return</span> frame_dict
+
+</code></pre>
+</div></div></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../../docs/help/uvap_gloss.html">Glossary</a><a href="../../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../../docs/feat/feat_overview.html">Key Features</a><a href="../../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

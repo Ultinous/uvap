@@ -1,0 +1,51 @@
+{
+  "sources":[
+    {% for INPUT_STREAM in INPUT_STREAMS %}
+    {
+      "broker_list":"{{ KAFKA_BROKER_LIST }}",
+      "name":"{{ KAFKA_TOPIC_PREFIX }}.cam.{{loop.index - 1}}.fvc.FVClusterUpdateRecord.json"
+    }{{ "," if not loop.last }}
+    {% endfor %}
+  ],
+  "source_options":{
+    "start":"START_NOW",
+    "end":"END_NEVER"
+  },
+  "target_options":{
+    "handling":"REPLACE"
+  },
+  "target":{
+    "broker_list":"{{ KAFKA_BROKER_LIST }}",
+    "name":"{{ KAFKA_TOPIC_PREFIX }}.cam.99.reids.ReidRecord.json"
+  },
+  "config_data":{
+    "clustering_config": {
+      "method": "SIMPLE_AVERAGE",
+      "save_internal_state": false,
+      "start_from_internal_state": false
+    },
+    "input_stream_configs": [
+      {% for INPUT_STREAM in INPUT_STREAMS %}
+      {% set do_reg = not loop.last or INPUT_STREAMS|length == 1 %}
+      {% set do_reid = loop.last or INPUT_STREAMS|length == 1 %}
+      {
+        "stream_id":"uvap{{loop.index - 1}}",
+        "fv_field_selector": {
+          "fv_cluster_path": "reg_event.cluster"
+        },
+        "camera_stream_config": {
+          "reg_stream_config": {
+          "reg_threshold": 0.8,
+          "cluster_retention_period_ms": 86400000
+        },
+          "reid_stream_config": {
+          "min_similarity": 0.8,
+          "max_num_matches": 1
+        }
+        }
+      }
+      {{ "," if not loop.last }}
+      {% endfor %}
+      ]
+  }
+}

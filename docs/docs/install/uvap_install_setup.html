@@ -1,0 +1,260 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Setting Up UVAP · UVAP</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Setting Up UVAP"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Setting Up UVAP · UVAP"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../index.html"/><meta property="og:description" content="# Setting Up UVAP"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../js/code-block-download-button.js"></script><script src="../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../css/main.css"/><script src="../../js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../"><img class="logo" src="../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class="siteNavGroupActive"><a href="../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Installation</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Installation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="../../docs/install/uvap_install_sysreq.html">System Requirements</a></li><li class="navListItem"><a class="navItem" href="../../docs/install/uvap_install_license.html">License Key</a></li><li class="navListItem navListItemActive"><a class="navItem" href="../../docs/install/uvap_install_setup.html">Setting Up UVAP</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Upgrade<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="../../docs/upgrade/uvap_upgrade.html">Upgrade Procedure</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="setting-up-uvap"></a><a href="#setting-up-uvap" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setting Up UVAP</h1>
+<p>This instruction page guides through the initial installation
+of UVAP. This procedure has to be executed only once. For upgrade instructions,
+see <a href="../../docs/upgrade/uvap_upgrade.html">Upgrading UVAP</a>.</p>
+<p>All shell commands in the UVAP Documentation have to run successfully.
+Always check the return value of an issued command (use <code>echo $?</code>). If a
+command fails (returns a non-zero return value), do not proceed.
+Instead, examine the error message printed by the issued command, and
+make any steps necessary for the command to succeed. Contact Ultinous support through
+email (sent to <code>support@ultinous.com</code>) if necessary.</p>
+<h2><a class="anchor" aria-hidden="true" id="prerequisite"></a><a href="#prerequisite" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Prerequisite</h2>
+<p>Before starting the installation, ensure that the hardware and software requirements are met according to <a href="../../docs/install/uvap_install_sysreq.html">System Requirements</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="creating-uvap-user"></a><a href="#creating-uvap-user" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating UVAP User</h2>
+<p>Before installing the components of UVAP, create a user named <code>ultinous</code>,
+and add it to the <code>sudo</code> group. To do so:</p>
+<ol>
+<li><p>Create <code>ultinous</code> user:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo adduser ultinous
+</code></pre></li>
+<li><p>Add the user to the <code>sudo</code> group:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo adduser ultinous sudo
+</code></pre></li>
+<li><p>Change user through UI (log out, then log in with <code>ultinous</code>
+user).</p></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="installing-nvidia-video-driver"></a><a href="#installing-nvidia-video-driver" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing NVIDIA Video Driver</h2>
+<p>UVAP requires a specific GPU driver installed to run properly. To install
+NVIDIA® video driver:</p>
+<ol>
+<li><p>Add the <code>graphics-drivers/ppa</code> repository to the APT:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo add-apt-repository ppa:graphics-drivers/ppa
+$ sudo apt update
+</code></pre></li>
+<li><p>Install NVIDIA video driver:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt install nvidia-driver-435
+</code></pre></li>
+<li><p>Reboot the node to use the new driver (and log in with <code>ultinous</code> user).</p></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="adding-docker-environment"></a><a href="#adding-docker-environment" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding Docker Environment</h2>
+<p>UVAP uses a containerized solution provided by Docker. This also has to be
+extended with an NVIDIA driver related add-on.</p>
+<ol>
+<li><p>Add Docker source to the APT repositories:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+  sudo apt-key add -
+$ sudo add-apt-repository "deb [arch=amd64] \
+  https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+$ sudo apt-get install docker-ce
+</code></pre></li>
+<li><p>Add the <code>ultinous</code> user to <code>docker</code> UNIX group:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo adduser ultinous docker
+</code></pre></li>
+<li><p>Log out from the graphical environment and log in again, to make the previous step take effect.</p></li>
+<li><p>On the server machine, enable <code>nvidia-persistenced</code> to prevent the sleep
+state of the GPU:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ cd /etc/systemd/system/
+$ sudo mkdir nvidia-persistenced.service.d
+$ cd nvidia-persistenced.service.d/
+$ cat | sudo tee override.conf &lt;&lt;EOF
+[Service]
+ExecStart=
+ExecStart=/usr/bin/nvidia-persistenced --user nvidia-persistenced --verbose
+EOF
+$ sudo systemctl daemon-reload
+$ sudo systemctl restart nvidia-persistenced.service
+</code></pre></li>
+<li><p>Install NVIDIA Docker:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | \
+  sudo apt-key add -
+$ distribution=$(. /etc/os-release; echo ${ID}${VERSION_ID})
+$ curl -s -L https://nvidia.github.io/nvidia-docker/${distribution}/nvidia-docker.list \
+  | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+$ sudo apt-get update
+$ sudo apt-get install nvidia-docker2
+$ sudo systemctl restart docker
+</code></pre></li>
+<li><p>Test the Docker environment:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ nvidia-docker run --rm nvidia/cuda:10.0-runtime-ubuntu18.04 \
+  nvidia-smi --query-gpu="gpu_name" --format="csv,noheader"
+</code></pre>
+<p>You should see the list of the names of the GPU devices, for example:</p>
+<pre><code class="hljs">GeForce GTX 1050 Ti
+GeForce GTX 1060 Ti
+</code></pre></li>
+<li><p>After the NVIDIA testing, the <code>nvidia/cuda</code> docker image is unnecessary.
+Remove the Docker Image:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker image rm nvidia/cuda:10.0-runtime-ubuntu18.04
+</code></pre></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="starting-kafka"></a><a href="#starting-kafka" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Starting Kafka</h2>
+<p>UVAP provides several sample streams over Kafka® where the integrator can
+connect to and implement custom solutions based on the outcoming streams.
+The way how Kafka is started is just an example, which can be easily and quickly
+carried out.<br>
+The <a href="https://kafka.apache.org/10/documentation/streams/developer-guide/">Kafka developer guide</a> covers the necessary steps to permanently
+install and configure a Kafka environment that is suitable for production use cases.
+The following steps must be performed in a single boot up period of the node. After
+a reboot, start over each step.</p>
+<ol>
+<li><p>Edit <code>/etc/hosts</code> file: add <code>zookeeper</code> as name for <code>127.0.0.1</code>:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ echo -e -n "\n127.0.0.1 zookeeper\n" | sudo tee -a /etc/hosts
+</code></pre></li>
+<li><p>Create a separate internal Docker network:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker network create uvap
+</code></pre>
+<p>Later, for each Docker container created in this network, Docker automatically
+creates a DNS name (resolvable inside this network). The created DNS name is
+the name of the Docker container, and has the address of the Docker container.</p></li>
+<li><p>Start or restart a Zookeeper container:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker rm -f zookeeper # Not necessary if not running
+$ docker run --net=uvap -d --name=zookeeper \
+  -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-zookeeper:4.1.0
+</code></pre></li>
+<li><p>Start or restart a Kafka container:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker rm -f kafka # Not necessary if not running
+$ docker run --net=uvap -d -p 9092:9092 --name=kafka \
+  -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 \
+  -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+  -e KAFKA_MESSAGE_MAX_BYTES=10485760 \
+  -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-kafka:4.1.0
+</code></pre></li>
+<li><p>Wait 30 seconds then check if the containers are still running:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker container inspect --format '{{.State.Status}}' kafka zookeeper
+</code></pre>
+<p>Expected output:</p>
+<pre><code class="hljs">running
+running
+</code></pre></li>
+<li><p>Test Kafka configuration:</p>
+<ol>
+<li><p>Create a Kafka topic:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker exec kafka kafka-topics --create \
+  --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 \
+  --topic test
+</code></pre>
+<p>Expected output:</p>
+<pre><code class="hljs">Created topic "test".
+</code></pre></li>
+<li><p>Test the stream:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ docker exec kafka /bin/bash -c \
+  'RND="${RANDOM}${RANDOM}${RANDOM}"; echo $RND | \
+  kafka-console-producer --broker-list localhost:9092 --topic test \
+  &gt; /dev/null &amp;&amp; kafka-console-consumer --bootstrap-server \
+  localhost:9092 --topic test --from-beginning --timeout-ms 1000 \
+  2&gt; /dev/null | grep -Fq $RND; if [ $? -eq 0 ]; then echo OK; \
+  else echo ERROR; fi'
+</code></pre>
+<p>It is expected to print <code>OK</code>. Running it the first time can also print a
+warning which is not a problem and can be ignored.</p></li>
+</ol></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="downloading-helper-scripts"></a><a href="#downloading-helper-scripts" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Downloading Helper Scripts</h2>
+<p>To make the download and configuration of UVAP related data files easier,
+clone the UVAP repository and fetch the provided helper scripts:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ cd ~
+$ git clone https://github.com/Ultinous/uvap.git uvap
+</code></pre>
+<p>Check the <code>uvap/README.md</code> file for a brief overview of this repository.</p>
+<p>Export UVAP_HOME:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ export UVAP_HOME=~/uvap
+$ echo "export UVAP_HOME=${UVAP_HOME}" &gt;&gt; "${HOME}/.bashrc"
+</code></pre>
+<p>Log in to the Docker account:</p>
+<pre><code class="hljs">$ docker login
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="installing-uvap"></a><a href="#installing-uvap" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing UVAP</h2>
+<p>The following script collects all Docker images for UVAP.</p>
+<p>Run the install script:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ "${UVAP_HOME}/scripts/install.sh"
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="additional-tools"></a><a href="#additional-tools" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Additional Tools</h2>
+<p>The following useful utilities can be handy during testing.</p>
+<h3><a class="anchor" aria-hidden="true" id="installing-vlc-media-player"></a><a href="#installing-vlc-media-player" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing VLC media player</h3>
+<p><strong>VLC media player</strong> is a video playback application that can be used
+to test live streams or playback a pre-recorded file.</p>
+<p>To install VLC:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt-get install vlc
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="installing-ffmpeg"></a><a href="#installing-ffmpeg" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing FFmpeg</h3>
+<p><strong>FFmpeg</strong> is a command line tool which can convert between different video
+formats and codecs.</p>
+<p>To install ffmpeg:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt-get install ffmpeg
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="../../docs/install/uvap_install_license.html"><span class="arrow-prev">← </span><span>License Key</span></a><a class="docs-next button" href="../../docs/upgrade/uvap_upgrade.html"><span>Upgrade Procedure</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#prerequisite">Prerequisite</a></li><li><a href="#creating-uvap-user">Creating UVAP User</a></li><li><a href="#installing-nvidia-video-driver">Installing NVIDIA Video Driver</a></li><li><a href="#adding-docker-environment">Adding Docker Environment</a></li><li><a href="#starting-kafka">Starting Kafka</a></li><li><a href="#downloading-helper-scripts">Downloading Helper Scripts</a></li><li><a href="#installing-uvap">Installing UVAP</a></li><li><a href="#additional-tools">Additional Tools</a><ul class="toc-headings"><li><a href="#installing-vlc-media-player">Installing VLC media player</a></li><li><a href="#installing-ffmpeg">Installing FFmpeg</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>
