@@ -56,81 +56,54 @@
             });
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="glossary"></a><a href="#glossary" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Glossary</h1>
 <h2><a class="anchor" aria-hidden="true" id="terms-and-definitions"></a><a href="#terms-and-definitions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Terms and Definitions</h2>
-<dl>
-  <dt>Docker</dt>
-  <dd>Docker® is a platform for creating and running applications with separate cloud 
-  based containers for the components and dependencies of each application.</dd>
-  <br>
-  <dt>Docker Container</dt>
-  <dd>Docker containers are cloud based packages used to store software components of 
-  the UVAP microservices.  
-  Each microservice has a dedicated container that needs to run to start the 
-  microservice.</dd>
-  <br>
-  <dt>Feature Vector</dt>
-  <dd>A feature vector is a vector that contains information describing an object's 
-  important characteristics.  
-  In UVAP a feature vector is typically a data representation of the recognizable facial 
-  or body properties of a person.</dd>
-  <br>
-  <dt>Feature Vector Cluster</dt>
-  <dd>A group of input feature vectors (provided by the _Facial Feature Vector_ 
-  feature) associated to the same person based on similarity.  
-  Often simply referred to as "clusters".</dd>
-  <br>
-  <dt>Kafka</dt>
-  <dd>Apache Kafka® is a community distributed event streaming platform used in UVAP
-  to process live or pre-recorded video footage in an abstract data stream format.</dd>
-  <br>
-  <dt>Kafka Topic</dt>
-  <dd>A Kafka topic is an abstract data stream representig a sequence of events 
-  usually accessable in `.json` file format in UVAP. In the UVAP documentation 
-  often simply referred to as "topics".  
-  Kafka topics are used as input and output channels for UVAP microservices.</dd>
-  <br>
-  <dt>Skeleton</dt>
-  <dd>The position of a persons head, body, limbs and joints represented by a 
-  simplified group of lines on a video frame.</dd>
-  <br>
-</dl>
+<hr>
+<p><strong>Docker</strong>  <br>
+Docker® is a platform for creating and running standardized application images
+in a containerized environment.</p>
+<p><strong>Docker Container</strong>  <br>
+Docker containers are running instances of an application image.<br>
+Each microservice has a dedicated container that needs to run to start the
+microservice.</p>
+<p><strong>Feature Vector</strong>  <br>
+A feature vector is a vector that contains information describing an object's
+important characteristics.<br>
+In UVAP a feature vector is typically a data representation of the recognizable facial or body properties of a person.</p>
+<p><strong>Feature Vector Cluster</strong>  <br>
+A group of feature vectors, associated to the same person based on similarity. Often
+simply referred to as &quot;cluster&quot;.</p>
+<p><strong>Kafka</strong>  <br>
+Apache Kafka® is a community distributed event streaming platform used in UVAP
+to process live or pre-recorded video footage in an abstract data stream format.</p>
+<p><strong>Kafka Topic</strong>  <br>
+A Kafka topic is an abstract data stream representig a sequence of events
+usually accessable in <code>.json</code> file format in UVAP. In the UVAP documentation
+often simply referred to as &quot;topics&quot;.<br>
+Kafka topics are used as input and output channels for UVAP microservices.</p>
+<p><strong>Skeleton</strong>  <br>
+The position of a persons head, body, limbs and joints represented by a
+simplified group of lines on a video frame.</p>
 <h2><a class="anchor" aria-hidden="true" id="abbreviations"></a><a href="#abbreviations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Abbreviations</h2>
-<dl>
-  <dt>APT</dt>
-  <dd>Advanced Package Tool</dd>
-  <br>
-  <dt>FPS</dt>
-  <dd>Frames per Second</dd>
-  <br>
-  <dt>I/O</dt>
-  <dd>Input/Output</dd>
-  <br>
-  <dt>MGR</dt>
-  <dd>Multi-Graph Runner</dd>
-  <br>
-  <dt>ROI</dt>
-  <dd>Region of Interest</dd>
-  <br>
-  <dt>RTSP</dt>
-  <dd>Real Time Streaming Protocol</dd>
-  <br>
-  <dt>SASL</dt>
-  <dd>Simple Authentication and Security Layer</dd>
-  <br>
-  <dt>URI</dt>
-  <dd>Uniform Resource Identifier</dd>
-  <br>
-  <dt>UVAP</dt>
-  <dd>Ultinous Video Analysis Platform</dd>
-  <br>
-  <dt>WSL</dt>
-  <dd>Windows Subsystem for Linux</dd>
-</dl>
-<!---
-Add new element:
-  <dt></dt>
-  <dd></dd>
-  <br>
---->
+<hr>
+<p><strong>APT</strong>  <br>
+Advanced Package Tool</p>
+<p><strong>FPS</strong>  <br>
+Frames per Second</p>
+<p><strong>I/O</strong>  <br>
+Input/Output</p>
+<p><strong>MGR</strong>  <br>
+Multi-Graph Runner</p>
+<p><strong>ROI</strong>  <br>
+Region of Interest</p>
+<p><strong>RTSP</strong>  <br>
+Real Time Streaming Protocol</p>
+<p><strong>SASL</strong>  <br>
+Simple Authentication and Security Layer</p>
+<p><strong>URI</strong>  <br>
+Uniform Resource Identifier</p>
+<p><strong>UVAP</strong>  <br>
+Ultinous Video Analysis Platform</p>
+<p><strong>WSL</strong>  <br>
+Windows Subsystem for Linux</p>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="../../docs/help/uvap_notations.html"><span class="arrow-prev">← </span><span>Typographic Conventions</span></a><a class="docs-next button" href="../../docs/help/uvap_tm.html"><span>Trademark Information</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#terms-and-definitions">Terms and Definitions</a></li><li><a href="#abbreviations">Abbreviations</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {

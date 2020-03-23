@@ -178,7 +178,10 @@ message FrameInfoRecord
 /** Output of kafka_tracker.
 
   One instance of this record is generated for each new point on each track.
-  New points can be detected or predicted. In either way, a new point is created for each new frame, until the track ends.
+  For each track, a new point is created for each new frame, until the track ends.
+  New points of the track are  predicted by the tracking algorithm.
+  The predicted points may or may not be confirmed by an actual detection.
+  Even when confirmed, predicted points produce smoother tracks than bounding box centers.
 
   time: time of the frame
   key: trackStartTime_trackId
@@ -188,9 +191,9 @@ message FrameInfoRecord
 message TrackChangeRecord
 {
   bool end_of_track = 1; ///< When true, no more results will be returned for this track; all other fields of the record are invalid.
-  string detection_key = 2; ///< Empty for predicted points, otherwise same as the key of the corresponding ObjectDetectionRecord.
+  string detection_key = 2; ///< Same as the key of the corresponding ObjectDetectionRecord when the prediction is confirmed by a detection. Empty otherwise.
 
-  Point point = 3; ///< Centroid of the detection or predicted point.
+  Point point = 3; ///< Track point predicted for the current input frame.
 }
 
 /** Identifier structure for a PassEvent

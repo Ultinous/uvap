@@ -48,7 +48,7 @@ if test "${image_name:-}" = "_auto_detected_"; then
 fi
 
 if test "${config_file_name:-}" != "_not_used_"; then
-	config_file_in_container="/ultinous_app/models/$(basename "${config_file_name}")"
+	config_file_in_container="/ultinous_app/config/$(basename "${config_file_name}")"
 	mount_param="--mount type=bind,readonly,source=$(realpath "${config_file_name}"),destination=${config_file_in_container}"
 fi
 

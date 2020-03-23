@@ -10,8 +10,9 @@
 <ul>
 <li><a href="../docs/feat/detect_person/feat_head_det.html">Head Detection</a></li>
 <li><a href="../docs/feat/detect_person/feat_anonym.html">Anonymization</a></li>
-<li><a href="../docs/feat/detect_person/feat_head_pose.html">3D Head Pose</a></li>
+<li><a href="../docs/feat/detect_person/feat_head_pose.html">3D Head Pose Detection</a></li>
 <li><a href="../docs/feat/detect_person/feat_skeleton.html">Skeleton Detection</a></li>
+<li><a href="../docs/feat/other/feat_det_filter.html">Detection Filtering</a></li>
 </ul></li>
 <li><strong>Movement Detection</strong>
 <ul>
@@ -20,29 +21,33 @@
 </ul></li>
 <li><strong>Facial Properties and Recognition</strong>
 <ul>
-<li><a href="../docs/feat/face_prop/feat_feature_vector.html">Feature Vector</a></li>
-<li><a href="../docs/feat/face_prop/feat_fv_clustering.html">Feature Vector Clustering</a></li>
 <li><a href="../docs/feat/face_prop/feat_gender.html">Gender Detection</a></li>
 <li><a href="../docs/feat/face_prop/feat_age.html">Age Detection</a></li>
+<li><a href="../docs/feat/face_prop/feat_feature_vector.html">Feature Vector Extraction</a></li>
+<li><a href="../docs/feat/face_prop/feat_fv_clustering.html">Feature Vector Clustering</a></li>
 <li><a href="../docs/feat/face_prop/feat_reid.html">Reidentification</a></li>
+</ul></li>
+<li><strong>Configuration</strong>
+<ul>
+<li><a href="../docs/feat/other/feat_stream_config.html">Stream Configuration</a></li>
 </ul></li>
 <li><strong>Additional Features</strong>
 <ul>
-<li><a href="../docs/feat/other/feat_det_filter.html">Detection Filter</a></li>
-<li><a href="../docs/feat/other/feat_show_image.html">Image Streams</a></li>
 <li><a href="../docs/feat/other/feat_frame_info.html">Frame Info</a></li>
-<li><a href="../docs/feat/other/feat_stream_config.html">Stream Configurator</a></li>
+<li><a href="../docs/feat/other/feat_show_image.html">Image Streaming</a></li>
 <li><a href="../docs/feat/other/feat_video_annotation.html">Video Annotation</a></li>
 </ul></li>
 </ul>
 </span></div></div></div><div class="blockElement fourByGridBlock"><div class="blockContent"><h2><div><span><p>Feature Demos</p>
 </span></div></h2><div><span><ul>
-<li><a href="../docs/demo/demo_overview.html">Starting Feature Demo</a></li>
+<li><a href="../docs/demo/demo_overview.html">Starting Feature Demos</a></li>
 <li><strong>Person Detection</strong>
 <ul>
 <li><a href="../docs/demo/demo_head_det.html">Head Detection</a></li>
-<li><a href="../docs/demo/demo_head_pose.html">3D Head Pose</a></li>
+<li><a href="../docs/demo/demo_show_image.html">Anonymization</a></li>
+<li><a href="../docs/demo/demo_head_pose.html">3D Head Pose Detection</a></li>
 <li><a href="../docs/demo/demo_skeleton.html">Skeleton Detection</a></li>
+<li><a href="../docs/demo/demo_det_filter.html">Detection Filtering</a></li>
 </ul></li>
 <li><strong>Movement Detection</strong>
 <ul>
@@ -53,12 +58,10 @@
 <ul>
 <li><a href="../docs/demo/demo_demography.html">Demography (Age and Gender)</a></li>
 <li><a href="../docs/demo/demo_reid_1.html">Single Camera Reidentification Demo with Pre-clustering</a></li>
-<li><a href="null">Two Camera Reidentification Demo with Pre-clustering</a></li>
 <li><a href="../docs/demo/demo_reid_with_name.html">Reidentification Demo with Person Names</a></li>
 </ul></li>
-<li><strong>Other Features</strong>
+<li><strong>Additional Features</strong>
 <ul>
-<li><a href="../docs/demo/demo_det_filter.html">Detection Filter</a></li>
 <li><a href="../docs/demo/demo_show_image.html">Show Image</a></li>
 </ul></li>
 <li><a href="../docs/demo/feat_practice.html">Practice Use Cases</a></li>
@@ -73,13 +76,12 @@
 <li><a href="../docs/install/uvap_install_license.html">License Key</a></li>
 <li><a href="../docs/install/uvap_install_setup.html">Setting Up UVAP</a>
 <ul>
-<li><a href="../docs/install/uvap_install_setup.html#creating-uvap-user">UVAP User</a></li>
-<li><a href="../docs/install/uvap_install_setup.html#downloading-helper-scripts">Download Helper Scripts</a></li>
-<li><a href="../docs/install/uvap_install_setup.html#installing-nvidia-video-driver">NVIDIA Video Driver</a></li>
-<li><a href="../docs/install/uvap_install_setup.html#adding-docker-environment">Docker</a></li>
-<li><a href="../docs/install/uvap_install_setup.html#starting-zookeeper">Zookeeper</a></li>
-<li><a href="../docs/install/uvap_install_setup.html#starting-kafka">Kafka</a></li>
-<li><a href="../docs/install/uvap_install_setup.html#installing-uvap">UVAP</a></li>
+<li><a href="../docs/install/uvap_install_setup.html#creating-uvap-user">Creating UVAP User</a></li>
+<li><a href="../docs/install/uvap_install_setup.html#installing-nvidia-video-driver">Installing NVIDIA Video Driver</a></li>
+<li><a href="../docs/install/uvap_install_setup.html#adding-docker-environment">Adding Docker Environment</a></li>
+<li><a href="../docs/install/uvap_install_setup.html#starting-kafka">Starting Kafka</a></li>
+<li><a href="../docs/install/uvap_install_setup.html#downloading-helper-scripts">Downloading Helper Scripts</a></li>
+<li><a href="../docs/install/uvap_install_setup.html#installing-uvap">Installing UVAP</a></li>
 <li><a href="../docs/install/uvap_install_setup.html#additional-tools">Additional tools</a></li>
 </ul></li>
 <li><a href="../docs/upgrade/uvap_upgrade.html">Upgrading UVAP</a></li>
@@ -88,22 +90,28 @@
 </span></div></h2><div><span><ul>
 <li><a href="../docs/dev/uvap_architect.html">Architecture</a></li>
 <li><a href="../docs/dev/uvap_data_model.html">Data Model</a></li>
-<li><strong>Microservice Description</strong>
+<li><strong>Microservice Descriptions</strong>
 <ul>
-<li><a href="../docs/dev/ms_det_filter.html">Detection Filter</a></li>
 <li><a href="../docs/dev/ms_mgr.html">Multi Graph Runner</a></li>
-<li><a href="../docs/dev/ms_track.html">Kafka Tracker</a></li>
-<li><a href="../docs/dev/ms_passdet.html">Kafka Pass Detection</a></li>
+<li><a href="../docs/dev/ms_det_filter.html">Detection Filter</a></li>
+<li><a href="../docs/dev/ms_track.html">Tracker</a></li>
+<li><a href="../docs/dev/ms_passdet.html">Pass Detector</a></li>
+<li><a href="../docs/dev/ms_cluster.html">Feature Vector Clustering</a></li>
 <li><a href="../docs/dev/ms_reid.html">Reidentifier</a></li>
 </ul></li>
 <li><strong>Microservice Configuration</strong>
 <ul>
+<li><a href="../docs/dev/conf_superconfig.html">Microservice Superconfiguration</a></li>
 <li><a href="../docs/dev/conf_mgr.html">Configuring Multi-Graph Runner</a></li>
+<li><a href="../docs/dev/conf_det_filter.html">Configuring Detection Filter</a></li>
 <li><a href="../docs/dev/conf_track.html">Configuring Tracker</a></li>
 <li><a href="../docs/dev/conf_passdet.html">Configuring Pass Detector</a></li>
-<li><a href="../docs/dev/conf_reid.html">Configuring Reidentifier</a></li>
 <li><a href="../docs/dev/conf_cluster.html">Configuring Feature Vector Clustering</a></li>
-<li><a href="../docs/dev/conf_superconfig.html">Microservice Superconfiguration</a></li>
+<li><a href="../docs/dev/conf_reid.html">Configuring Reidentifier</a></li>
+</ul></li>
+<li><strong>Tools</strong>
+<ul>
+<li><a href="../docs/dev/conf_sc_ui.html">Stream Configuration UI</a></li>
 </ul></li>
 <li><a href="../docs/dev/uvap_extend.html">Extending UVAP</a></li>
 <li><a href="../docs/operation/op_opguide.html">UVAP Operation Guide</a></li>
@@ -111,10 +119,12 @@
 </span></div></div></div><div class="blockElement fourByGridBlock"><div class="blockContent"><h2><div><span><p>Tutorials</p>
 </span></div></h2><div><span><ul>
 <li><a href="../docs/tutorials/uvap_example_analysis.html">Example Analysis Results</a></li>
+<li><a href="../docs/tutorials/uvap_video_annotation.html">Video Annotation Tutorial</a></li>
 </ul>
 </span></div></div></div><div class="blockElement fourByGridBlock"><div class="blockContent"><h2><div><span><p>Help</p>
 </span></div></h2><div><span><ul>
 <li><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a></li>
+<li><a href="../docs/help/uvap_training.html">UVAP Training</a></li>
 <li><a href="../docs/help/uvap_notations.html">Typographic Conventions</a></li>
 <li><a href="../docs/help/uvap_gloss.html">Glossary</a></li>
 <li><a href="../docs/help/uvap_tm.html">Trademark Information</a></li>

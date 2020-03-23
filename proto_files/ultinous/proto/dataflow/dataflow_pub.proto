@@ -45,6 +45,17 @@ message EnvironmentConfig
   optional string kafka_topic_prefix = 16 [ default = "" ]; // Example "account.1337."
   optional string kafka_sasl_username = 17 [ default = "" ]; // Enables SASL authentication when set.
   optional string kafka_sasl_password = 18 [ default = "" ];
+
+  // Defines the behaviour in case the inputs become empty:
+  //  RUN: the application does not terminate on empty input, but waits for a stop signal
+  //  STOP: the application terminates as soon as the inputs are empty
+  //  RUN_IF_DROP_ON: if 'drop_mode' is 'drop_on', behaves like 'RUN', otherwise behaves like 'STOP'
+  enum NoInputPolicy {
+    RUN = 1;
+    STOP = 2;
+    RUN_IF_DROP_ON = 0;
+  }
+  optional NoInputPolicy no_input_policy = 21 [ default = RUN_IF_DROP_ON ];
 }
 
 // Frame dropping disabled. Use this mode for batch video processing.
@@ -145,6 +156,7 @@ message ProcessNodeConfig
     OBJ_FILTER = 30;
     HEAD_POSE_FILTER = 38;
     KAFKA_OUTPUT = 44;
+    POLY_ROI_FILTER = 45;
     HEAD_POSE_CALC = 51;
     FACE_FEATURE_CALC = 52;
     FACE_DEMOGRAPHY_CALC = 53;
@@ -166,11 +178,23 @@ message ProcessNodeConfig
   optional ObjFilterNodeConfig obj_filter_config = 37;
   optional HeadPoseFilterConfig head_pose_filter_config = 45;
   optional KafkaOutputConfig kafka_output_config = 51;
+  optional PolyRoiFilterConfig poly_roi_filter_config = 52;
   optional HeadPoseCalcConfig head_pose_calc_config = 60;
   optional FaceFeatureCalcConfig face_feature_calc_config = 61;
   optional FaceDemographyCalcConfig face_demography_calc_config = 62;
   optional FrameInfoExtractorConfig frame_info_extractor_config = 66;
   optional SkeletonEstimatorNodeConfig skeleton_estimator_config = 67;
+}
+
+// Cut a region of interest (ROI) from a frame.
+message ROIConfig {
+  required string input = 1; // type: FRAME
+  required string output = 2; // type: FRAME
+
+  required int32 x = 3; // x coordinate of the top left corner in pixels
+  required int32 y = 4; // y coordinate of the top left corner in pixels
+  required int32 width = 5; // in pixels
+  required int32 height = 6; // in pixels
 }
 
 // Object detector. Find objects on a frame. Objects are returned as bounding boxes.
@@ -186,11 +210,55 @@ message ObjDetectorConfig {
 
   // Size of the smallest square that fully contains the object. Detection performance and accuracy drops as the size gets smaller.
   // Size below 30-40 pixels are not suggested in real-world applications.
-  optional int32 min_height_in_pixels = 5 [default = 160]; // Please specify because it will be required in the future
-  optional int32 max_height_in_pixels = 6 [default = 160]; // Please specify because it will be required in the future
+  required int32 min_height_in_pixels = 5;
+  required int32 max_height_in_pixels = 6;
 
   optional float confidence_threshold = 7 [default = 0.95]; // Confidence is a real value from 0-1.
   optional float image_scale_factor = 11 [default = 1.0]; // This parameter explicitly resize the input frame.
+}
+
+// Draw rectangles on a frame. Blurring, and full image blackout is also supported to meet with different privacy requirements.
+message DrawRectsConfig {
+  enum DrawBoundingBoxType {
+    FRAME = 1; // Bounding box around the object
+    FILL = 2; // Fill the bounding box
+  }
+
+  required string input_frame = 1; // type: FRAME
+  required string output_frame = 2; // type: FRAME
+  required string input_bounding_boxes = 3; // type: DETECTIONS
+  optional string input_tracks = 4; // type: TRACKS
+
+  required imageproc.RGB det_color = 5; // rgb color for the rectangles and fill if there is detection
+  optional imageproc.RGB no_det_color = 6; // rgb color for fill if no detection
+
+  optional bool blur = 7 [default = false]; // if set blurring applied to all detection with blur_kernel_size and blur_sigma parameters
+  optional int32 blur_kernel_size = 8 [default = 31]; // Use 15 for weak, 31 for strong blurring
+  optional float blur_sigma = 9 [default = 20]; // Use 10 for weak, 40 for strong blurring
+
+  optional bool draw_rect = 10 [default = true]; // if set bounding boxes are drawn
+  optional float draw_rect_threshold = 11 [default = 0.0]; // threshold filter for bounding boxes
+  optional bool draw_properties = 12 [ default = true ]; // write out explicitly added properties, like confidence, gender, name etc
+  optional bool draw_score = 21; // write out score, defaults to draw_properties.
+  optional double draw_properties_scale = 22 [ default = 0.7 ]; // Scaling factor for rendering font
+
+  optional bool fill_if_det = 13 [default = false]; // if set the full image is filled with det_color if there is at least one detection
+  optional bool fill_if_no_det = 14 [default = false ]; // if set the full image is filled with no_det_color if there no detection
+
+  optional int32 input_bounding_boxes_offset_x = 15 [default = 0]; // If you used filter roi at OBJ_FILTER, use its filter_roi_x value here.
+  optional int32 input_bounding_boxes_offset_y = 16 [default = 0]; // If you used filter roi at OBJ_FILTER, use its filter_roi_y value here.
+
+  optional float head_padding_top = 17 [default = 0]; // Blur this many detection size above the detection
+  optional float head_padding_right = 18 [default = 0]; // Blur this many detection size below the detection
+  optional float head_padding_bottom = 19 [default = 0]; // Blur this many detection size right to the detection
+  optional float head_padding_left = 20 [default = 0]; // Blur this many detection size left to the detection
+
+  // FRAME: draw a nice frame around the bounding boxes. FILL: fill the bounding boxes entirely.
+  // Color is defined by det_color. Only works if draw_rect is true, obviously.
+  optional DrawBoundingBoxType draw_bounding_box_type = 23 [default = FRAME];
+
+  // Draw bounding box height as property. Works only if draw_properties is true.
+  optional bool draw_bounding_box_height_properties = 24 [default = false];
 }
 
 // Resizes a frame
@@ -212,6 +280,29 @@ message ResizeConfig {
   optional bool resizeWarning = 10 [default = false];
 }
 
+// Write frames to a file.
+message WriteVideoConfig {
+  required string file_name = 2; // filename without extension
+  required string file_ext = 3; // Extension that defines the video container format. Supported formats: mp4, avi
+  required string input = 4; // type: FRAME
+
+  optional uint32 fps = 5; // force output fps
+
+  // Video codec. Supported codecs depend on OS environment. A portable example: "FMP4"
+  required string codec = 6;
+
+  // If set the files will be split into minute or hour long chunks on minute/hour boundaries.
+  optional Chunking chunking = 7 [default = NONE];
+  optional uint32 max_queue_size = 8 [default = 1024];
+}
+
+// Slicing of output videos
+// Used by WriteVideoConfig.
+enum Chunking {
+  NONE = 1; ///< Write video to a single file
+  MINUTE = 2; ///< Create separate file for every minute.
+  HOUR = 3; ///< Create separate file for every hour.
+}
 
 // Calculates age and gender for a head detection
 message FaceDemographyCalcConfig
@@ -295,6 +386,18 @@ message KafkaOutputConfig {
   required string topic_name = 1;
   // Input data node
   required string input_node = 2;
+}
+
+// Detections with their center inside the polygon will remain.
+message PolyRoiFilterConfig {
+  required string input_bounding_boxes = 1; // Input data node (type: DETECTIONS)
+  required string output_bounding_boxes = 2; // Output data node (type: DETECTIONS)
+  repeated Point2D polygon = 5; // Filtering polygon. The last point will be connected to the first.
+}
+
+message Point2D {
+  required int32 x = 1;
+  required int32 y = 2;
 }
 
 // Calculates head poses from input frame and detections

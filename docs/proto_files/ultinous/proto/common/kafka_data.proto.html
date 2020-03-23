@@ -178,7 +178,10 @@ message FrameInfoRecord
 /** Output of kafka_tracker.
 
   One instance of this record is generated for each new point on each track.
-  New points can be detected or predicted. In either way, a new point is created for each new frame, until the track ends.
+  For each track, a new point is created for each new frame, until the track ends.
+  New points of the track are  predicted by the tracking algorithm.
+  The predicted points may or may not be confirmed by an actual detection.
+  Even when confirmed, predicted points produce smoother tracks than bounding box centers.
 
   time: time of the frame
   key: trackStartTime_trackId
@@ -188,9 +191,9 @@ message FrameInfoRecord
 message TrackChangeRecord
 {
   bool end_of_track = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; When true, no more results will be returned for this track; all other fields of the record are invalid.</span>
-  <span class="hljs-built_in">string</span> detection_key = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Empty for predicted points, otherwise same as the key of the corresponding ObjectDetectionRecord.</span>
+  <span class="hljs-built_in">string</span> detection_key = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Same as the key of the corresponding ObjectDetectionRecord when the prediction is confirmed by a detection. Empty otherwise.</span>
 
-  Point point = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Centroid of the detection or predicted point.</span>
+  Point point = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Track point predicted for the current input frame.</span>
 }
 
 /** Identifier structure for a PassEvent

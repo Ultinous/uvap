@@ -5,6 +5,7 @@ environment:
   debug_level: 4
   profile: true
   drop_on: {}
+  no_input_policy: RUN_IF_DROP_ON
 
   kafka_broker_list: "localhost:9092"
 }

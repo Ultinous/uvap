@@ -102,7 +102,7 @@ docker_container_run() {
 		container_dynamic_options+=("--group-add" "video")
 	fi
 
-    container_name_with_id="$(implode '-' "${container_name}" "${instance_id}")"
+	container_name_with_id="$(implode '-' "${container_name}" "${instance_id}")"
 
 	test "$(docker container ls --filter name="^${container_name_with_id}\$" --all --quiet | wc -l)" -eq 1 \
 		&& docker container stop "${container_name_with_id}" > /dev/null \

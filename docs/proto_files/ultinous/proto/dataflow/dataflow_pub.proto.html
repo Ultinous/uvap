@@ -45,6 +45,17 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">string</span> kafka_topic_prefix = <span class="hljs-number">16</span> [ default = <span class="hljs-string">""</span> ]; <span class="hljs-comment">// Example "account.1337."</span>
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">string</span> kafka_sasl_username = <span class="hljs-number">17</span> [ default = <span class="hljs-string">""</span> ]; <span class="hljs-comment">// Enables SASL authentication when set.</span>
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">string</span> kafka_sasl_password = <span class="hljs-number">18</span> [ default = <span class="hljs-string">""</span> ];
+
+  <span class="hljs-comment">// Defines the behaviour in case the inputs become empty:</span>
+  <span class="hljs-comment">//  RUN: the application does not terminate on empty input, but waits for a stop signal</span>
+  <span class="hljs-comment">//  STOP: the application terminates as soon as the inputs are empty</span>
+  <span class="hljs-comment">//  RUN_IF_DROP_ON: if 'drop_mode' is 'drop_on', behaves like 'RUN', otherwise behaves like 'STOP'</span>
+  <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">NoInputPolicy</span> </span>{
+    RUN = <span class="hljs-number">1</span>;
+    STOP = <span class="hljs-number">2</span>;
+    RUN_IF_DROP_ON = <span class="hljs-number">0</span>;
+  }
+  <span class="hljs-keyword">optional</span> NoInputPolicy no_input_policy = <span class="hljs-number">21</span> [ default = RUN_IF_DROP_ON ];
 }
 
 <span class="hljs-comment">// Frame dropping disabled. Use this mode for batch video processing.</span>
@@ -145,6 +156,7 @@ syntax = <span class="hljs-string">"proto2"</span>;
     OBJ_FILTER = <span class="hljs-number">30</span>;
     HEAD_POSE_FILTER = <span class="hljs-number">38</span>;
     KAFKA_OUTPUT = <span class="hljs-number">44</span>;
+    POLY_ROI_FILTER = <span class="hljs-number">45</span>;
     HEAD_POSE_CALC = <span class="hljs-number">51</span>;
     FACE_FEATURE_CALC = <span class="hljs-number">52</span>;
     FACE_DEMOGRAPHY_CALC = <span class="hljs-number">53</span>;
@@ -166,11 +178,23 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-keyword">optional</span> ObjFilterNodeConfig obj_filter_config = <span class="hljs-number">37</span>;
   <span class="hljs-keyword">optional</span> HeadPoseFilterConfig head_pose_filter_config = <span class="hljs-number">45</span>;
   <span class="hljs-keyword">optional</span> KafkaOutputConfig kafka_output_config = <span class="hljs-number">51</span>;
+  <span class="hljs-keyword">optional</span> PolyRoiFilterConfig poly_roi_filter_config = <span class="hljs-number">52</span>;
   <span class="hljs-keyword">optional</span> HeadPoseCalcConfig head_pose_calc_config = <span class="hljs-number">60</span>;
   <span class="hljs-keyword">optional</span> FaceFeatureCalcConfig face_feature_calc_config = <span class="hljs-number">61</span>;
   <span class="hljs-keyword">optional</span> FaceDemographyCalcConfig face_demography_calc_config = <span class="hljs-number">62</span>;
   <span class="hljs-keyword">optional</span> FrameInfoExtractorConfig frame_info_extractor_config = <span class="hljs-number">66</span>;
   <span class="hljs-keyword">optional</span> SkeletonEstimatorNodeConfig skeleton_estimator_config = <span class="hljs-number">67</span>;
+}
+
+<span class="hljs-comment">// Cut a region of interest (ROI) from a frame.</span>
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">ROIConfig</span> </span>{
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input = <span class="hljs-number">1</span>; <span class="hljs-comment">// type: FRAME</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> output = <span class="hljs-number">2</span>; <span class="hljs-comment">// type: FRAME</span>
+
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">int32</span> x = <span class="hljs-number">3</span>; <span class="hljs-comment">// x coordinate of the top left corner in pixels</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">int32</span> y = <span class="hljs-number">4</span>; <span class="hljs-comment">// y coordinate of the top left corner in pixels</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">int32</span> width = <span class="hljs-number">5</span>; <span class="hljs-comment">// in pixels</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">int32</span> height = <span class="hljs-number">6</span>; <span class="hljs-comment">// in pixels</span>
 }
 
 <span class="hljs-comment">// Object detector. Find objects on a frame. Objects are returned as bounding boxes.</span>
@@ -186,11 +210,55 @@ syntax = <span class="hljs-string">"proto2"</span>;
 
   <span class="hljs-comment">// Size of the smallest square that fully contains the object. Detection performance and accuracy drops as the size gets smaller.</span>
   <span class="hljs-comment">// Size below 30-40 pixels are not suggested in real-world applications.</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> min_height_in_pixels = <span class="hljs-number">5</span> [default = <span class="hljs-number">160</span>]; <span class="hljs-comment">// Please specify because it will be required in the future</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> max_height_in_pixels = <span class="hljs-number">6</span> [default = <span class="hljs-number">160</span>]; <span class="hljs-comment">// Please specify because it will be required in the future</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">int32</span> min_height_in_pixels = <span class="hljs-number">5</span>;
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">int32</span> max_height_in_pixels = <span class="hljs-number">6</span>;
 
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> confidence_threshold = <span class="hljs-number">7</span> [default = <span class="hljs-number">0.95</span>]; <span class="hljs-comment">// Confidence is a real value from 0-1.</span>
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> image_scale_factor = <span class="hljs-number">11</span> [default = <span class="hljs-number">1.0</span>]; <span class="hljs-comment">// This parameter explicitly resize the input frame.</span>
+}
+
+<span class="hljs-comment">// Draw rectangles on a frame. Blurring, and full image blackout is also supported to meet with different privacy requirements.</span>
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">DrawRectsConfig</span> </span>{
+  <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">DrawBoundingBoxType</span> </span>{
+    FRAME = <span class="hljs-number">1</span>; <span class="hljs-comment">// Bounding box around the object</span>
+    FILL = <span class="hljs-number">2</span>; <span class="hljs-comment">// Fill the bounding box</span>
+  }
+
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input_frame = <span class="hljs-number">1</span>; <span class="hljs-comment">// type: FRAME</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> output_frame = <span class="hljs-number">2</span>; <span class="hljs-comment">// type: FRAME</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input_bounding_boxes = <span class="hljs-number">3</span>; <span class="hljs-comment">// type: DETECTIONS</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">string</span> input_tracks = <span class="hljs-number">4</span>; <span class="hljs-comment">// type: TRACKS</span>
+
+  <span class="hljs-keyword">required</span> imageproc.RGB det_color = <span class="hljs-number">5</span>; <span class="hljs-comment">// rgb color for the rectangles and fill if there is detection</span>
+  <span class="hljs-keyword">optional</span> imageproc.RGB no_det_color = <span class="hljs-number">6</span>; <span class="hljs-comment">// rgb color for fill if no detection</span>
+
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> blur = <span class="hljs-number">7</span> [default = <span class="hljs-literal">false</span>]; <span class="hljs-comment">// if set blurring applied to all detection with blur_kernel_size and blur_sigma parameters</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> blur_kernel_size = <span class="hljs-number">8</span> [default = <span class="hljs-number">31</span>]; <span class="hljs-comment">// Use 15 for weak, 31 for strong blurring</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> blur_sigma = <span class="hljs-number">9</span> [default = <span class="hljs-number">20</span>]; <span class="hljs-comment">// Use 10 for weak, 40 for strong blurring</span>
+
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> draw_rect = <span class="hljs-number">10</span> [default = <span class="hljs-literal">true</span>]; <span class="hljs-comment">// if set bounding boxes are drawn</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> draw_rect_threshold = <span class="hljs-number">11</span> [default = <span class="hljs-number">0.0</span>]; <span class="hljs-comment">// threshold filter for bounding boxes</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> draw_properties = <span class="hljs-number">12</span> [ default = <span class="hljs-literal">true</span> ]; <span class="hljs-comment">// write out explicitly added properties, like confidence, gender, name etc</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> draw_score = <span class="hljs-number">21</span>; <span class="hljs-comment">// write out score, defaults to draw_properties.</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">double</span> draw_properties_scale = <span class="hljs-number">22</span> [ default = <span class="hljs-number">0.7</span> ]; <span class="hljs-comment">// Scaling factor for rendering font</span>
+
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> fill_if_det = <span class="hljs-number">13</span> [default = <span class="hljs-literal">false</span>]; <span class="hljs-comment">// if set the full image is filled with det_color if there is at least one detection</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> fill_if_no_det = <span class="hljs-number">14</span> [default = <span class="hljs-literal">false</span> ]; <span class="hljs-comment">// if set the full image is filled with no_det_color if there no detection</span>
+
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> input_bounding_boxes_offset_x = <span class="hljs-number">15</span> [default = <span class="hljs-number">0</span>]; <span class="hljs-comment">// If you used filter roi at OBJ_FILTER, use its filter_roi_x value here.</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> input_bounding_boxes_offset_y = <span class="hljs-number">16</span> [default = <span class="hljs-number">0</span>]; <span class="hljs-comment">// If you used filter roi at OBJ_FILTER, use its filter_roi_y value here.</span>
+
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> head_padding_top = <span class="hljs-number">17</span> [default = <span class="hljs-number">0</span>]; <span class="hljs-comment">// Blur this many detection size above the detection</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> head_padding_right = <span class="hljs-number">18</span> [default = <span class="hljs-number">0</span>]; <span class="hljs-comment">// Blur this many detection size below the detection</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> head_padding_bottom = <span class="hljs-number">19</span> [default = <span class="hljs-number">0</span>]; <span class="hljs-comment">// Blur this many detection size right to the detection</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> head_padding_left = <span class="hljs-number">20</span> [default = <span class="hljs-number">0</span>]; <span class="hljs-comment">// Blur this many detection size left to the detection</span>
+
+  <span class="hljs-comment">// FRAME: draw a nice frame around the bounding boxes. FILL: fill the bounding boxes entirely.</span>
+  <span class="hljs-comment">// Color is defined by det_color. Only works if draw_rect is true, obviously.</span>
+  <span class="hljs-keyword">optional</span> DrawBoundingBoxType draw_bounding_box_type = <span class="hljs-number">23</span> [default = FRAME];
+
+  <span class="hljs-comment">// Draw bounding box height as property. Works only if draw_properties is true.</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> draw_bounding_box_height_properties = <span class="hljs-number">24</span> [default = <span class="hljs-literal">false</span>];
 }
 
 <span class="hljs-comment">// Resizes a frame</span>
@@ -212,6 +280,29 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> resizeWarning = <span class="hljs-number">10</span> [default = <span class="hljs-literal">false</span>];
 }
 
+<span class="hljs-comment">// Write frames to a file.</span>
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">WriteVideoConfig</span> </span>{
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> file_name = <span class="hljs-number">2</span>; <span class="hljs-comment">// filename without extension</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> file_ext = <span class="hljs-number">3</span>; <span class="hljs-comment">// Extension that defines the video container format. Supported formats: mp4, avi</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input = <span class="hljs-number">4</span>; <span class="hljs-comment">// type: FRAME</span>
+
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> fps = <span class="hljs-number">5</span>; <span class="hljs-comment">// force output fps</span>
+
+  <span class="hljs-comment">// Video codec. Supported codecs depend on OS environment. A portable example: "FMP4"</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> codec = <span class="hljs-number">6</span>;
+
+  <span class="hljs-comment">// If set the files will be split into minute or hour long chunks on minute/hour boundaries.</span>
+  <span class="hljs-keyword">optional</span> Chunking chunking = <span class="hljs-number">7</span> [default = NONE];
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> max_queue_size = <span class="hljs-number">8</span> [default = <span class="hljs-number">1024</span>];
+}
+
+<span class="hljs-comment">// Slicing of output videos</span>
+<span class="hljs-comment">// Used by WriteVideoConfig.</span>
+<span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">Chunking</span> </span>{
+  NONE = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Write video to a single file</span>
+  MINUTE = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Create separate file for every minute.</span>
+  HOUR = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Create separate file for every hour.</span>
+}
 
 <span class="hljs-comment">// Calculates age and gender for a head detection</span>
 <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">FaceDemographyCalcConfig</span>
@@ -295,6 +386,18 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> topic_name = <span class="hljs-number">1</span>;
   <span class="hljs-comment">// Input data node</span>
   <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input_node = <span class="hljs-number">2</span>;
+}
+
+<span class="hljs-comment">// Detections with their center inside the polygon will remain.</span>
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">PolyRoiFilterConfig</span> </span>{
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input_bounding_boxes = <span class="hljs-number">1</span>; <span class="hljs-comment">// Input data node (type: DETECTIONS)</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> output_bounding_boxes = <span class="hljs-number">2</span>; <span class="hljs-comment">// Output data node (type: DETECTIONS)</span>
+  <span class="hljs-keyword">repeated</span> Point2D polygon = <span class="hljs-number">5</span>; <span class="hljs-comment">// Filtering polygon. The last point will be connected to the first.</span>
+}
+
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">Point2D</span> </span>{
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">int32</span> x = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">int32</span> y = <span class="hljs-number">2</span>;
 }
 
 <span class="hljs-comment">// Calculates head poses from input frame and detections</span>
