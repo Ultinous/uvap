@@ -21,6 +21,18 @@ track_colors = cycle(TYPE_TO_COLOR.values())
 pass_colors = cycle(((0, 0, 255), (255, 0, 0), (255, 0, 0)))
 
 
+def parse_config_data(args, parser):
+    config_file = Path(args.config)
+
+    if not config_file.is_file():
+        parser.error(f"{args.config} does not exist.")
+
+    with open(config_file) as f:
+        ms_config_json = json.loads(f.read())
+
+    return ms_config_json["config_data"]
+
+
 class ColoredPolyLine:
     MAX_SIZE = 30
 
@@ -77,10 +89,10 @@ def main():
     parser.add_argument('-o', '--output', help='write output image into kafka topic', action='store_true')
     args = parser.parse_args()
 
-    config_file = Path(args.config)
-
-    if not config_file.is_file():
-        parser.error(f"{args.config} does not exist.")
+    passdet_config_json = parse_config_data(
+        args=args,
+        parser=parser
+    )
 
     if not args.display and not args.output:
         parser.error("Missing argument: -d (display output) or -o (write output to kafka) is needed")
@@ -93,14 +105,6 @@ def main():
     if args.video_file:
         begin_flag = BeginFlag.BEGINNING
         end_flag = EndFlag.END_OF_PARTITION
-
-    with config_file.open() as f:
-        try:
-            passdet_config_json = json.loads(javaproperties.load(f)["ultinous.service.kafka.passdet.config"])
-        except KeyError:
-            parser.error("Missing property: ultinous.service.kafka.passdet.config")
-        except JSONDecodeError as e:
-            parser.error(f"Error parsing {e}")
 
     overlay = cv2.imread('resources/powered_by_white.png', cv2.IMREAD_UNCHANGED)
 

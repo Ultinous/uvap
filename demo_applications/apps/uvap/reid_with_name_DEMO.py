@@ -27,7 +27,7 @@ OUTPUT_TOPIC_POSTFIX = "reids.Image.jpg"
 # List of camera IDs
 CAMERA_TOPIC_IDS = ["0", "1"]
 # List of Reid topic IDs
-REID_TOPIC_IDS = ["99", "100"]
+REID_TOPIC_ID = "99"
 
 
 class Registration:
@@ -95,8 +95,8 @@ def main():
     # Prepare the topics to read
     input_topics = [f"{args.prefix}.cam.{id}.{topic_postfix}"
         for id in CAMERA_TOPIC_IDS for topic_postfix in TOPIC_POSTFIXES]
-    reid_topics = [f"{args.prefix}.cam.{id}.{topic_postfix}"
-        for id in REID_TOPIC_IDS for topic_postfix in REID_TOPIC_POSTFIXES]
+    reid_topics = [f"{args.prefix}.cam.{REID_TOPIC_ID}.{topic_postfix}"
+        for topic_postfix in REID_TOPIC_POSTFIXES]
     consumable_topics = list(map(TopicInfo, input_topics)) \
                         + (list(map(lambda t: TopicInfo(t, drop=False), reid_topics)))
 
@@ -128,12 +128,11 @@ def main():
 
             # Collect Reid records
             reid_records = {}
-            for reid_id in REID_TOPIC_IDS:
-                reid_message = message.get(reid_id, {})
-                reid_records.update(reid_message.get("reid", {}))
+            reid_message = message.get(REID_TOPIC_ID, {})
+            reid_records.update(reid_message.get("reid", {}))
 
             # Process the image
-            for topic_key, topic_message in filter(lambda t: t[0] not in REID_TOPIC_IDS, message.items()):
+            for topic_key, topic_message in filter(lambda t: t[0] != REID_TOPIC_ID, message.items()):
                 img = topic_message.get("image", {})
                 if not isinstance(img, np.ndarray):
                     continue

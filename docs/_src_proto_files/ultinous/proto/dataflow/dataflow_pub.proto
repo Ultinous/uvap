@@ -11,10 +11,16 @@ package ultinous.proto.dataflow;
 // Complete configuration for a multi graph runner instance.
 message DataFlowGraphRunnerConfig
 {
-  optional imageproc.EnginesConfig engines = 1; // specifies the engine set usable by the graph
-  optional string engines_file = 2; // specifies the engines file if engines is not present
-  optional EnvironmentConfig environment = 3; // specifies the environment of the runner
-  optional string environment_file = 4; // specifies the environment file if the environment is not present
+  oneof engines_spec
+  {
+    imageproc.EnginesConfig engines = 1; // specifies the engine set usable by the graph
+    string engines_file = 2; // specifies the engines file if engines is not present
+  }
+  oneof environment_spec
+  {
+    EnvironmentConfig environment = 3; // specifies the environment of the runner
+    string environment_file = 4; // specifies the environment file if the environment is not present
+  }
   repeated DataFlowGraphRunConfig data_run = 5; // specifies the graph and input pairs
   repeated string data_run_file = 6; // specifies the file names for graph -- input pairs
 }
@@ -56,6 +62,20 @@ message EnvironmentConfig
     RUN_IF_DROP_ON = 0;
   }
   optional NoInputPolicy no_input_policy = 21 [ default = RUN_IF_DROP_ON ];
+
+  //Defines the analysis backend engine.
+  //CAFFE: Caffe is a slow and has big memory usage.
+  //TENSORRT_FP32: TensorRT is a modern fast and optimized analysis backend.
+  //  The analysis output is almost the same as CAFFE.
+  //TENSORRT_FP16: Uses same TensorRT backend and its almost 2 time faster then previous one.
+  //  The price of speed up, is small accuracy loss!
+  enum BackendType
+  {
+    CAFFE = 0;
+    TENSORRT_FP32 = 1;
+    TENSORRT_FP16 = 2;
+  }
+  optional BackendType backend = 22 [ default = CAFFE ];
 }
 
 // Frame dropping disabled. Use this mode for batch video processing.
@@ -83,18 +103,31 @@ message DropOnMode
 message DataFlowGraphRunConfig
 {
   required Input input = 1; ///< Specifies the input (frame source) for the graph
-  optional DataFlowGraphConfig data_flow = 2; ///< Specifies the data flow graph
-  optional string data_flow_file = 3; ///< Specifies the data flow graph file if data flow graph is not present
+  oneof data_flow_spec
+  {
+    DataFlowGraphConfig data_flow = 2; ///< Specifies the data flow graph
+    string data_flow_file = 3; ///< Specifies the data flow graph file if data flow graph is not present
+  }
 }
 
 // Configuration of a frame source
 message Input
 {
-  // Input file/stream/device name. Can be one of the following:
-  //  - video file (eg.: avi, mp4)
-  //  - rtsp url (eg.: "rtsp://user:pwd@10.99.99.99:554/live1.sdp")
-  //  - device id (eg.: 0 [which refers to "/dev/video0"])
-  required string file_name = 1;
+  oneof file_spec
+  {
+    // Input file/stream/device name. Can be one of the following:
+    //  - video file (eg.: avi, mp4)
+    //  - rtsp url (eg.: "rtsp://user:pwd@10.99.99.99:554/live1.sdp")
+    //  - device id (eg.: 0 [which refers to "/dev/video0"])
+    string file_name = 1;
+    // File name where the file/stream/device name is stored.
+    // See file_name for details
+    string file_name_file = 17;
+  }
+  // In some cases the input video does not contain absolute timestamps (only relative).
+  // In this case the start time can be specified as an ISO-8601 timestamp (opt. millisec and TZ)
+  //  eg.: "2013-03-18T03:17:23.123-01:00"
+  optional string start_time = 2;
   // A preliminary filter on input frames.
   // Must be at least one. Means that one of every keep_rate frame will be kept, other will be
   // dropped. The frame_period_ms related logic is applied after that.
@@ -138,6 +171,7 @@ message DataNodeConfig
     DETECTIONS = 11;
     FRAME_INFO = 13; ///< Frame attributes (eg.: dimensions) Kafka output is supported.
     SKELETONS = 14; ///< List of human body poses. Kafka output is supported.
+    FACE_MASKS = 15; ///< List of face mask detections (true/false) and their confidence values. Kafka output is supported.
   }
   required Type type = 1;
   required string name = 2;
@@ -162,6 +196,7 @@ message ProcessNodeConfig
     FACE_DEMOGRAPHY_CALC = 53;
     FRAME_INFO_EXTRACTOR = 57;
     SKELETON_ESTIMATOR = 58;
+    FACE_MASK_ESTIMATOR = 60;
   }
 
   required Type type = 1;
@@ -184,6 +219,7 @@ message ProcessNodeConfig
   optional FaceDemographyCalcConfig face_demography_calc_config = 62;
   optional FrameInfoExtractorConfig frame_info_extractor_config = 66;
   optional SkeletonEstimatorNodeConfig skeleton_estimator_config = 67;
+  optional FaceMaskEstimatorConfig face_mask_estimator_config = 69;
 }
 
 // Cut a region of interest (ROI) from a frame.
@@ -210,11 +246,13 @@ message ObjDetectorConfig {
 
   // Size of the smallest square that fully contains the object. Detection performance and accuracy drops as the size gets smaller.
   // Size below 30-40 pixels are not suggested in real-world applications.
-  required int32 min_height_in_pixels = 5;
-  required int32 max_height_in_pixels = 6;
+  optional uint32 min_height_in_pixels = 5 [default = 160]; // Please specify because it will be required in the future
+  optional uint32 max_height_in_pixels = 6 [default = 160]; // Please specify because it will be required in the future
 
   optional float confidence_threshold = 7 [default = 0.95]; // Confidence is a real value from 0-1.
-  optional float image_scale_factor = 11 [default = 1.0]; // This parameter explicitly resize the input frame.
+  //Amodal perception is the perception of the whole of a physical structure when only parts of it affect the sensory receptors.
+  //In our context this means we allow bounding boxes partly stretching outside the image.
+  optional bool amodal_boxes = 12 [default = false];
 }
 
 // Draw rectangles on a frame. Blurring, and full image blackout is also supported to meet with different privacy requirements.
@@ -233,7 +271,6 @@ message DrawRectsConfig {
   optional imageproc.RGB no_det_color = 6; // rgb color for fill if no detection
 
   optional bool blur = 7 [default = false]; // if set blurring applied to all detection with blur_kernel_size and blur_sigma parameters
-  optional int32 blur_kernel_size = 8 [default = 31]; // Use 15 for weak, 31 for strong blurring
   optional float blur_sigma = 9 [default = 20]; // Use 10 for weak, 40 for strong blurring
 
   optional bool draw_rect = 10 [default = true]; // if set bounding boxes are drawn
@@ -271,13 +308,9 @@ message ResizeConfig {
   required string input = 2; // Input data node (type: FRAME)
   required string output = 3; // Output data node (type: FRAME)
   optional bool lock_ar = 4 [default = true]; // Lock aspect ratio. If set then set only one of width or height.
-  optional int32 width = 5; // Desired width
-  optional int32 height = 6; // Desired height
+  optional uint32 width = 5; // Desired width
+  optional uint32 height = 6; // Desired height
   optional Interpolation interpol = 7 [default = INTER_LINEAR]; // Interpolation method.
-
-  // if set to true, a warning is logged in case resize actually happens.
-  // Will raise an error and stop processing if aspect ration changes.
-  optional bool resizeWarning = 10 [default = false];
 }
 
 // Write frames to a file.
@@ -312,9 +345,18 @@ message FaceDemographyCalcConfig
   required string output_genders = 3; // Output data node (type: GENDERS)
   required string output_ages = 4; // Output data node (type: AGES)
   optional bool use_multicrop = 5 [default = false]; // Higher cost, better quality.
+  optional bool use_flip = 7 [default = false]; // Higher cost, better quality.
   // Filtering on incoming detections for vertical size.
   // Default is the input size of the demography model. See model documentation for details.
   optional uint32 valid_box_min_size = 6;
+}
+
+message FaceMaskEstimatorConfig
+{
+  required string input_frame = 1; // Input data node (type: FRAME)
+  required string input_detections = 2; // Input data node (type: DETECTIONS)
+  required string output_masks = 3; // Output data node (type: FACE_MASKS)
+  optional bool use_multicrop = 4 [default = false]; // Higher cost, better quality.
 }
 
 // Finds human bodies and parts on image.
@@ -322,6 +364,13 @@ message SkeletonEstimatorNodeConfig
 {
   required string input_frame = 1; // Input data node (type: FRAME)
   required string skeletons = 2; // Output data node (type: SKELETONS)
+
+  optional float point_confidence_threshold = 3 [default = 0.2]; // Confidence is a real value from 0-1.
+  optional float bone_confidence_threshold = 4 [default = 0.4]; // Confidence is a real value from 0-1.
+
+  optional float skeleton_scale_factor = 5 [default = 1.0]; // Multiplies the estimated coordinates of the skeletons with this factor.
+
+  optional uint32 min_point_num = 6 [default = 3]; //Minimum point number in skeleton
 }
 
 // Filters data from a DETECTIONS typed data node
@@ -332,11 +381,11 @@ message ObjFilterNodeConfig
 
   optional int32 filter_roi_x = 6; ///< x coordinate of the top left corner in pixels
   optional int32 filter_roi_y = 7; ///< y coordinate of the top left corner in pixels
-  optional int32 filter_roi_width = 8; ///< in pixels
-  optional int32 filter_roi_height = 9; ///< in pixels
+  optional uint32 filter_roi_width = 8; ///< in pixels
+  optional uint32 filter_roi_height = 9; ///< in pixels
 
-  optional int32 filter_detection_min_height_in_pixels = 10 [default = 160]; ///< Minimum head size
-  optional int32 filter_detection_max_height_in_pixels = 11 [default = 160]; ///< Maximum head size
+  optional uint32 filter_detection_min_height_in_pixels = 10 [default = 160]; ///< Minimum head size
+  optional uint32 filter_detection_max_height_in_pixels = 11 [default = 160]; ///< Maximum head size
 
   optional float filter_detection_confidence_threshold = 12 [default = 0.95]; ///< Confidence is a real value from 0-1.
 
@@ -408,6 +457,7 @@ message HeadPoseCalcConfig {
   // Filtering on incoming detections for vertical size.
   // Default is the input size of the head pose estimator model. See model documentation for details.
   optional uint32 valid_box_min_size = 4;
+  optional bool use_multicrop = 5 [default = true]; // Higher cost, better quality. Default true for backward comp
 }
 
 // Calculates face feature vectors from input frame and detections
@@ -418,6 +468,8 @@ message FaceFeatureCalcConfig {
   // Filtering on incoming detections for vertical size.
   // Default is the input size of the face feature extractor model. See model documentation for details.
   optional uint32 valid_box_min_size = 4;
+  optional bool use_multicrop = 5 [default = true]; // Higher cost, better quality. Default true for backward comp
+  optional bool use_flip = 6 [default = false]; // Higher cost, better quality.
 }
 
 // Extract frame information from input frame

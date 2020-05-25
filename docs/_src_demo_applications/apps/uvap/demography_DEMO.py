@@ -98,20 +98,21 @@ def main():
                     age = "" if age_record['age'] == {} else age_record['age']
                     gender = "" if gender_record['gender'] == {} else gender_record['gender']
                     # draw bounding_box
-                    img = draw_nice_bounding_box(
-                        canvas=img,
-                        bounding_box=object_detection_record["bounding_box"],
-                        color=(10, 95, 255),
-                        scaling=scaling
-                    )
-                    # write age and gender
-                    img = draw_nice_text(
-                        img,
-                        str(gender) + " " + str(age),
-                        object_detection_record["bounding_box"],
-                        (10, 95, 255),
-                        scale=scaling
-                    )
+                    if object_detection_record["type"] == "PERSON_HEAD":
+                        img = draw_nice_bounding_box(
+                            canvas=img,
+                            bounding_box=object_detection_record["bounding_box"],
+                            color=(10, 95, 255),
+                            scaling=scaling
+                        )
+                        # write age and gender
+                        img = draw_nice_text(
+                            img,
+                            str(gender) + " " + str(age),
+                            object_detection_record["bounding_box"],
+                            (10, 95, 255),
+                            scale=scaling
+                        )
                 # draw ultinous logo
                 img = draw_overlay(
                     canvas=img,

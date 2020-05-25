@@ -52,4 +52,5 @@ message EnginesConfig
   optional string facial_demography_estimator_64_cfg_file_rel_path = 19;
   optional string facial_demography_estimator_128_cfg_file_rel_path = 20;
   optional string skeleton_estimator_cfg_file_rel_path = 21;
+  optional string face_mask_estimator_cfg_file_rel_path = 22;
 }

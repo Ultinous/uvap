@@ -123,6 +123,20 @@ message GenderRecord
   bool end_of_frame = 3; ///< When true, no more results will be returned for this frame; all other fields of the record are invalid.
 }
 
+/** Output of MGR Face Mask Detection.
+
+  One instance of this record is generated for a detection if it is suitable for face mask detection.
+
+  time: timestamp of the input video frame
+  key: same as the key of the corresponding ObjectDetectionRecord
+*/
+message FaceMaskRecord
+{
+  bool has_mask = 1; ///< True if the detected person wears a face mask.
+  float confidence = 2; ///< Confidence of the algorithm about the decision. Range: [0..1]
+  bool end_of_frame = 3; ///< When true, no more results will be returned for this frame; all other fields of the record are invalid.
+}
+
 /** Output of MGR Age Detection.
 
   One instance of this record is generated for a detection if its age can be determined.

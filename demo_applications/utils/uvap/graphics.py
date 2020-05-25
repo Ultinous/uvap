@@ -128,11 +128,14 @@ def _draw_skeleton(
         model=COCO_MODEL_WITH_PELVIS,
         color_palette=TYPE_TO_COLOR,
         point_size=5,
-        joint_width=3
+        joint_width=3,
+        scaling=1.0
 ) -> np.array:
-    def skeleton_point_to_cv(pt):
-        return (int(round(pt["x"])), int(round(pt["y"])))
+    def skeleton_point_to_cv(pt, scaling):
+        return (int(round(pt["x"] * scaling)), int(round(pt["y"] * scaling)))
 
+    point_size = int(point_size * scaling)
+    joint_width = int(joint_width * scaling)
     points = _generate_pelvis(points)
     # draw joints
     for edge in model:
@@ -147,7 +150,7 @@ def _draw_skeleton(
                 current_joint_width = int(np.ceil(current_joint_width * 0.6))
             cv2.line(
                 canvas,
-                skeleton_point_to_cv(u_list[0]), skeleton_point_to_cv(v_list[0]),
+                skeleton_point_to_cv(u_list[0], scaling), skeleton_point_to_cv(v_list[0], scaling),
                 color_palette[v],
                 current_joint_width,
                 cv2.LINE_AA
@@ -162,7 +165,7 @@ def _draw_skeleton(
             current_point_size = int(0.6 * current_point_size)
 
         if pt['type'] in END_KEYPOINTS:
-            x, y = skeleton_point_to_cv(pt)
+            x, y = skeleton_point_to_cv(pt, scaling)
             pt1 = (x - current_point_size, y - current_point_size)
             pt2 = (x + current_point_size, y + current_point_size)
             cv2.rectangle(canvas, pt1, pt2, color=color_palette[pt["type"]], thickness=cv2.FILLED, lineType=cv2.LINE_AA)
@@ -171,7 +174,7 @@ def _draw_skeleton(
         else:
             cv2.circle(
                 canvas,
-                skeleton_point_to_cv(pt),
+                skeleton_point_to_cv(pt, scaling),
                 current_point_size,
                 color_palette[pt["type"]],
                 cv2.FILLED,
@@ -340,7 +343,8 @@ def draw_skeleton_with_background(
         point_size=5,
         joint_width=3,
         draw_background=True,
-        background_color=(195, 195, 195)
+        background_color=(195, 195, 195),
+        scaling=1.0
 ) -> np.array:
     """
     Draw skeleton to a canvas with an additional background.
@@ -363,14 +367,16 @@ def draw_skeleton_with_background(
             model=model,
             color_palette=back_color,
             point_size=point_size + 1,
-            joint_width=joint_width + 3
+            joint_width=joint_width + 3,
+            scaling=scaling
         )
     canvas = _draw_skeleton(
         canvas, points,
         skip_unknown=skip_unknown,
         model=model,
         point_size=point_size,
-        joint_width=joint_width
+        joint_width=joint_width,
+        scaling=scaling
     )
     return canvas
 

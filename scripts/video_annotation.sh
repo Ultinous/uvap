@@ -24,7 +24,7 @@ uvap_kafka_detection_filter_docker_image_name="_auto_detected_"
 set +a
 
 parse_all_arguments "${@}"
-parse_argument_with_value "demo_name" "<head_detection|head_pose|demography|tracker|detection_filter|skeleton|reidentification>"
+parse_argument_with_value "demo_name" "<head_detection|head_pose|demography|face_mask|tracker|detection_filter|skeleton|reidentification>"
 parse_argument_with_value "video_dir" "directory path of the input and output videos - default: ${video_dir}"
 parse_argument_with_value "video_file_name" "basename of the input video file inside the --video-dir directory"
 parse_argument_with_value "fps_number" "the FPS number of the input video"
@@ -61,7 +61,7 @@ fps_number="${fps_number}" # parse_argument_with_value declares it - this just c
 width_number="${width_number}" # parse_argument_with_value declares it - this just clears IDE warnings
 height_number="${height_number}" # parse_argument_with_value declares it - this just clears IDE warnings
 demo_name="${demo_name}" # parse_argument_with_value declares it - this just clears IDE warnings
-if ! [[ "${demo_name}" =~ ^(head_detection|head_pose|demography|tracker|detection_filter|skeleton|reidentification)$ ]]; then
+if ! [[ "${demo_name}" =~ ^(head_detection|head_pose|demography|face_mask|tracker|detection_filter|skeleton|reidentification)$ ]]; then
 	echo "ERROR: unrecognized demo name: ${demo_name}" >&2
 	echo "ERROR: override with --demo-name" >&2
 	print_help
@@ -90,6 +90,7 @@ echo "Starting to configure..."
 	--templates-dir "${templates_dir}" \
 	--config-ac-dir "${config_ac_dir}" \
 	--demo-image-name "${uvap_demo_applications_docker_image_name}" \
+	--fps-number "${fps_number}" \
 	 $(test "true" = "${use_dev_tags:-"false"}" && echo "--use-dev-tags") \
 	> "${ms_log_output}"
 echo "Finished configuring."

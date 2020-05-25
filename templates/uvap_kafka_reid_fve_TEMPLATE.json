@@ -9,7 +9,8 @@
   ],
   "source_options":{
     "start":"START_NOW",
-    "end":"END_NEVER"
+    "end":"END_NEVER",
+    "message_processing_latency_ms":200
   },
   "target_options":{
     "handling":"REPLACE"

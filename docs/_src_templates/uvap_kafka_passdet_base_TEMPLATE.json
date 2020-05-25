@@ -1,0 +1,47 @@
+{
+  "source_options": {
+    "start": "START_NOW",
+    "end": "END_NEVER"
+  },
+  "source": {
+    "broker_list": "{{ KAFKA_BROKER_LIST }}",
+    "name": "{{ KAFKA_TOPIC_PREFIX }}.cam.0.tracks.TrackChangeRecord.json"
+  },
+  "target_options": {
+    "handling": "SKIP_TS"
+  },
+  "target": {
+    "broker_list": "{{ KAFKA_BROKER_LIST }}",
+    "name": "{{ KAFKA_TOPIC_PREFIX }}.cam.0.passdet.PassDetectionRecord.json"
+  },
+  "config_data": {
+    "passLines": [
+      {
+        "id": "x",
+        "poly": [
+          {
+            "x": 100,
+            "y": 500
+          },
+          {
+            "x": 1870,
+            "y": 500
+          }
+        ]
+      },
+      {
+        "id": "y",
+        "poly": [
+          {
+            "x": 960,
+            "y": 980
+          },
+          {
+            "x": 960,
+            "y": 100
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,12 +1,44 @@
 import cv2
 import json
 import numpy as np
+import os
+import platform
+from pathlib import Path
 from confluent_kafka import Message
 from typing import List
 from turbojpeg import TurboJPEG
 
-jpeg = TurboJPEG('/usr/lib/x86_64-linux-gnu/libturbojpeg.so.0')
-turbo = TurboJPEG()
+actual_platform = platform.system()
+try:
+    if actual_platform == 'Windows' and 'PythonTurboJpeg' in os.environ :
+        print("Looking for turbojpeg.dll location defined in %PythonTurboJpeg% environmental variable: \n",
+              os.environ['PythonTurboJpeg'] , "\n")
+        if not Path(os.environ['PythonTurboJpeg']).exists():
+            raise FileNotFoundError(os.environ['PythonTurboJpeg'])
+        turbo = TurboJPEG(os.environ['PythonTurboJpeg'])
+    else:
+        turbo = TurboJPEG()
+except RuntimeError as e:
+    if e.args[0].find("turbojpeg"):
+        print("libjpeg-turbo library is not found. Please check if it is installed on the system. \n"
+              "Installable can be downloaded from: https://github.com/libjpeg-turbo/libjpeg-turbo/releases \n"
+              "or refer to the installation steps described at https://pypi.org/project/PyTurboJPEG \n"
+              "(Because of current limitation of PyTurboJpeg, please use the vc version.)")
+        if actual_platform == 'Windows':
+            print("If the library is already installed, please ensure that the installation location is directly under the C: drive, e.g.:\n"
+                  "c:\\libjpeg-turbo64\\bin\\turbojpeg.dll \n"
+                  "or set the actual path of the .dll file in %PythonTurboJpeg% environmental variable\n")
+        elif actual_platform == 'Linux':
+            print("If the library is already installed, please ensure that it can be found at:\n"
+                  "/usr/lib/x86_64-linux-gnu/libturbojpeg.so.0 \n"
+                  "or /opt/libjpeg-turbo/lib64/libturbojpeg.so \n"
+                  "Create a symbolic link or add the path to the LD_LIBRARY_PATH if the .so file is located elsewhere. \n")
+        else:
+            print("If the library is already installed, please ensure that it can be found at: \n"
+                  "/usr/local/opt/jpeg-turbo/lib/libturbojpeg.dylib \n")
+        raise
+
+
 
 class NoKeyErrorDict(dict):
     """
@@ -56,6 +88,8 @@ def _get_message_type(message_topic) -> str:
         return 'age'
     elif '.GenderRecord' in message_topic:
         return 'gender'
+    elif '.FaceMaskRecord' in message_topic:
+        return 'face_mask'
     elif '.TrackChangeRecord' in message_topic:
         return 'track'
     elif '.PassDetectionRecord' in message_topic:
@@ -83,7 +117,7 @@ def _get_current_cam(message_topic: str) -> str:
 
 def message_list_to_frame_structure(messages: List[Message]) -> dict:
     """
-    Grouping list of messages into a dictionary. Bounding boxes, age and gender infos, head poses are grouped
+    Grouping list of messages into a dictionary. Bounding boxes, age and gender infos, face masks, head poses are grouped
     under "head_detection" key. The points of skeletons are grouped under "skeleton" key. Skeletons and head detections
     are grouped under the associated camera, which is represented by the camera id. The structure allows us to use
     multiple cameras from multiple streams so the cameras are merging under the stream key. To use re-identification

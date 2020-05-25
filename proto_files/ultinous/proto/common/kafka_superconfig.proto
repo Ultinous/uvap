@@ -106,10 +106,38 @@ message TargetTopicOptions
   {
     INVALID = 0;
     REPLACE = 1; ///< Delete target topic before sending messages.
-    CHECK_TS = 2; ///< Raise error if topic contains message with newer timestamp.
-    SKIP_TS = 3; ///< Skip messages in target topic with older timestamps. Messages with equal timestamp will be preserved.
+    CHECK_TS = 2; ///< Raise error if topic contains message with newer or equal timestamp.
+    SKIP_TS = 3; ///< Skip messages in target topic with older or equal timestamps.
   }
   Handling handling = 1; ///< Controls how conflicting timestamps are handled when writing to an existing topic.
+}
+
+/**
+ * Tracker Microservice Configuration
+ */
+message TrackerMSConfig
+{
+  SourceTopicOptions source_options = 1; ///< Optional. Options for opening source topics.
+  Topic source = 2; ///< Source topic
+
+  TargetTopicOptions target_options = 3; ///< Options for opening target topic.
+  Topic target = 4; ///< Target topic
+
+  TrackingConfigRecord config_data = 5; ///< Functional configuration.
+}
+
+/**
+ * Pass Detector Microservice Configuration
+ */
+message PassDetectorMSConfig
+{
+  SourceTopicOptions source_options = 1; ///< Optional. Options for opening source topics.
+  Topic source = 2; ///< Source topic
+
+  TargetTopicOptions target_options = 3; ///< Options for opening target topic.
+  Topic target = 4; ///< Target topic
+
+  PassDetConfigRecord config_data = 5; ///< Functional configuration.
 }
 
 /** Feature Vector Clustering Microservice Configuration */

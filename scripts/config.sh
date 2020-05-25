@@ -12,6 +12,8 @@ demo_image_name="_auto_detected_"
 configurator_image_name="_auto_detected_"
 host_name="localhost"
 web_player_port_number="9999"
+keep_rate_number=1
+fps_number=8
 set +a
 
 parse_all_arguments "${@}"
@@ -24,6 +26,8 @@ parse_argument_with_value "demo_image_name" "tag of docker image to use - defaul
 parse_argument_with_value "configurator_image_name" "tag of docker image to use - default: will be determined by git tags"
 parse_argument_with_value "host_name" "the domain name of the host useful to access services remotely - default: localhost"
 parse_argument_with_value "web_player_port_number" "default port of the uvap web player ms - default: 9999"
+parse_argument_with_value "keep_rate_number" "n means keep every nth frame - default: ${keep_rate_number}"
+parse_argument_with_value "fps_number" "frame rate - default: ${fps_number}"
 validate_remaining_cli_arguments
 
 test_executable "docker"
@@ -45,11 +49,14 @@ fi
 jinja_yaml_param_file_path="${config_ac_dir}/params.yaml"
 trap "rm -f ${jinja_yaml_param_file_path}" TERM INT EXIT
 
+frame_period_ms=$((1000/${fps_number}))
 echo "ENGINES_FILE: /ultinous_app/models/engines/basic_detections.prototxt
 KAFKA_BROKER_LIST: kafka
 KAFKA_TOPIC_PREFIX: ${demo_mode}
 HOST_NAME: ${host_name}
 WEB_PLAYER_PORT: ${web_player_port_number}
+KEEP_RATE: ${keep_rate_number}
+FRAME_PERIOD_MS: ${frame_period_ms}
 INPUT_STREAMS:" > "${jinja_yaml_param_file_path}"
 
 found_realtime_stream="false"

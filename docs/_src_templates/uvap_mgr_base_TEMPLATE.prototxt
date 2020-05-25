@@ -15,8 +15,8 @@ data_run:
   input:
   {
     file_name: "{{ INPUT_STREAM }}"
-    keep_rate: 1
-    frame_period_ms: 125
+    keep_rate: {{ KEEP_RATE }}
+    frame_period_ms: {{FRAME_PERIOD_MS}}
   }
 
   data_flow:
@@ -30,6 +30,7 @@ data_run:
     data_node: {type: HEAD_POSE_3DS name: "poses"}
     data_node: {type: GENDERS name: "genders"}
     data_node: {type: AGES name: "ages"}
+    data_node: {type: FACE_MASKS name: "masks"}
 
     process_node:
     {
@@ -138,14 +139,30 @@ data_run:
         use_multicrop: true
       }
     }
+
+    process_node:
+    {
+      type: FACE_MASK_ESTIMATOR
+      name: "facemask"
+      logging: false
+      face_mask_estimator_config:
+      {
+        input_frame: "input"
+        input_detections: "dets_filtered"
+        output_masks: "masks"
+        use_multicrop: true
+      }
+    }
+
     # kafka output
-    process_node:{type: KAFKA_OUTPUT name: "vid_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.original.Image.jpg"                      input_node: "input"}}
-    process_node:{type: KAFKA_OUTPUT name: "anonymized_vid_out" kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.anonymized_original.Image.jpg"           input_node: "anonymized"}}
+    process_node:{type: KAFKA_OUTPUT name: "vid_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.original.Image.jpg"                    input_node: "input"}}
+    process_node:{type: KAFKA_OUTPUT name: "anonymized_vid_out" kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.anonymized_original.Image.jpg"         input_node: "anonymized"}}
     process_node:{type: KAFKA_OUTPUT name: "frameinfo_out"      kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.frameinfo.FrameInfoRecord.json"        input_node: "frameinfo"}}
     process_node:{type: KAFKA_OUTPUT name: "det_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.dets.ObjectDetectionRecord.json"       input_node: "dets"}}
     process_node:{type: KAFKA_OUTPUT name: "pose_out"           kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.poses.HeadPose3DRecord.json"           input_node: "poses"}}
     process_node:{type: KAFKA_OUTPUT name: "gender_out"         kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.genders.GenderRecord.json"             input_node: "genders"}}
     process_node:{type: KAFKA_OUTPUT name: "age_out"            kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.ages.AgeRecord.json"                   input_node: "ages"}}
+    process_node:{type: KAFKA_OUTPUT name: "mask_out"           kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.masks.FaceMaskRecord.json"             input_node: "masks"}}
   }
 }
 {% endfor %}

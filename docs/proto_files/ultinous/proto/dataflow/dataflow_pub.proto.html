@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang=""><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>UVAP · Ultinous Video Analytics Platform</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Ultinous Video Analytics Platform"/><meta property="og:title" content="UVAP · Ultinous Video Analytics Platform"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../../../index.html"/><meta property="og:description" content="Ultinous Video Analytics Platform"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../../../js/code-block-download-button.js"></script><script src="../../../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../../../css/main.css"/><script src="../../../../js/codetabs.js"></script></head><body><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../../../"><img class="logo" src="../../../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../../../help.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer documentContainer postContainer"><div class="wrapper"><div class="post"><div><a target="_blank" class="btnDownload" href="../../../../_src_proto_files/ultinous/proto/dataflow/dataflow_pub.proto"></a><div class="static-file-code-block"><pre><code class="hljs css language-protobuf codeBlockCopy"><span class="hljs-comment">//</span>
+<!DOCTYPE html><html lang=""><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>UVAP · Ultinous Video Analytics Platform</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Ultinous Video Analytics Platform"/><meta property="og:title" content="UVAP · Ultinous Video Analytics Platform"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../../../index.html"/><meta property="og:description" content="Ultinous Video Analytics Platform"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../../../js/code-block-download-button.js"></script><script src="../../../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../../../css/main.css"/><script src="../../../../js/codetabs.js"></script></head><body><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../../../"><img class="logo" src="../../../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../../../docs/help/uvap_support.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer documentContainer postContainer"><div class="wrapper"><div class="post"><div><a target="_blank" class="btnDownload" href="../../../../_src_proto_files/ultinous/proto/dataflow/dataflow_pub.proto"></a><div class="static-file-code-block"><pre><code class="hljs css language-protobuf codeBlockCopy"><span class="hljs-comment">//</span>
 <span class="hljs-comment">// UVAP MGR configuration format</span>
 <span class="hljs-comment">//</span>
 
@@ -11,10 +11,16 @@ syntax = <span class="hljs-string">"proto2"</span>;
 <span class="hljs-comment">// Complete configuration for a multi graph runner instance.</span>
 <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">DataFlowGraphRunnerConfig</span>
 </span>{
-  <span class="hljs-keyword">optional</span> imageproc.EnginesConfig engines = <span class="hljs-number">1</span>; <span class="hljs-comment">// specifies the engine set usable by the graph</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">string</span> engines_file = <span class="hljs-number">2</span>; <span class="hljs-comment">// specifies the engines file if engines is not present</span>
-  <span class="hljs-keyword">optional</span> EnvironmentConfig environment = <span class="hljs-number">3</span>; <span class="hljs-comment">// specifies the environment of the runner</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">string</span> environment_file = <span class="hljs-number">4</span>; <span class="hljs-comment">// specifies the environment file if the environment is not present</span>
+  <span class="hljs-keyword">oneof</span> engines_spec
+  {
+    imageproc.EnginesConfig engines = <span class="hljs-number">1</span>; <span class="hljs-comment">// specifies the engine set usable by the graph</span>
+    <span class="hljs-built_in">string</span> engines_file = <span class="hljs-number">2</span>; <span class="hljs-comment">// specifies the engines file if engines is not present</span>
+  }
+  <span class="hljs-keyword">oneof</span> environment_spec
+  {
+    EnvironmentConfig environment = <span class="hljs-number">3</span>; <span class="hljs-comment">// specifies the environment of the runner</span>
+    <span class="hljs-built_in">string</span> environment_file = <span class="hljs-number">4</span>; <span class="hljs-comment">// specifies the environment file if the environment is not present</span>
+  }
   <span class="hljs-keyword">repeated</span> DataFlowGraphRunConfig data_run = <span class="hljs-number">5</span>; <span class="hljs-comment">// specifies the graph and input pairs</span>
   <span class="hljs-keyword">repeated</span> <span class="hljs-built_in">string</span> data_run_file = <span class="hljs-number">6</span>; <span class="hljs-comment">// specifies the file names for graph -- input pairs</span>
 }
@@ -56,6 +62,20 @@ syntax = <span class="hljs-string">"proto2"</span>;
     RUN_IF_DROP_ON = <span class="hljs-number">0</span>;
   }
   <span class="hljs-keyword">optional</span> NoInputPolicy no_input_policy = <span class="hljs-number">21</span> [ default = RUN_IF_DROP_ON ];
+
+  <span class="hljs-comment">//Defines the analysis backend engine.</span>
+  <span class="hljs-comment">//CAFFE: Caffe is a slow and has big memory usage.</span>
+  <span class="hljs-comment">//TENSORRT_FP32: TensorRT is a modern fast and optimized analysis backend.</span>
+  <span class="hljs-comment">//  The analysis output is almost the same as CAFFE.</span>
+  <span class="hljs-comment">//TENSORRT_FP16: Uses same TensorRT backend and its almost 2 time faster then previous one.</span>
+  <span class="hljs-comment">//  The price of speed up, is small accuracy loss!</span>
+  <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">BackendType</span>
+  </span>{
+    CAFFE = <span class="hljs-number">0</span>;
+    TENSORRT_FP32 = <span class="hljs-number">1</span>;
+    TENSORRT_FP16 = <span class="hljs-number">2</span>;
+  }
+  <span class="hljs-keyword">optional</span> BackendType backend = <span class="hljs-number">22</span> [ default = CAFFE ];
 }
 
 <span class="hljs-comment">// Frame dropping disabled. Use this mode for batch video processing.</span>
@@ -83,18 +103,31 @@ syntax = <span class="hljs-string">"proto2"</span>;
 <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">DataFlowGraphRunConfig</span>
 </span>{
   <span class="hljs-keyword">required</span> Input input = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Specifies the input (frame source) for the graph</span>
-  <span class="hljs-keyword">optional</span> DataFlowGraphConfig data_flow = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Specifies the data flow graph</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">string</span> data_flow_file = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Specifies the data flow graph file if data flow graph is not present</span>
+  <span class="hljs-keyword">oneof</span> data_flow_spec
+  {
+    DataFlowGraphConfig data_flow = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Specifies the data flow graph</span>
+    <span class="hljs-built_in">string</span> data_flow_file = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Specifies the data flow graph file if data flow graph is not present</span>
+  }
 }
 
 <span class="hljs-comment">// Configuration of a frame source</span>
 <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">Input</span>
 </span>{
-  <span class="hljs-comment">// Input file/stream/device name. Can be one of the following:</span>
-  <span class="hljs-comment">//  - video file (eg.: avi, mp4)</span>
-  <span class="hljs-comment">//  - rtsp url (eg.: "rtsp://user:pwd@10.99.99.99:554/live1.sdp")</span>
-  <span class="hljs-comment">//  - device id (eg.: 0 [which refers to "/dev/video0"])</span>
-  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> file_name = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">oneof</span> file_spec
+  {
+    <span class="hljs-comment">// Input file/stream/device name. Can be one of the following:</span>
+    <span class="hljs-comment">//  - video file (eg.: avi, mp4)</span>
+    <span class="hljs-comment">//  - rtsp url (eg.: "rtsp://user:pwd@10.99.99.99:554/live1.sdp")</span>
+    <span class="hljs-comment">//  - device id (eg.: 0 [which refers to "/dev/video0"])</span>
+    <span class="hljs-built_in">string</span> file_name = <span class="hljs-number">1</span>;
+    <span class="hljs-comment">// File name where the file/stream/device name is stored.</span>
+    <span class="hljs-comment">// See file_name for details</span>
+    <span class="hljs-built_in">string</span> file_name_file = <span class="hljs-number">17</span>;
+  }
+  <span class="hljs-comment">// In some cases the input video does not contain absolute timestamps (only relative).</span>
+  <span class="hljs-comment">// In this case the start time can be specified as an ISO-8601 timestamp (opt. millisec and TZ)</span>
+  <span class="hljs-comment">//  eg.: "2013-03-18T03:17:23.123-01:00"</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">string</span> start_time = <span class="hljs-number">2</span>;
   <span class="hljs-comment">// A preliminary filter on input frames.</span>
   <span class="hljs-comment">// Must be at least one. Means that one of every keep_rate frame will be kept, other will be</span>
   <span class="hljs-comment">// dropped. The frame_period_ms related logic is applied after that.</span>
@@ -138,6 +171,7 @@ syntax = <span class="hljs-string">"proto2"</span>;
     DETECTIONS = <span class="hljs-number">11</span>;
     FRAME_INFO = <span class="hljs-number">13</span>; <span class="hljs-comment">///&lt; Frame attributes (eg.: dimensions) Kafka output is supported.</span>
     SKELETONS = <span class="hljs-number">14</span>; <span class="hljs-comment">///&lt; List of human body poses. Kafka output is supported.</span>
+    FACE_MASKS = <span class="hljs-number">15</span>; <span class="hljs-comment">///&lt; List of face mask detections (true/false) and their confidence values. Kafka output is supported.</span>
   }
   <span class="hljs-keyword">required</span> Type type = <span class="hljs-number">1</span>;
   <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> name = <span class="hljs-number">2</span>;
@@ -162,6 +196,7 @@ syntax = <span class="hljs-string">"proto2"</span>;
     FACE_DEMOGRAPHY_CALC = <span class="hljs-number">53</span>;
     FRAME_INFO_EXTRACTOR = <span class="hljs-number">57</span>;
     SKELETON_ESTIMATOR = <span class="hljs-number">58</span>;
+    FACE_MASK_ESTIMATOR = <span class="hljs-number">60</span>;
   }
 
   <span class="hljs-keyword">required</span> Type type = <span class="hljs-number">1</span>;
@@ -184,6 +219,7 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-keyword">optional</span> FaceDemographyCalcConfig face_demography_calc_config = <span class="hljs-number">62</span>;
   <span class="hljs-keyword">optional</span> FrameInfoExtractorConfig frame_info_extractor_config = <span class="hljs-number">66</span>;
   <span class="hljs-keyword">optional</span> SkeletonEstimatorNodeConfig skeleton_estimator_config = <span class="hljs-number">67</span>;
+  <span class="hljs-keyword">optional</span> FaceMaskEstimatorConfig face_mask_estimator_config = <span class="hljs-number">69</span>;
 }
 
 <span class="hljs-comment">// Cut a region of interest (ROI) from a frame.</span>
@@ -210,11 +246,13 @@ syntax = <span class="hljs-string">"proto2"</span>;
 
   <span class="hljs-comment">// Size of the smallest square that fully contains the object. Detection performance and accuracy drops as the size gets smaller.</span>
   <span class="hljs-comment">// Size below 30-40 pixels are not suggested in real-world applications.</span>
-  <span class="hljs-keyword">required</span> <span class="hljs-built_in">int32</span> min_height_in_pixels = <span class="hljs-number">5</span>;
-  <span class="hljs-keyword">required</span> <span class="hljs-built_in">int32</span> max_height_in_pixels = <span class="hljs-number">6</span>;
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> min_height_in_pixels = <span class="hljs-number">5</span> [default = <span class="hljs-number">160</span>]; <span class="hljs-comment">// Please specify because it will be required in the future</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> max_height_in_pixels = <span class="hljs-number">6</span> [default = <span class="hljs-number">160</span>]; <span class="hljs-comment">// Please specify because it will be required in the future</span>
 
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> confidence_threshold = <span class="hljs-number">7</span> [default = <span class="hljs-number">0.95</span>]; <span class="hljs-comment">// Confidence is a real value from 0-1.</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> image_scale_factor = <span class="hljs-number">11</span> [default = <span class="hljs-number">1.0</span>]; <span class="hljs-comment">// This parameter explicitly resize the input frame.</span>
+  <span class="hljs-comment">//Amodal perception is the perception of the whole of a physical structure when only parts of it affect the sensory receptors.</span>
+  <span class="hljs-comment">//In our context this means we allow bounding boxes partly stretching outside the image.</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> amodal_boxes = <span class="hljs-number">12</span> [default = <span class="hljs-literal">false</span>];
 }
 
 <span class="hljs-comment">// Draw rectangles on a frame. Blurring, and full image blackout is also supported to meet with different privacy requirements.</span>
@@ -233,7 +271,6 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-keyword">optional</span> imageproc.RGB no_det_color = <span class="hljs-number">6</span>; <span class="hljs-comment">// rgb color for fill if no detection</span>
 
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> blur = <span class="hljs-number">7</span> [default = <span class="hljs-literal">false</span>]; <span class="hljs-comment">// if set blurring applied to all detection with blur_kernel_size and blur_sigma parameters</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> blur_kernel_size = <span class="hljs-number">8</span> [default = <span class="hljs-number">31</span>]; <span class="hljs-comment">// Use 15 for weak, 31 for strong blurring</span>
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> blur_sigma = <span class="hljs-number">9</span> [default = <span class="hljs-number">20</span>]; <span class="hljs-comment">// Use 10 for weak, 40 for strong blurring</span>
 
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> draw_rect = <span class="hljs-number">10</span> [default = <span class="hljs-literal">true</span>]; <span class="hljs-comment">// if set bounding boxes are drawn</span>
@@ -271,13 +308,9 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input = <span class="hljs-number">2</span>; <span class="hljs-comment">// Input data node (type: FRAME)</span>
   <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> output = <span class="hljs-number">3</span>; <span class="hljs-comment">// Output data node (type: FRAME)</span>
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> lock_ar = <span class="hljs-number">4</span> [default = <span class="hljs-literal">true</span>]; <span class="hljs-comment">// Lock aspect ratio. If set then set only one of width or height.</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> width = <span class="hljs-number">5</span>; <span class="hljs-comment">// Desired width</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> height = <span class="hljs-number">6</span>; <span class="hljs-comment">// Desired height</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> width = <span class="hljs-number">5</span>; <span class="hljs-comment">// Desired width</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> height = <span class="hljs-number">6</span>; <span class="hljs-comment">// Desired height</span>
   <span class="hljs-keyword">optional</span> Interpolation interpol = <span class="hljs-number">7</span> [default = INTER_LINEAR]; <span class="hljs-comment">// Interpolation method.</span>
-
-  <span class="hljs-comment">// if set to true, a warning is logged in case resize actually happens.</span>
-  <span class="hljs-comment">// Will raise an error and stop processing if aspect ration changes.</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> resizeWarning = <span class="hljs-number">10</span> [default = <span class="hljs-literal">false</span>];
 }
 
 <span class="hljs-comment">// Write frames to a file.</span>
@@ -312,9 +345,18 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> output_genders = <span class="hljs-number">3</span>; <span class="hljs-comment">// Output data node (type: GENDERS)</span>
   <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> output_ages = <span class="hljs-number">4</span>; <span class="hljs-comment">// Output data node (type: AGES)</span>
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> use_multicrop = <span class="hljs-number">5</span> [default = <span class="hljs-literal">false</span>]; <span class="hljs-comment">// Higher cost, better quality.</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> use_flip = <span class="hljs-number">7</span> [default = <span class="hljs-literal">false</span>]; <span class="hljs-comment">// Higher cost, better quality.</span>
   <span class="hljs-comment">// Filtering on incoming detections for vertical size.</span>
   <span class="hljs-comment">// Default is the input size of the demography model. See model documentation for details.</span>
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> valid_box_min_size = <span class="hljs-number">6</span>;
+}
+
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">FaceMaskEstimatorConfig</span>
+</span>{
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input_frame = <span class="hljs-number">1</span>; <span class="hljs-comment">// Input data node (type: FRAME)</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input_detections = <span class="hljs-number">2</span>; <span class="hljs-comment">// Input data node (type: DETECTIONS)</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> output_masks = <span class="hljs-number">3</span>; <span class="hljs-comment">// Output data node (type: FACE_MASKS)</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> use_multicrop = <span class="hljs-number">4</span> [default = <span class="hljs-literal">false</span>]; <span class="hljs-comment">// Higher cost, better quality.</span>
 }
 
 <span class="hljs-comment">// Finds human bodies and parts on image.</span>
@@ -322,6 +364,13 @@ syntax = <span class="hljs-string">"proto2"</span>;
 </span>{
   <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input_frame = <span class="hljs-number">1</span>; <span class="hljs-comment">// Input data node (type: FRAME)</span>
   <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> skeletons = <span class="hljs-number">2</span>; <span class="hljs-comment">// Output data node (type: SKELETONS)</span>
+
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> point_confidence_threshold = <span class="hljs-number">3</span> [default = <span class="hljs-number">0.2</span>]; <span class="hljs-comment">// Confidence is a real value from 0-1.</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> bone_confidence_threshold = <span class="hljs-number">4</span> [default = <span class="hljs-number">0.4</span>]; <span class="hljs-comment">// Confidence is a real value from 0-1.</span>
+
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> skeleton_scale_factor = <span class="hljs-number">5</span> [default = <span class="hljs-number">1.0</span>]; <span class="hljs-comment">// Multiplies the estimated coordinates of the skeletons with this factor.</span>
+
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> min_point_num = <span class="hljs-number">6</span> [default = <span class="hljs-number">3</span>]; <span class="hljs-comment">//Minimum point number in skeleton</span>
 }
 
 <span class="hljs-comment">// Filters data from a DETECTIONS typed data node</span>
@@ -332,11 +381,11 @@ syntax = <span class="hljs-string">"proto2"</span>;
 
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> filter_roi_x = <span class="hljs-number">6</span>; <span class="hljs-comment">///&lt; x coordinate of the top left corner in pixels</span>
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> filter_roi_y = <span class="hljs-number">7</span>; <span class="hljs-comment">///&lt; y coordinate of the top left corner in pixels</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> filter_roi_width = <span class="hljs-number">8</span>; <span class="hljs-comment">///&lt; in pixels</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> filter_roi_height = <span class="hljs-number">9</span>; <span class="hljs-comment">///&lt; in pixels</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> filter_roi_width = <span class="hljs-number">8</span>; <span class="hljs-comment">///&lt; in pixels</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> filter_roi_height = <span class="hljs-number">9</span>; <span class="hljs-comment">///&lt; in pixels</span>
 
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> filter_detection_min_height_in_pixels = <span class="hljs-number">10</span> [default = <span class="hljs-number">160</span>]; <span class="hljs-comment">///&lt; Minimum head size</span>
-  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">int32</span> filter_detection_max_height_in_pixels = <span class="hljs-number">11</span> [default = <span class="hljs-number">160</span>]; <span class="hljs-comment">///&lt; Maximum head size</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> filter_detection_min_height_in_pixels = <span class="hljs-number">10</span> [default = <span class="hljs-number">160</span>]; <span class="hljs-comment">///&lt; Minimum head size</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> filter_detection_max_height_in_pixels = <span class="hljs-number">11</span> [default = <span class="hljs-number">160</span>]; <span class="hljs-comment">///&lt; Maximum head size</span>
 
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">float</span> filter_detection_confidence_threshold = <span class="hljs-number">12</span> [default = <span class="hljs-number">0.95</span>]; <span class="hljs-comment">///&lt; Confidence is a real value from 0-1.</span>
 
@@ -408,6 +457,7 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-comment">// Filtering on incoming detections for vertical size.</span>
   <span class="hljs-comment">// Default is the input size of the head pose estimator model. See model documentation for details.</span>
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> valid_box_min_size = <span class="hljs-number">4</span>;
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> use_multicrop = <span class="hljs-number">5</span> [default = <span class="hljs-literal">true</span>]; <span class="hljs-comment">// Higher cost, better quality. Default true for backward comp</span>
 }
 
 <span class="hljs-comment">// Calculates face feature vectors from input frame and detections</span>
@@ -418,6 +468,8 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-comment">// Filtering on incoming detections for vertical size.</span>
   <span class="hljs-comment">// Default is the input size of the face feature extractor model. See model documentation for details.</span>
   <span class="hljs-keyword">optional</span> <span class="hljs-built_in">uint32</span> valid_box_min_size = <span class="hljs-number">4</span>;
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> use_multicrop = <span class="hljs-number">5</span> [default = <span class="hljs-literal">true</span>]; <span class="hljs-comment">// Higher cost, better quality. Default true for backward comp</span>
+  <span class="hljs-keyword">optional</span> <span class="hljs-built_in">bool</span> use_flip = <span class="hljs-number">6</span> [default = <span class="hljs-literal">false</span>]; <span class="hljs-comment">// Higher cost, better quality.</span>
 }
 
 <span class="hljs-comment">// Extract frame information from input frame</span>

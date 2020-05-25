@@ -10,8 +10,8 @@ environment {
 data_run {
   input {
     file_name: "{{ INPUT_STREAM }}"
-    keep_rate: 1
-    frame_period_ms: 125
+    keep_rate: {{ KEEP_RATE }}
+    frame_period_ms: {{FRAME_PERIOD_MS}}
   }
   data_flow {
     data_node: {type: FRAME name: "input"}

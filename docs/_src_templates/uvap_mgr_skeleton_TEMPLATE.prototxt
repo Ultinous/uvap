@@ -16,14 +16,27 @@ data_run:
   input:
   {
     file_name: "{{ INPUT_STREAM }}"
-    keep_rate: 1
-    frame_period_ms: 125
+    keep_rate: {{ KEEP_RATE }}
+    frame_period_ms: {{FRAME_PERIOD_MS}}
   }
 
   data_flow:
   {
     data_node: {type: FRAME name: "input"}
     data_node: {type: SKELETONS name: "skeletons"}
+    data_node: {type: FRAME_INFO name: "frameinfo"}
+
+    process_node:
+    {
+      type: FRAME_INFO_EXTRACTOR
+      name: "frameinfocalc"
+      logging: false
+      frame_info_extractor_config:
+      {
+        input_frame: "input"
+        output_info: "frameinfo"
+      }
+    }
 
     process_node:
     {
@@ -37,6 +50,7 @@ data_run:
 
     # kafka output
     process_node:{type: KAFKA_OUTPUT name: "skeletons_out"  kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.skeletons.SkeletonRecord.json"   input_node: "skeletons"}}
+    process_node:{type: KAFKA_OUTPUT name: "frameinfo_out"      kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.frameinfo.FrameInfoRecord.json"        input_node: "frameinfo"}}
     process_node:{type: KAFKA_OUTPUT name: "vid_out"        kafka_output_config: {topic_name: "cam.{{loop.index - 1}}.original.Image.jpg"                input_node: "input"}}
   }
 }

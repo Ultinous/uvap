@@ -112,7 +112,6 @@ def main():
                 shape_orig = v[args.prefix]["0"]["head_detection"].pop("image", {})
                 if shape_orig:
                     scaling = img.shape[1] / shape_orig["frame_info"]["columns"]
-                    print("scaling: ", scaling)
 
                 # draw bounding_box
                 for head_detection in v[args.prefix]["0"]["head_detection"]:

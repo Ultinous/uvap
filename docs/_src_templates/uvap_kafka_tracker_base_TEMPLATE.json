@@ -1,0 +1,20 @@
+{
+  "source_options": {
+    "start": "START_NOW",
+    "end": "END_NEVER"
+  },
+  "source": {
+    "broker_list": "{{ KAFKA_BROKER_LIST }}",
+    "name": "{{ KAFKA_TOPIC_PREFIX }}.cam.0.dets.ObjectDetectionRecord.json"
+  },
+  "target_options": {
+    "handling": "SKIP_TS"
+  },
+  "target": {
+    "broker_list": "{{ KAFKA_BROKER_LIST }}",
+    "name": "{{ KAFKA_TOPIC_PREFIX }}.cam.0.tracks.TrackChangeRecord.json"
+  },
+  "config_data": {
+    "detectionThreshold": 0.7
+  }
+}

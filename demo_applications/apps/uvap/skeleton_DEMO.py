@@ -46,6 +46,7 @@ def main():
 
     img_topic = f"{args.prefix}.cam.0.original.Image.jpg"
     skeleton_topic = f"{args.prefix}.cam.0.skeletons.SkeletonRecord.json"
+    frameinfo_topic = f"{args.prefix}.cam.0.frameinfo.FrameInfoRecord.json"
     output_topic_name = f"{args.prefix}.cam.0.skeleton.Image.jpg"
 
     # handle full screen
@@ -60,7 +61,8 @@ def main():
         "skeleton",
         [
             TopicInfo(img_topic),
-            TopicInfo(skeleton_topic)
+            TopicInfo(skeleton_topic),
+            TopicInfo(frameinfo_topic)
         ],
         100,
         None,
@@ -69,16 +71,33 @@ def main():
         end_flag=end_flag
     )
     i = 0
+    scaling = 1.0
     for msgs in consumer.getMessages():
         for time, v in message_list_to_frame_structure(msgs).items():
             img = v[args.prefix]["0"]["image"]
             if type(img) == np.ndarray:
+
+                # Set the image scale
+                shape_orig = v[args.prefix]["0"]["head_detection"].pop("image", {})
+                if shape_orig:
+                    scaling = img.shape[1] / shape_orig["frame_info"]["columns"]
+
                 # draw skeletons
                 for skeleton_id, skeleton in v[args.prefix]["0"]["skeleton"].items():
-                    img = draw_skeleton_with_background(img, skeleton["points"])
+                    img = draw_skeleton_with_background(
+                        canvas=img,
+                        points=skeleton["points"],
+                        scaling=scaling
+                    )
 
                 # draw ultinous logo
-                img = draw_overlay(img, overlay, Position.BOTTOM_RIGHT)
+                img = draw_overlay(
+                    canvas=img,
+                    overlay=overlay,
+                    position=Position.BOTTOM_RIGHT,
+                    scale=scaling
+                )
+
 
                 # produce output topic
                 if args.output:
