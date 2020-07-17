@@ -95,7 +95,7 @@ echo "Starting to configure..."
 	> "${ms_log_output}"
 echo "Finished configuring."
 
-sed -i -e 's/startTS=NOW/startTS=0/' -e 's/endTS=NEVER/endTS=END/' "${config_ac_dir}"/uvap_*/*.properties
+sed -i -e 's/"start":[ ]*"START_NOW"/"start": "START_BEGIN"/' -e 's/"end":[ ]*"END_NEVER"/"end": "END_END"/' "${config_ac_dir}"/uvap_*/*.json
 
 echo "Starting the core analysis..."
 "${current_directory}/run_mgr.sh" \
@@ -220,6 +220,7 @@ docker container create \
 	python3.7 "apps/uvap/write_video.py" \
 		kafka:9092 \
 		"${demo_mode}.cam.0.${demo_name}.Image.jpg" \
+		-e \
 		-fps "${fps_number}" \
 		-width "${width_number}" \
 		-height "${height_number}" \

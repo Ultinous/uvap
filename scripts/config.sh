@@ -5,33 +5,53 @@ source "$(dirname "$(realpath "$0")")/uvap_bash_functions"
 
 current_directory="${current_directory}" # the above source declares it - this just clears IDE warnings
 set -a
-demo_applications_dir="${current_directory}/../demo_applications"
-templates_dir="${current_directory}/../templates"
-config_ac_dir="${current_directory}/../config"
+
+# default values:
+default_demo_applications_dir="${current_directory}/../demo_applications"
+default_templates_dir="${current_directory}/../templates"
+default_config_ac_dir="${current_directory}/../config"
+default_host_name="localhost"
+default_web_player_port_number="9999"
+default_keep_rate_number=1
+default_fps_number=8
+default_video_processing_mode="mgr"
+# configurable values
+demo_applications_dir="${default_demo_applications_dir}"
+templates_dir="${default_templates_dir}"
+config_ac_dir="${default_config_ac_dir}"
 demo_image_name="_auto_detected_"
 configurator_image_name="_auto_detected_"
-host_name="localhost"
-web_player_port_number="9999"
-keep_rate_number=1
-fps_number=8
+host_name="${default_host_name}"
+web_player_port_number="${default_web_player_port_number}"
+keep_rate_number="${default_keep_rate_number}"
+fps_number="${default_fps_number}"
+video_processing_mode="${default_video_processing_mode}"
 set +a
 
 parse_all_arguments "${@}"
 parse_argument_with_value "demo_mode" "<base|skeleton|fve>"
 parse_argument_with_multi_value "stream_uri" "file name / device name / RTSP URL of a stream to analyze - may be specified multiple times"
-parse_argument_with_value "demo_applications_dir" "directory path of demo applications scripts - default: ${demo_applications_dir}"
-parse_argument_with_value "templates_dir" "directory path of configuration templates - default: ${templates_dir}"
-parse_argument_with_value "config_ac_dir" "directory path of configuration files - will be created if not existent - default: ${config_ac_dir}"
+parse_argument_with_value "demo_applications_dir" "directory path of demo applications scripts - default: ${default_demo_applications_dir}"
+parse_argument_with_value "templates_dir" "directory path of configuration templates - default: ${default_templates_dir}"
+parse_argument_with_value "config_ac_dir" "directory path of configuration files - will be created if not existent - default: ${default_config_ac_dir}"
 parse_argument_with_value "demo_image_name" "tag of docker image to use - default: will be determined by git tags"
 parse_argument_with_value "configurator_image_name" "tag of docker image to use - default: will be determined by git tags"
-parse_argument_with_value "host_name" "the domain name of the host useful to access services remotely - default: localhost"
-parse_argument_with_value "web_player_port_number" "default port of the uvap web player ms - default: 9999"
-parse_argument_with_value "keep_rate_number" "n means keep every nth frame - default: ${keep_rate_number}"
-parse_argument_with_value "fps_number" "frame rate - default: ${fps_number}"
+parse_argument_with_value "host_name" "the domain name of the host useful to access services remotely - default: ${default_host_name}"
+parse_argument_with_value "web_player_port_number" "default port of the uvap web player ms - default: ${default_web_player_port_number}"
+parse_argument_with_value "keep_rate_number" "n means keep every nth frame - default: ${default_keep_rate_number}"
+parse_argument_with_value "fps_number" "frame rate - default: ${default_fps_number}"
+parse_argument_with_value "video_processing_mode" "<mgr|vc> decides which video stream processing mode is used - default: ${default_video_processing_mode}"
 validate_remaining_cli_arguments
 
 test_executable "docker"
 test_executable "tar"
+
+video_processing_mode="${video_processing_mode}" # parse_argument_with_value declares it - this just clears IDE warnings
+if ! [[ "${video_processing_mode}" =~ ^(mgr|vc)$ ]]; then
+	echo "ERROR: unrecognized video processing mode: ${video_processing_mode}" >&2
+	echo "ERROR: override with --video-processing-mode" >&2
+	print_help
+fi
 
 demo_mode="${demo_mode}" # parse_argument_with_value declares it - this just clears IDE warnings
 if ! [[ "${demo_mode}" =~ ^(base|skeleton|fve)$ ]]; then
@@ -61,16 +81,16 @@ INPUT_STREAMS:" > "${jinja_yaml_param_file_path}"
 
 found_realtime_stream="false"
 found_recorded_stream="false"
-for stream_url in ${stream_uris}; do
-	echo "  - ${stream_url}" >> "${jinja_yaml_param_file_path}"
-	if test_string_starts_with "${stream_url}" "/"; then
-		if test_string_starts_with "${stream_url}" "/dev/video"; then
+for stream_uri in ${stream_uris}; do
+	echo "  - ${stream_uri}" >> "${jinja_yaml_param_file_path}"
+	if test_string_starts_with "${stream_uri}" "/"; then
+		if test_string_starts_with "${stream_uri}" "/dev/video"; then
 			found_realtime_stream="true"
 		else
 			found_recorded_stream="true"
 		fi
 	else
-		if echo "${stream_url}" | grep -qE '^[a-z]+://.*$'; then
+		if echo "${stream_uri}" | grep -qE '^[a-z]+://.*$'; then
 			found_realtime_stream="true"
 		else
 			found_recorded_stream="true"
@@ -85,6 +105,10 @@ if test "true" = "${found_recorded_stream}"; then
 	echo 'DROP: "off"' >> "${jinja_yaml_param_file_path}"
 else
 	echo 'DROP: "on"' >> "${jinja_yaml_param_file_path}"
+fi
+
+if test "${video_processing_mode}" = "vc"; then
+	echo 'VIDEO_CAPTURE: "true"' >> "${jinja_yaml_param_file_path}"
 fi
 
 mounted_config_dir="/config"
@@ -109,6 +133,11 @@ add_config_to_jinja_run_script() {
 }
 
 for raw_service_name in $(get_uvap_components_list AND "properties" "${demo_mode}"); do
+	# Do not create vc config if mgr mode is selected
+	if test "${raw_service_name}" = "vc" -a "${video_processing_mode}" != "vc"; then
+		continue
+	fi
+
 	uvap_component_name=$(echo ${raw_service_name} | force_uvap_prefix)
 	mkdir -p "${config_ac_dir}/${uvap_component_name}/"
 	if has_uvap_component_attribute "${raw_service_name}" 'instance_per_stream'; then

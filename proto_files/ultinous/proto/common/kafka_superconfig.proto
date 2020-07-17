@@ -32,6 +32,9 @@ message AuthDefs
 
 /**
  * Basic connection parameters for a topic
+ *
+ * Please note that population of topics might be monitored in your system, so notification of a system
+ * administrator might be required before changing these setting schemas.
  */
 message Topic
 {
@@ -182,4 +185,14 @@ message DetectionFilterMSConfig
   Topic target = 4; ///< Target topic
 
   DetectionFilterConfigRecord config_data = 5; ///< Functional configuration.
+}
+
+/**
+ * Video Capture Microservice Configuration
+ */
+message VideoCaptureMSConfig
+{
+  repeated Topic targets = 4; ///< Target topics
+
+  VideoCaptureConfigRecord config_data = 5; ///< Functional configuration.
 }

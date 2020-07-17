@@ -7,3 +7,4 @@ uvap_demo_applications
 uvap_web_player:properties:base:skeleton:fve
 kafka_fvc:ms:properties:fve:instance_per_stream
 stream_configurator_ui:ms:properties:base
+vc:ms:properties:base:video

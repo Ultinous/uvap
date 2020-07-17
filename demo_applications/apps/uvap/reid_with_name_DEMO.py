@@ -9,11 +9,14 @@ from typing import Dict
 
 import cv2
 import numpy as np
+import time
 from confluent_kafka.cimpl import Producer, Consumer, TopicPartition  # TODO (when names via person stream): remove Consumer and TopicPartition
 
 from utils.kafka.time_ordered_generator_with_timeout import TimeOrderedGeneratorWithTimeout, TopicInfo
-from utils.uvap.graphics import draw_nice_bounding_box, draw_overlay, Position, draw_nice_text
+from utils.kafka.time_ordered_generator_with_timeout import BeginFlag, EndFlag
+from utils.uvap.graphics import draw_nice_bounding_box, draw_overlay, Position, draw_nice_text, draw_simple_text
 from utils.uvap.uvap import message_list_to_frame_structure, encode_image_to_message
+from utils.generator.heartbeat import HeartBeat
 
 COLOR_LIGHT_GREY = (255, 95, 10) # face detected
 COLOR_DARK_GREY = (128, 128, 128) # head detected
@@ -107,6 +110,13 @@ def main():
 
     output_topics = dict((id, f"{args.prefix}.cam.{id}.{OUTPUT_TOPIC_POSTFIX}") for id in CAMERA_TOPIC_IDS)
 
+    # Write notification if no message is received for this long
+    notification_delay_sec = 10
+
+    begin_flag = None
+    end_flag = EndFlag.NEVER
+    heartbeat_interval_ms = 1000
+
     # read message, draw and display them
     consumer = TimeOrderedGeneratorWithTimeout(
         broker=args.broker,
@@ -114,141 +124,160 @@ def main():
         topics_infos=consumable_topics,
         latency_ms=200,
         commit_interval_sec=None,
-        group_by_time=True
+        group_by_time=True,
+        begin_flag=begin_flag,
+        end_flag=end_flag,
+        heartbeat_interval_ms=heartbeat_interval_ms
     )
 
     registrations: Dict[str, Registration] = {}
     i = 0
     inner_id = 0
     scaling = 1.0
+    img_dimensions = (768, 1024)
+    last_image_ts = None
+    cameras = {"DEMO Camera 0": (last_image_ts, img_dimensions)}  # We assume that Camera 0 is always configured
     for msgs in consumer.getMessages():
-        k = -1
-        for time, v in message_list_to_frame_structure(msgs).items():
-            message = v.get(args.prefix, {})
+        if not isinstance(msgs, HeartBeat):
+            for ts, v in message_list_to_frame_structure(msgs).items():
+                message = v.get(args.prefix, {})
 
-            # Collect Reid records
-            reid_records = {}
-            reid_message = message.get(REID_TOPIC_ID, {})
-            reid_records.update(reid_message.get("reid", {}))
+                # Collect Reid records
+                reid_records = {}
+                reid_message = message.get(REID_TOPIC_ID, {})
+                reid_records.update(reid_message.get("reid", {}))
 
-            # Process the image
-            for topic_key, topic_message in filter(lambda t: t[0] != REID_TOPIC_ID, message.items()):
-                img = topic_message.get("image", {})
-                if not isinstance(img, np.ndarray):
-                    continue
-                head_detections = topic_message.get("head_detection", {})
-                # Set the image scale
-                shape_orig = head_detections.pop("image", {})
-                if shape_orig:
-                    scaling = img.shape[1] / shape_orig["frame_info"]["columns"]
-
-                # Processing the detections of the image
-                for detection_key, detection_record in head_detections.items():
-                    object_detection_record = detection_record.get("bounding_box", {})
-                    if not object_detection_record:
+                # Process the image
+                for topic_key, topic_message in filter(lambda t: t[0] != REID_TOPIC_ID, message.items()):
+                    img = topic_message.get("image", {})
+                    if not isinstance(img, np.ndarray):
                         continue
-                    key_to_display = ""
-                    color = COLOR_DARK_GREY
+                    head_detections = topic_message.get("head_detection", {})
+                    # Update the camera properties for display
+                    cameras[f"DEMO Camera {topic_key}"] = (int(time.time()), (img.shape[0], img.shape[1]))
+                    # Set the image scale
+                    shape_orig = head_detections.pop("image", {})
+                    if shape_orig:
+                        scaling = img.shape[1] / shape_orig["frame_info"]["columns"]
 
-                    face_detection = detection_record.get("unknown", {})
-                    if face_detection:
-                        color = COLOR_LIGHT_GREY
+                    # Processing the detections of the image
+                    for detection_key, detection_record in head_detections.items():
+                        object_detection_record = detection_record.get("bounding_box", {})
+                        if not object_detection_record:
+                            continue
+                        key_to_display = ""
+                        color = COLOR_DARK_GREY
 
-                    age = None
-                    age_detection_record = detection_record.get("age", {})
-                    if age_detection_record:
-                        age = age_detection_record["age"]
-                    if args.text == "age" or args.text == "both":
-                        key_to_display = f"Age: {age}" if age else ""
+                        face_detection = detection_record.get("unknown", {})
+                        if face_detection:
+                            color = COLOR_LIGHT_GREY
 
-                    # Reidentification received for the detection
-                    reid_records_for_det = reid_records.get(detection_key, {})
-                    if reid_records_for_det:
-                        for reid_record in filter(lambda r: "reid_event" in r, reid_records_for_det):
-                            # We only use the first [0] identified face now
-                            reid_key = reid_record["reid_event"]["match_list"][0]["id"]["first_detection_key"]
-                            registered = registrations.get(reid_key, None)
-                            if registered:
-                                age_to_display = ""
-                                if age:
-                                    registered.addAge(age)
-                                if args.text == "age" or args.text == "both":
-                                    age_to_display = f"; Age: {registered.age:d}" if age else ""
-                                # Calculate the dwell time if required
-                                dwell_time_display = ""
-                                if args.text == "dwell_time" or args.text == "both":
-                                    detection_time = reid_record["reid_event"]["match_list"][0]["id"]["first_detection_time"]
-                                    dwell_time = time - int(detection_time)
-                                    dwell_time_display = f"; Dwell time: {dwell_time}ms"
-                                color = COLOR_ORANGE
-                                name_to_display = registered.name if registered.name else f"ID: {registered.id}"
-                                key_to_display = f"{name_to_display}{age_to_display}{dwell_time_display}"
+                        age = None
+                        age_detection_record = detection_record.get("age", {})
+                        if age_detection_record:
+                            age = age_detection_record["age"]
+                        if args.text == "age" or args.text == "both":
+                            key_to_display = f"Age: {age}" if age else ""
 
-                            else:
-                                inner_id += 1
-                                registrations[reid_key] = Registration(id=inner_id)
-                                if age:
-                                    registrations[reid_key].addAge(age)
+                        # Reidentification received for the detection
+                        reid_records_for_det = reid_records.get(detection_key, {})
+                        if reid_records_for_det:
+                            for reid_record in filter(lambda r: "reid_event" in r, reid_records_for_det):
+                                # We only use the first [0] identified face now
+                                reid_key = reid_record["reid_event"]["match_list"][0]["id"]["first_detection_key"]
+                                registered = registrations.get(reid_key, None)
+                                if registered:
+                                    age_to_display = ""
+                                    if age:
+                                        registered.addAge(age)
+                                    if args.text == "age" or args.text == "both":
+                                        age_to_display = f"; Age: {registered.age:d}" if age else ""
+                                    # Calculate the dwell time if required
+                                    dwell_time_display = ""
+                                    if args.text == "dwell_time" or args.text == "both":
+                                        detection_time = reid_record["reid_event"]["match_list"][0]["id"]["first_detection_time"]
+                                        dwell_time = ts - int(detection_time)
+                                        dwell_time_display = f"; Dwell time: {dwell_time}ms"
+                                    color = COLOR_ORANGE
+                                    name_to_display = registered.name if registered.name else f"ID: {registered.id}"
+                                    key_to_display = f"{name_to_display}{age_to_display}{dwell_time_display}"
 
-                                # Update the technical naming topic
-                                #  TODO (when names via person stream): remove
-                                producer.produce("detected.records.json", key=str(reid_key).encode("utf-8"), value=(str(inner_id) + ";").encode("utf-8"), timestamp=time)
+                                else:
+                                    inner_id += 1
+                                    registrations[reid_key] = Registration(id=inner_id)
+                                    if age:
+                                        registrations[reid_key].addAge(age)
 
-                    # Read the technical naming topic
-                    #  TODO (when names via person stream): remove
-                    reg_msg = reg_consumer.poll(0.01)
-                    if reg_msg is not None:
-                        try:
-                            key = reg_msg.key().decode("utf-8")
-                            name = reg_msg.value().decode("utf-8")
-                            # Update the person name
-                            reg_to_update = registrations.get(key)
-                            if reg_to_update:
-                                reg_to_update.addName(name)
-                            else:
-                                registrations[key] = Registration(name=name)
-                        except:
-                            print("Decoding entry of the named.records topic failed.", flush=True)
+                                    # Update the technical naming topic
+                                    #  TODO (when names via person stream): remove
+                                    producer.produce("detected.records.json", key=str(reid_key).encode("utf-8"), value=(str(inner_id) + ";").encode("utf-8"), timestamp=ts)
 
-                    # draw text above bounding box
-                    img = draw_nice_text(
+                        # Read the technical naming topic
+                        #  TODO (when names via person stream): remove
+                        reg_msg = reg_consumer.poll(0.01)
+                        if reg_msg is not None:
+                            try:
+                                key = reg_msg.key().decode("utf-8")
+                                name = reg_msg.value().decode("utf-8")
+                                # Update the person name
+                                reg_to_update = registrations.get(key)
+                                if reg_to_update:
+                                    reg_to_update.addName(name)
+                                else:
+                                    registrations[key] = Registration(name=name)
+                            except:
+                                print("Decoding entry of the named.records topic failed.", flush=True)
+
+                        # draw text above bounding box
+                        img = draw_nice_text(
+                            canvas=img,
+                            text=key_to_display,
+                            bounding_box=object_detection_record["bounding_box"],
+                            color=color,
+                            scale=scaling
+                        )
+
+                        # draw bounding_box
+                        img = draw_nice_bounding_box(
+                            canvas=img,
+                            bounding_box=object_detection_record["bounding_box"],
+                            color=color,
+                            scaling=scaling
+                        )
+
+                    # draw ultinous logo
+                    img = draw_overlay(
                         canvas=img,
-                        text=key_to_display,
-                        bounding_box=object_detection_record["bounding_box"],
-                        color=color,
+                        overlay=overlay,
+                        position=Position.BOTTOM_RIGHT,
                         scale=scaling
                     )
 
-                    # draw bounding_box
-                    img = draw_nice_bounding_box(
-                        canvas=img,
-                        bounding_box=object_detection_record["bounding_box"],
-                        color=color,
-                        scaling=scaling
-                    )
+                    # produce output topic
+                    if args.output:
+                        out_topic = output_topics.get(topic_key)
+                        producer.produce(out_topic, value=encode_image_to_message(img), timestamp=ts)
+                        producer.poll(0)
+                        if i % 1000 == 0:
+                            producer.flush()
+                        i += 1
 
-                # draw ultinous logo
-                img = draw_overlay(
-                    canvas=img,
-                    overlay=overlay,
-                    position=Position.BOTTOM_RIGHT,
-                    scale=scaling
-                )
+                    # display #
+                    if args.display:
+                        cv2.imshow(f"DEMO Camera {topic_key}", img)
 
-                # produce output topic
-                if args.output:
-                    out_topic = output_topics.get(topic_key)
-                    producer.produce(out_topic, value=encode_image_to_message(img), timestamp=time)
-                    producer.poll(0)
-                    if i % 1000 == 0:
-                        producer.flush()
-                    i += 1
+        # Write notification until the first message is received
+        # (output topic is not updated to ensure kafka timestamp consistency)
+        elif args.display:
+            for camera_name, (last_image_ts, dimension) in cameras.items():
+                if last_image_ts is None or last_image_ts + notification_delay_sec < int(time.time()):
+                    img = np.zeros((*img_dimensions, 3), np.uint8)
+                    text = "Waiting for input Kafka topics to be populated. \n" \
+                           "Please make sure that MGR and other necessary services are running."
+                    img = draw_simple_text(canvas=img, text=text, color=(10, 95, 255))
+                    cv2.imshow(camera_name, img)
 
-                # display #
-                if args.display:
-                    cv2.imshow(f"DEMO Camera {topic_key}", img)
-                    k = cv2.waitKey(33)
-
+        k = cv2.waitKey(33)
         if k == 113:  # The 'q' key to stop
             break
         elif k == -1:  # normally -1 returned,so don't print it

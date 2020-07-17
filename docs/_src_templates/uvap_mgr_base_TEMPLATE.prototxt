@@ -14,7 +14,11 @@ data_run:
 {
   input:
   {
+    {% if VIDEO_CAPTURE %}
+    file_name: "kafka:cam.{{loop.index - 1}}.vc.Packet.upw"
+    {% else %}
     file_name: "{{ INPUT_STREAM }}"
+    {% endif %}
     keep_rate: {{ KEEP_RATE }}
     frame_period_ms: {{FRAME_PERIOD_MS}}
   }

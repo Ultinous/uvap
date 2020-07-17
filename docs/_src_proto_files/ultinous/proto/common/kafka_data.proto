@@ -244,21 +244,26 @@ message PassEvent
 /** Output of kafka_passdet.
 
   One instance of this record is generated when any of the following events happens:
-  E1. Passage event:
+  E1. Passage event (type = PASS_CANDIDATE, pass_candidate given)
     A track crosses a pass line. That is, the previous and current TrackChangeRecord points are
-    on opposite sides of the pass line. The last point of the track can be either detected or predicted.
+    on opposite sides of the pass line. The last point of the track can be either detected or
+    predicted, this is represented by the pass_candidate.is_extrapolated being true. For non-predicted
+    events there will be no passage realization (type = PASS_REALIZED). For predicted events there
+    is a possibility for a realization event until the end of the track (type = END_OF_TRACK).
       Key is pass_line_id.
       Time is the time of the frame containing the last point of the track, i.e. the first frame after the passage.
-  E2. Passage Realization event:
-    A prediction based passage event is confirmed by a true detection.
-    A single track change input may trigger several Passage Realization Events when the track contained several passages based on prediction.
+  E2. Passage Realization event (type = PASS_REALIZED, pass_realized given):
+    A prediction based PassCandidate (is_extrapolated = true) can be confirmed by a true detection.
+    Such a PassCandidate can become realized until the track ends. A single track change input may
+    trigger several Passage Realization Events when the track contained several passages based
+    on prediction.
       Key is empty.
       Time is the time of the frame containing the last point of the track, i.e. the frame containing the true detection.
-  E3. End of Track event:
+  E3. End of Track event (type = END_OF_TRACK, end_of_track given):
     A track has ended. It is sent out even if the track didn't generate passage event.
       Key is empty.
       Time is the time of the TrackChangeRecord with end_of_track=true.
-  E4. Heartbeat event:
+  E4. Heartbeat event (type = HEARTBEAT, no details):
     There is input but no message was sent in the last second.
       Key is empty.
       Time is the time of the last input.

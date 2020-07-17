@@ -94,6 +94,12 @@ class Position(enum.Enum):
     TOP_LEFT = 4
 
 
+class TextPosition(enum.Enum):
+    TOP = 1
+    CENTER = 2
+    BOTTOM = 3
+
+
 def _generate_pelvis(points: List[dict]) -> List[dict]:
     new_points = points
     r_hip = [key_point for key_point in points if key_point['type'] == 'RIGHT_HIP']
@@ -616,3 +622,65 @@ def draw_polyline(
         color=color,
         thickness=thickness
     )
+
+def draw_simple_text(
+        canvas: np.array,
+        text: str,
+        color: tuple,
+        position=TextPosition.CENTER,
+        thickness=1,
+        margin=40,
+        font_scale=1,
+        shadow=True
+) -> np.array:
+    """
+    Draw text with line breaks with dynamically changing size and shadow to an image.
+    :param canvas: target image
+    :param text: drawable text. Use line breaks (\n) for displaying in multiple lines.
+    :param color: BRG color of the text
+    :param position: position of the text
+    :param thickness: thickness of the font line in px
+    :param margin: vertical offset of multi-lined text
+    :param font_scale: font scale factor that is multiplied by the font-specific base size.
+    :param shadow: to visualize text shadow or not
+    :return: image with text
+    """
+    font_face = cv2.FONT_HERSHEY_COMPLEX_SMALL
+    y0 = 10
+    margin = margin * font_scale
+
+    if position == TextPosition.TOP:
+        y0 = margin
+    if position == TextPosition.CENTER:
+        dimensions = (canvas.shape[0], canvas.shape[1])
+        y0 = int(dimensions[0] / 2)
+    if position == TextPosition.BOTTOM:
+        line_num = text.count('\n')
+        y0 = canvas.shape[0] - ((line_num + 1) * margin)
+
+    for i, line in enumerate(text.split('\n')):
+        y = y0 + i * margin
+        if shadow:
+            cv2.putText(
+                canvas,
+                line,
+                (10, y),
+                font_face,
+                font_scale,
+                (0, 0, 0),
+                thickness + 1,
+                lineType=cv2.LINE_AA
+            )
+        cv2.putText(
+            canvas,
+            line,
+            (10, y),
+            font_face,
+            font_scale,
+            color,
+            thickness,
+            lineType=cv2.LINE_AA
+        )
+
+    return canvas
+

@@ -38,10 +38,46 @@ message TrackingConfigRecord
 
   /** Maximum lifetime of a track without new detection.
   unit: msec
-  range: [0..+inf)
+  range: (0..+inf)
   default: 1000
   */
   uint32 time_passed_threshold = 3;
+
+  /** Smoothing parameter.
+  If high then track stealing is more unlikely, but track fracturing may occur more frequently.
+  If you experience track fracturing try a lower value, against track stealing try higher.
+  unit: unspecified
+  range: [0..+inf)
+  default: 0.2
+  */
+  float delta_time = 4;
+
+  /** On locations where the angle of the camera is shallow, it is often the case that people's heads are overlapping.
+  This could cause track stealing. To prevent this the system also tracks head sizes. A sudden change in head size will
+  disqualify the candidate from the continuation of the track.
+  */
+  enum SizeFilteringMeasurementType
+  {
+    NONE = 0; // Disable size filtering
+    AREA = 1; // Calculate the area of bounding boxes (width * height).
+    MIN_SIDE = 2; // Take minimum of the sides of each bounding box: min(width, height)
+    MAX_SIDE = 3; // Take maximum of the sides of each bounding box: max(width, height)
+    DIAGONAL = 4; // Calculate diagonal of bounding boxes
+  }
+
+  /** Defines which size measurement will be used to compare bounding boxes.
+  default: NONE (size filtering is disabled by default)
+  */
+  SizeFilteringMeasurementType size_filtering_measurement_type = 5;
+
+  /** The following parameter sets the maximum size change allowed for bounding boxes in subsequent frames. It is
+  expressed as the ratio of bounding box sizes (smaller size divided by the larger size), where size is defined by
+  size_filtering_measurement_type.
+
+  range: (0..1]
+  default: 1 (ie. disables size measurement filtering)
+  */
+  float size_change_threshold = 6;
 }
 
 /** Configuration for kafka_passdet
@@ -307,4 +343,27 @@ message ReidConfigRecord
 
   FVClusteringConfig clustering_config = 1;
   repeated InputStreamConfig input_stream_configs = 2; ///< Exactly as many configurations as input streams configured for the service.
+}
+
+/** Configuration for the Video Capture microservice
+Video Capture service is for capturing video streams and files from both network and filesystems.
+These streams are pushed into Kafka.
+*/
+message VideoCaptureConfigRecord
+{
+  message VCStreamConfig
+  {
+    string url = 1; ///< URL of input video stream.
+    bool use_rtp_ntp_time = 2; ///< True if packet NTP timestamp should be used instead of inner heuristic.
+    /**
+     * When reading an RTSP stream the output's starting timestamp will be (approximately) the current time.
+     * When reading a file the output's timestamp will start from 0.
+     * To override this and set a specific start time set override_start_time to true.
+     */
+    bool override_start_time = 3;
+    int64 start_time = 4; ///< Overrides first frame's timestamp (if override_start_time is true).
+    bool no_retry = 5; ///< True if url should not be reopened after a demuxing failure.
+  }
+  
+  repeated VCStreamConfig streams = 1;
 }

@@ -1,0 +1,233 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Configuring Multi Task Runner API · UVAP</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Configuring Multi Task Runner API (prototype)"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Configuring Multi Task Runner API · UVAP"/><meta property="og:type" content="website"/><meta property="og:url" content="http://docs.ultinous.com/uvap/../../index.html"/><meta property="og:description" content="# Configuring Multi Task Runner API (prototype)"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="../../img/face-200.png"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="../../css/code-block-buttons.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script><script type="text/javascript" src="../../js/code-block-copy-button.js"></script><script type="text/javascript" src="../../js/code-block-download-button.js"></script><script src="../../js/scrollSpy.js"></script><link rel="stylesheet" href="../../css/main.css"/><script src="../../js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="../../"><img class="logo" src="../../img/ultinous-logo-BW-logo.png" alt="UVAP"/></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="../../docs/feat/feat_overview.html" target="_self">Key Features</a></li><li class=""><a href="../../docs/demo/demo_overview.html" target="_self">Feature Demos</a></li><li class=""><a href="../../docs/install/uvap_install_sysreq.html" target="_self">Installation</a></li><li class=""><a href="../../docs/dev/uvap_architect.html" target="_self">Developer Guide</a></li><li class=""><a href="../../docs/operation/op_guide.html" target="_self">Operation Guide</a></li><li class=""><a href="../../docs/tutorials/uvap_example_analysis.html" target="_self">Tutorials</a></li><li class=""><a href="../../docs/help/uvap_support.html" target="_self">Help</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="configuring-multi-task-runner-api-prototype"></a><a href="#configuring-multi-task-runner-api-prototype" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuring Multi Task Runner API (prototype)</h1>
+<p>This microservice does not require GPU resources.</p>
+<p>The <strong>Multi Task Runner API</strong> microservice publishes an REST API through which can be accessed the <strong>Multi Task Runner</strong> functionality. The <strong>Multi Task Runner</strong> is a Java based project witch manage the different task instances.</p>
+<h2><a class="anchor" aria-hidden="true" id="environment-variables"></a><a href="#environment-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Environment Variables</h2>
+<ul>
+<li><code>UVAP_MULTI_TASK_RUNNER_API_PROPERTY_FILE_PATHS</code>: property files path list.</li>
+</ul>
+<p><strong>Multi Task Runner API</strong> reads its configuration from the property files
+in the above list during startup. See the list of properties below.</p>
+<h2><a class="anchor" aria-hidden="true" id="properties"></a><a href="#properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Properties</h2>
+<h3><a class="anchor" aria-hidden="true" id="general"></a><a href="#general" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>General</h3>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.log.level</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Log level</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.host</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Rest API host</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.jmx.port</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>JMX port</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.monitoring.port</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>API monitoring port</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="kafka"></a><a href="#kafka" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Kafka</h3>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.application.id.prefix</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Postfix of all identifiers for the Kafka stream processing applications.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.bootstrap.servers</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>A list of host/port pairs to use for establishing the initial connection to the Kafka cluster.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.cache.max.bytes.buffering</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Maximum number of memory bytes to be used for buffering across all threads.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.commit.interval.ms</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>The frequency with which to save the position of the processor.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.max.task.idle.ms</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Maximum amount of time a stream task will stay idle when not all of its partition buffers contain records, to avoid potential out-of-order record processing across multiple input streams.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.buffered.records.per.partition</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Maximum number of records to buffer per partition.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.max.poll.records</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>The maximum number of records returned in a single Kafka call to poll.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.num.stream.threads</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>The number of threads to execute Kafka stream processing.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.state.dir</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Directory location for Kafka state store.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="storage"></a><a href="#storage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Storage</h3>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.task.storage.class</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Configuration <a href="../../docs/dev/ms_mtr.html#storage">Storage</a> implementation</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="kafka-storage"></a><a href="#kafka-storage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Kafka Storage</h4>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.kafka.config.storage.topic</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Kafka topic of the stored task configuration</td></tr>
+<tr><td>Required</td><td>Required if <a href="../../docs/dev/ms_mtr.html#kafka-storage">Kafka Storage</a> is the registered storage implementation</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="task"></a><a href="#task" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Task</h3>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.task.handler.implementation</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Comma separated list of registered <a href="../../docs/dev/ms_mtr.html#task">Task</a> Handler implementations.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="service"></a><a href="#service" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Service</h3>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.service.implementations</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Comma separated list of registered <a href="../../docs/dev/ms_mtr.html#service">Service</a> implementations.</td></tr>
+<tr><td>Required</td><td>Required</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="heartbeat-service"></a><a href="#heartbeat-service" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Heartbeat Service</h4>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.service.heartbeat.output.topic</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Kafka output topic name of <a href="../../docs/dev/ms_mtr.html#heartbeat-service">Heartbeat Service</a></td></tr>
+<tr><td>Required</td><td>Required if <a href="../../docs/dev/ms_mtr.html#heartbeat-service">Heartbeat Service</a> is registered</td></tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr><th>Property</th><th>com.ultinous.uvap.multi.task.runner.api.service.heartbeat.frequency.ms</th></tr>
+</thead>
+<tbody>
+<tr><td>Description</td><td>Frequency in milliseconds of heartbeat.</td></tr>
+<tr><td>Required</td><td>Required if <a href="../../docs/dev/ms_mtr.html#heartbeat-service">Heartbeat Service</a> is registered</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="example-properties-file"></a><a href="#example-properties-file" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example properties file</h2>
+<pre><code class="hljs css language-properties"><span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.host</span>=<span class="hljs-string">0.0.0.0</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.port</span>=<span class="hljs-string">4444</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.jmx.port</span>=<span class="hljs-string">4441</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.monitoring.port</span>=<span class="hljs-string">4442</span>
+
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.application.id.prefix</span>=<span class="hljs-string">DEV_UMTR</span>
+
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.bootstrap.servers</span>=<span class="hljs-string">kafka:9092</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.cache.max.bytes.buffering</span>=<span class="hljs-string">0</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.commit.interval.ms</span>=<span class="hljs-string">100</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.max.task.idle.ms</span>=<span class="hljs-string">2000</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.buffered.records.per.partition</span>=<span class="hljs-string">500</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.max.poll.records</span>=<span class="hljs-string">100</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.num.stream.threads</span>=<span class="hljs-string">8</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.state.dir</span>=<span class="hljs-string">/tmp/pycharm/kafka-state</span>
+
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.task.storage.class</span>=<span class="hljs-string">com.ultinous.uvap.multi.task.runner.storage.KafkaStorage</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.kafka.config.storage.topic</span>=<span class="hljs-string">DEV_UMTR.permanent.storage</span>
+
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.task.handler.implementations</span>=<span class="hljs-string">com.ultinous.uvap.task.kafka.crowd.detection.CrowdDetectionTaskHandler, com.ultinous.uvap.task.kafka.empty.area.EmptyAreaTaskHandler,com.ultinous.uvap.task.kafka.wrong.direction.WrongDirectionTaskHandler</span>
+
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.service.implementations</span>=<span class="hljs-string">com.ultinous.uvap.multi.task.runner.service.KafkaHeartbeatService</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.service.heartbeat.output.topic</span>=<span class="hljs-string">DEV_UMTR.heartbeat</span>
+<span class="hljs-meta">com.ultinous.uvap.multi.task.runner.api.service.heartbeat.frequency.ms</span>=<span class="hljs-string">10000</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#environment-variables">Environment Variables</a></li><li><a href="#properties">Properties</a><ul class="toc-headings"><li><a href="#general">General</a></li><li><a href="#kafka">Kafka</a></li><li><a href="#storage">Storage</a></li><li><a href="#task">Task</a></li><li><a href="#service">Service</a></li></ul></li><li><a href="#example-properties-file">Example properties file</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '537f90d4167048c6fde59df438687767',
+                indexName: 'uvap',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>

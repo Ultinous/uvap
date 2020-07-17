@@ -5,7 +5,8 @@ from collections import deque
 from enum import Enum
 from typing import List, Deque
 
-from confluent_kafka.cimpl import Consumer, TopicPartition, OFFSET_END, OFFSET_BEGINNING, OFFSET_STORED, KafkaError
+from confluent_kafka.cimpl import Consumer, TopicPartition, OFFSET_END, OFFSET_BEGINNING, OFFSET_STORED
+from confluent_kafka.cimpl import KafkaException, KafkaError
 
 from utils.generator.generator_interface import GeneratorInterface
 from utils.generator.heartbeat import HeartBeat
@@ -20,7 +21,8 @@ class BeginFlag(Enum):
     LIVE = 2
     """ Continue from the last committed offset. If there is no committed it will run from the beginning of the stream."""
     CONTINUE_OR_BEGINNING = 3
-
+    """ Start consuming from a specific offset. Negative value will start from the beginning"""
+    OFFSET = 4
 
 
 class EndFlag(Enum):
@@ -169,6 +171,7 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
             , end_timestamp=None
             , end_flag=None
             , heartbeat_interval_ms=-1
+            , begin_offset=None
     ):
         """
         :param broker: Broker to connect to.
@@ -185,6 +188,7 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
         :param end_flag: NEVER, END_OF_PARTITION
         :param heartbeat_interval_ms: -1 does not produce heartbeat. After every interval will produce a HeartBeat typed
                                         message with the timestamp.
+        :param begin_offset: Starting offset position if begin_flag is set to OFFSET
         """
         if begin_timestamp is not None and begin_flag is not None:
             raise Exception('You can not set the begin timestamp and a flag in the same time.')
@@ -196,9 +200,17 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
                 begin_flag == BeginFlag.LIVE and end_flag == EndFlag.END_OF_PARTITION:
             raise Exception('You can not start in live and process until the end of the streams.')
         if end_flag is not None and not (end_flag == EndFlag.END_OF_PARTITION or end_flag == EndFlag.NEVER):
-            raise Exception('Unknow end flag: {} . Please use the given enum to use proper end flag.'.format(end_flag))
+            raise Exception('Unknown end flag: {} . Please use the given enum to use proper end flag.'.format(end_flag))
+        if begin_flag == BeginFlag.OFFSET and begin_offset is None:
+            raise Exception('Starting offset position must be configured if BeginFlag is set to OFFSET')
+        if begin_offset is not None:
+            if begin_flag != BeginFlag.OFFSET:
+                raise Exception('Specific offset starting position is set but BeginFlag is not set to OFFSET.')
+            elif not isinstance(begin_offset, int):
+                raise Exception('Starting offset must be integer, not {}.'.format(type(begin_offset)))
         self.end_ts = end_timestamp
         self.end_flag = end_flag
+        self.begin_offset = begin_offset
         self.commit_interval_sec = commit_interval_sec
         self.latency_ms = latency_ms
         self.group_by_time = group_by_time
@@ -212,6 +224,20 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
              'max.poll.interval.ms': self.max_poll_interval_ms,
              'enable.partition.eof': True})
         self.last_poll = None
+        self.running = True
+
+        # Warning:
+        # If you check individual topics, kafka may auto create them if the auto.create.topics.enable is set to True.
+        try:
+            self.consumer.list_topics(timeout=1)
+        except KafkaException as e:
+            if e.args[0].name() == "_TRANSPORT":
+                logging.error(
+                    'Broker "{0}" is not available. Please check if it is running and accessible. \n{1}'.format(broker, e)
+                )
+                self.running = False
+            else:
+                raise e
 
         self.tps = []
         self.queues = {}
@@ -230,6 +256,12 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
                     self.tps.append(TopicPartition(topic_name, partition=ti.partition, offset=OFFSET_STORED))
                 elif begin_flag == BeginFlag.LIVE:
                     self.tps.append(TopicPartition(topic_name, partition=ti.partition, offset=OFFSET_END))
+                elif begin_flag == BeginFlag.OFFSET:
+                    self.tps.append(TopicPartition(
+                        topic_name, 
+                        partition=ti.partition,
+                        offset=OFFSET_BEGINNING if begin_offset <= 0 else begin_offset)
+                    )
                 else:
                     raise Exception('Unknown begin flag. Please use the enum to provide proper begin flag.')
             else:
@@ -248,7 +280,6 @@ class TimeOrderedGeneratorWithTimeout(GeneratorInterface):
                 )
         self.consumer.assign(self.tps)
         self.last_commit = time.time()
-        self.running = True
         self.heartbeat_interval_ms = heartbeat_interval_ms
         self.next_hb = None
 

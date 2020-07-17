@@ -1,0 +1,19 @@
+{
+  "targets":[
+    {% for INPUT_STREAM in INPUT_STREAMS %}
+    {
+      "broker_list":"{{ KAFKA_BROKER_LIST }}",
+      "name":"{{ KAFKA_TOPIC_PREFIX }}.cam.{{loop.index - 1}}.vc.Packet.upw"
+    }{{ "," if not loop.last }}
+    {% endfor %}
+  ],
+  "config_data": {
+    "streams": [
+      {% for INPUT_STREAM in INPUT_STREAMS %}
+      {
+        "url":"{{ INPUT_STREAM }}"
+      }{{ "," if not loop.last }}
+      {% endfor %}
+    ]
+  }
+}

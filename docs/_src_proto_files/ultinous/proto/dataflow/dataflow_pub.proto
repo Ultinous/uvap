@@ -115,15 +115,20 @@ message Input
 {
   oneof file_spec
   {
-    // Input file/stream/device name. Can be one of the following:
-    //  - video file (eg.: avi, mp4)
-    //  - rtsp url (eg.: "rtsp://user:pwd@10.99.99.99:554/live1.sdp")
-    //  - device id (eg.: 0 [which refers to "/dev/video0"])
+    // Input file/stream/device/topic name. Can be one of the following:
+    //  - single image (e.g. jpg, png)
+    //  - video file (e.g. avi, mp4)
+    //  - rtsp url (must start with "rtsp:", e.g. "rtsp://user:pwd@10.99.99.99:554/live1.sdp")
+    //  - device id (e.g. 0 [which refers to "/dev/video0"])
+    //  - Kafka topic name (must be prefixed with "kafka:", e.g. "kafka:cam.0.Image.jpg" or "kafka:cam.0.Packet.upw")
+    //    Note that the value of 'kafka_topic_prefix' in EnvironmentConfig will be used as a prefix for the topic name.
     string file_name = 1;
     // File name where the file/stream/device name is stored.
     // See file_name for details
     string file_name_file = 17;
   }
+  optional uint32 image_repeat_dt = 15 [default = 0]; // [ms], 0 = no-repeat
+
   // In some cases the input video does not contain absolute timestamps (only relative).
   // In this case the start time can be specified as an ISO-8601 timestamp (opt. millisec and TZ)
   //  eg.: "2013-03-18T03:17:23.123-01:00"
@@ -300,17 +305,11 @@ message DrawRectsConfig {
 
 // Resizes a frame
 message ResizeConfig {
-  enum Interpolation {
-    INTER_NEAREST = 1; // Fastest, worst quality
-    INTER_LINEAR = 2; // Medium speed, medium quality
-    INTER_CUBIC = 3; // Slow, good quality
-  }
   required string input = 2; // Input data node (type: FRAME)
   required string output = 3; // Output data node (type: FRAME)
   optional bool lock_ar = 4 [default = true]; // Lock aspect ratio. If set then set only one of width or height.
   optional uint32 width = 5; // Desired width
   optional uint32 height = 6; // Desired height
-  optional Interpolation interpol = 7 [default = INTER_LINEAR]; // Interpolation method.
 }
 
 // Write frames to a file.
