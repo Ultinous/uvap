@@ -202,6 +202,7 @@ syntax = <span class="hljs-string">"proto2"</span>;
     FRAME_INFO_EXTRACTOR = <span class="hljs-number">57</span>;
     SKELETON_ESTIMATOR = <span class="hljs-number">58</span>;
     FACE_MASK_ESTIMATOR = <span class="hljs-number">60</span>;
+    FACE_MASK_FILTER = <span class="hljs-number">61</span>;
   }
 
   <span class="hljs-keyword">required</span> Type type = <span class="hljs-number">1</span>;
@@ -225,6 +226,7 @@ syntax = <span class="hljs-string">"proto2"</span>;
   <span class="hljs-keyword">optional</span> FrameInfoExtractorConfig frame_info_extractor_config = <span class="hljs-number">66</span>;
   <span class="hljs-keyword">optional</span> SkeletonEstimatorNodeConfig skeleton_estimator_config = <span class="hljs-number">67</span>;
   <span class="hljs-keyword">optional</span> FaceMaskEstimatorConfig face_mask_estimator_config = <span class="hljs-number">69</span>;
+  <span class="hljs-keyword">optional</span> FaceMaskFilterConfig face_mask_filter_config = <span class="hljs-number">70</span>;
 }
 
 <span class="hljs-comment">// Cut a region of interest (ROI) from a frame.</span>
@@ -426,6 +428,22 @@ syntax = <span class="hljs-string">"proto2"</span>;
 
   <span class="hljs-comment">// Required. Acceptable range of head pose.</span>
   <span class="hljs-keyword">optional</span> imageproc.HeadPose3DThreshold head_pose_3d_threshold = <span class="hljs-number">7</span>;
+}
+
+<span class="hljs-comment">// Filters detections based on them having face mask or not.</span>
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">FaceMaskFilterConfig</span>
+</span>{
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input_bounding_boxes = <span class="hljs-number">1</span>; <span class="hljs-comment">///&lt; Input data node (type: DETECTIONS)</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> input_face_masks = <span class="hljs-number">2</span>; <span class="hljs-comment">///&lt; Required. Input data note (type: FACE_MASKS)</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">string</span> output_bounding_boxes = <span class="hljs-number">3</span>; <span class="hljs-comment">///&lt; Output data node (type: DETECTIONS)</span>
+
+  <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">Keep</span>
+  </span>{
+    FACE_WITH_MASK = <span class="hljs-number">1</span>;
+    FACE_WITHOUT_MASK = <span class="hljs-number">2</span>;
+  }
+  <span class="hljs-keyword">required</span> Keep keep = <span class="hljs-number">4</span>; <span class="hljs-comment">///&lt; Select which kind of face you need.</span>
+  <span class="hljs-keyword">required</span> <span class="hljs-built_in">float</span> min_confidence = <span class="hljs-number">5</span>; <span class="hljs-comment">///&lt; Confidence goes from 0.5 to 1.0, select minimum.</span>
 }
 
 <span class="hljs-comment">// Type sensitive kafka output stream. Please refer to data node types for availability.</span>

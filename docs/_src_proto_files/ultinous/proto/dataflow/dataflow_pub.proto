@@ -202,6 +202,7 @@ message ProcessNodeConfig
     FRAME_INFO_EXTRACTOR = 57;
     SKELETON_ESTIMATOR = 58;
     FACE_MASK_ESTIMATOR = 60;
+    FACE_MASK_FILTER = 61;
   }
 
   required Type type = 1;
@@ -225,6 +226,7 @@ message ProcessNodeConfig
   optional FrameInfoExtractorConfig frame_info_extractor_config = 66;
   optional SkeletonEstimatorNodeConfig skeleton_estimator_config = 67;
   optional FaceMaskEstimatorConfig face_mask_estimator_config = 69;
+  optional FaceMaskFilterConfig face_mask_filter_config = 70;
 }
 
 // Cut a region of interest (ROI) from a frame.
@@ -426,6 +428,22 @@ message HeadPoseFilterConfig
 
   // Required. Acceptable range of head pose.
   optional imageproc.HeadPose3DThreshold head_pose_3d_threshold = 7;
+}
+
+// Filters detections based on them having face mask or not.
+message FaceMaskFilterConfig
+{
+  required string input_bounding_boxes = 1; ///< Input data node (type: DETECTIONS)
+  required string input_face_masks = 2; ///< Required. Input data note (type: FACE_MASKS)
+  required string output_bounding_boxes = 3; ///< Output data node (type: DETECTIONS)
+
+  enum Keep
+  {
+    FACE_WITH_MASK = 1;
+    FACE_WITHOUT_MASK = 2;
+  }
+  required Keep keep = 4; ///< Select which kind of face you need.
+  required float min_confidence = 5; ///< Confidence goes from 0.5 to 1.0, select minimum.
 }
 
 // Type sensitive kafka output stream. Please refer to data node types for availability.
