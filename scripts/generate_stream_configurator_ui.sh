@@ -16,7 +16,4 @@ parse_argument_with_value "config_ac_dir" "directory path of configuration files
 parse_argument_with_value "image_name" "tag of docker image to use - default: will be determined by git tags"
 parse_argument_with_value "output_ac_dir" "output directory path of the generated files - default: ${output_ac_dir}"
 validate_remaining_cli_arguments
-
-not_our_args+=("--rm" "--mount" "type=bind,source=${output_ac_dir},destination=/output" "--mount" "type=bind,source=${config_ac_dir},destination=/ultinous_app/${container_name}")
-
-docker_container_run "--target-directory" "/output" "--properties-file" "/ultinous_app/${container_name}/${container_name}.properties"
+docker_generate_files_for_ui "--target-directory" "${output_ac_dir}" "--properties-file" "${config_ac_dir}/${container_name}.properties"

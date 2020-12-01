@@ -58,7 +58,7 @@
 <p><strong>Detection Filter</strong> microservice suppliments the <em>Object Detection</em> Kafka
 topic produced by the other microservices.</p>
 <blockquote>
-<p><strong>Note:</strong>  <br>
+<p><strong>Note:</strong>
 For each detection filter a separate microservice needs to be run.</p>
 </blockquote>
 <p>The filter is configured by <code>.json</code> configuration files. For further details on
@@ -68,10 +68,10 @@ is considered as a positive area.</p>
 <p>The microservice works the following way:</p>
 <ol>
 <li><strong>Detection Filter</strong> checks if the detection reaches the confidence level.</li>
-<li><strong>Detection Filter</strong> checks if the detection type matches the ones configured.<br>
+<li><strong>Detection Filter</strong> checks if the detection type matches the ones configured.
 If no detection types are defined, all detections are included.</li>
 <li><strong>Detection Filter</strong> checks if the detection does not fall into a negative area.</li>
-<li><strong>Detection Filter</strong> checks if the detection falls into a positive area.<br>
+<li><strong>Detection Filter</strong> checks if the detection falls into a positive area.
 If no positive areas are defined, the detection is considered to be in a positive area.</li>
 </ol>
 <p>If the detection passes all checks, it is included in the produced topic.</p>

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eu
+
+usage() {
+	echo "USAGE: $0 <key of property to extract the value of> <property file path>[;<more property file path>]*[,more property file path>]* ..."
+	exit 1
+}
+
+PROPERTY_KEY="${1:?"Provide a property key!"}"; shift
+PROPERTY_FILES_PATH="$(echo "${@}" | sed -e 's/;/ /g' -e 's/,/ /g')"
+
+PROPERTY_KEY="$(echo "^$PROPERTY_KEY=" | sed 's/\./\\./g')"
+
+grep "$PROPERTY_KEY" ${PROPERTY_FILES_PATH} | cut -f2 -d= | tail -n1

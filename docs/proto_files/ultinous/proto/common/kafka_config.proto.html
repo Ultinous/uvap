@@ -162,7 +162,7 @@ message FVClusteringConfig
   Clusters are unrealized until either they contain num_samples observations or time_limit_ms is reached.
   Once they are realized, the action specified by realized_cluster_action is performed.
   The time until time_limit_ms is measured from the first observation belonging to the cluster, after the previous realization of the same cluster.
-  Registration events are generated for both realized and unrealized clusters. 
+  Registration events are generated for both realized and unrealized clusters.
   */
   message ClusterRealizationConfig
   {
@@ -364,8 +364,42 @@ message VideoCaptureConfigRecord
     <span class="hljs-built_in">int64</span> start_time = <span class="hljs-number">4</span>; <span class="hljs-comment">///&lt; Overrides first frame's timestamp (if override_start_time is true).</span>
     <span class="hljs-built_in">bool</span> no_retry = <span class="hljs-number">5</span>; <span class="hljs-comment">///&lt; True if url should not be reopened after a demuxing failure.</span>
   }
-  
+
   <span class="hljs-keyword">repeated</span> VCStreamConfig streams = <span class="hljs-number">1</span>;
+}
+
+/**
+ * Configuration for Video Player microservice.
+ */
+<span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">VideoPlayerConfigRecord</span>
+</span>{
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">VideoPlayerTopic</span>
+  </span>{
+    <span class="hljs-built_in">string</span> port = <span class="hljs-number">1</span>; <span class="hljs-comment">//&lt; Reference to the topic.</span>
+    <span class="hljs-built_in">string</span> topic = <span class="hljs-number">2</span>; <span class="hljs-comment">//&lt; Name of the topic in Kafka.</span>
+    <span class="hljs-built_in">bool</span> config = <span class="hljs-number">3</span>; <span class="hljs-comment">//&lt; If true, last message from the topic will be sent at every seek.</span>
+  }
+
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">VideoPlayerJoinPort</span>
+  </span>{
+    <span class="hljs-built_in">string</span> port = <span class="hljs-number">1</span>; <span class="hljs-comment">//&lt; The port of the joined topic.</span>
+    <span class="hljs-built_in">string</span> key = <span class="hljs-number">2</span>; <span class="hljs-comment">//&lt; The path of the joined key in the messages of the topic. Possible values: "key", "payload.[path in JSON object separated with dots]".</span>
+  }
+
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">VideoPlayerJoin</span>
+  </span>{
+    <span class="hljs-built_in">string</span> name = <span class="hljs-number">1</span>; <span class="hljs-comment">//&lt; Name of the join, eq. "detections".</span>
+    <span class="hljs-keyword">repeated</span> VideoPlayerJoinPort ports = <span class="hljs-number">2</span>; <span class="hljs-comment">//&lt; Ports in the join.</span>
+  }
+
+  <span class="hljs-class"><span class="hljs-keyword">message</span> <span class="hljs-title">VideoPlayerStream</span>
+  </span>{
+    <span class="hljs-built_in">string</span> id = <span class="hljs-number">1</span>; <span class="hljs-comment">//&lt; The id of the stream</span>
+    <span class="hljs-keyword">repeated</span> VideoPlayerTopic topics = <span class="hljs-number">2</span>; <span class="hljs-comment">//&lt; List of topics in the stream. Must contain exactly one video packet topic ("**.upw)".</span>
+    <span class="hljs-keyword">repeated</span> VideoPlayerJoin joins = <span class="hljs-number">3</span>; <span class="hljs-comment">//&lt; List of joins in the stream.</span>
+  }
+
+  <span class="hljs-keyword">repeated</span> VideoPlayerStream streams = <span class="hljs-number">1</span>;
 }
 
 </code></pre>

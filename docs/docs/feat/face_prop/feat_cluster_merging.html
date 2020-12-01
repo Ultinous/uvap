@@ -5,7 +5,7 @@ defined by the <code>initial threshold</code> and the <code>threshold_discount_r
 decreases as the number of input samples in the potentially mergeable clusters grows. But never goes under
 the <code>min_threshold</code> parameter. For details about configurable parameters and calculating
 the <code>current threshold</code> of the <em>Cluster Merging</em> feature, see <a href="../../../docs/dev/conf_cluster.html">Configuring Feature
-Vector Clustering</a>.<br>
+Vector Clustering</a>.
 The result of merging is a <code>MERGE_EVENT</code> shown in the <code>FVClusterUpdateRecord</code> of
 the concerning stream's Kafka topic. A new cluster is created with it's own <code>cluster id</code>
 and representative feature vector and the merged ones are deleted. For an example of a

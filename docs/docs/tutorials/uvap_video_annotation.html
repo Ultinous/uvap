@@ -73,7 +73,7 @@ them with the visual results of different features of UVAP.</p>
   "${UVAP_HOME}"/videos/testvideo.mkv
 </code></pre>
 <blockquote>
-<p><strong>Note:</strong>  <br>
+<p><strong>Note:</strong>
 By using <code>-i</code> for interactive, the user is asked if the file is to be replaced (if already exists).</p>
 </blockquote></li>
 <li><p>Check video resolution and frame rate:</p>
@@ -81,7 +81,7 @@ By using <code>-i</code> for interactive, the user is asked if the file is to be
 </code></pre></li>
 </ol>
 <blockquote>
-<p><strong>Note:</strong>  <br>
+<p><strong>Note:</strong>
 Important part of the output of <code>ffprobe</code>:</p>
 </blockquote>
 <pre><code class="hljs">[...]
@@ -98,7 +98,7 @@ Important part of the output of <code>ffprobe</code>:</p>
 <ol>
 <li><p>Stop, remove, and restart Zookeeper and Kafka containers with the following command:</p>
 <blockquote>
-<p><strong>Attention!</strong>  <br>
+<p><strong>Attention!</strong>
 This process removes all topics from Kafka.</p>
 </blockquote>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ "${UVAP_HOME}"/scripts/restart_empty_kafka.sh
@@ -140,16 +140,20 @@ Options that do not have a default value are mandatory.</p>
 <p>Use the video writer script to create the output video into <code>&quot;${UVAP_HOME}&quot;/videos</code>
 with <code>[IMAGE_TOPIC_NAME].avi</code> name, overwriting the existing file:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ "${UVAP_HOME}"/scripts/video_annotation.sh \
-  --demo-name [DEMO_NAME] \
   --video-file-name [INPUT_VIDEO] \
   --fps-number [FPS] \
   --width-number [WIDTH] \
-  --height-number [HEIGHT] 
+  --height-number [HEIGHT] \
+  --demo-name [DEMO_NAME]
 </code></pre>
 <p>Parameters:</p>
 <ul>
+<li><code>[INPUT_VIDEO]</code>: name of the input video. Replace parameter with the name of the
+existing video, following the example above: <code>testvideo.mkv</code>.</li>
+<li><code>[FPS]</code>, <code>[WIDTH]</code>, and <code>[HEIGHT]</code>: parameters of output video. Replace with the
+parameters of the original video, see <a href="#preparing-source-video-and-containers">Preparing Source Video and Containers</a>.</li>
 <li><code>[DEMO_NAME]</code>: name of the demo. Replace (including the brackets) with a name of the
-demo (string).<br>
+demo (string).
 Valid values of <code>[DEMO_NAME]</code> are the following:
 <ul>
 <li><code>head_detection</code></li>
@@ -161,10 +165,6 @@ Valid values of <code>[DEMO_NAME]</code> are the following:
 <li><code>skeleton</code></li>
 <li><code>reidentification</code></li>
 </ul></li>
-<li><code>[INPUT_VIDEO]</code>: name of the input video. Replace parameter with the name of the
-existing video, following the example above: <code>testvideo.mkv</code>.</li>
-<li><code>[FPS]</code>, <code>[WIDTH]</code>, and <code>[HEIGHT]</code>: parameters of output video. Replace with the
-parameters of the original video, see <a href="#preparing-source-video-and-containers">Preparing Source Video and Containers</a>.</li>
 </ul>
 <p>Expected console output:</p>
 <pre><code class="hljs">Starting to configure...

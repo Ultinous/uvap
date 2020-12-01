@@ -282,8 +282,8 @@ message DrawRectsConfig {
 
   optional bool draw_rect = 10 [default = true]; // if set bounding boxes are drawn
   optional float draw_rect_threshold = 11 [default = 0.0]; // threshold filter for bounding boxes
-  optional bool draw_properties = 12 [ default = true ]; // write out explicitly added properties, like confidence, gender, name etc
-  optional bool draw_score = 21; // write out score, defaults to draw_properties.
+  optional bool draw_properties = 12 [ deprecated = true, default = true ]; // write out explicitly added properties, like confidence, gender, name etc
+  optional bool draw_score = 21 [ default = false ]; // Print score over bounding box
   optional double draw_properties_scale = 22 [ default = 0.7 ]; // Scaling factor for rendering font
 
   optional bool fill_if_det = 13 [default = false]; // if set the full image is filled with det_color if there is at least one detection

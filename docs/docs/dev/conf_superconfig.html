@@ -98,8 +98,8 @@ UVAP microservices.</p>
 </tbody>
 </table>
 <blockquote>
-<p><strong>Note:</strong>  <br>
-Set <code>start_date_time</code> only if <code>start</code> is set to <code>START_DATETIME</code>.<br>
+<p><strong>Note:</strong>
+Set <code>start_date_time</code> only if <code>start</code> is set to <code>START_DATETIME</code>.
 For example: <code>2019-04-08 10:10:24.123 +01:00</code></p>
 </blockquote>
 <table>
@@ -121,7 +121,7 @@ For example: <code>2019-04-08 10:10:24.123 +01:00</code></p>
 </table>
 <blockquote>
 <p><strong>Note:</strong>
-Set <code>end_date_time</code> only if <code>end</code> is set to <code>END_DATETIME</code>.<br>
+Set <code>end_date_time</code> only if <code>end</code> is set to <code>END_DATETIME</code>.
 For example: <code>2019-04-08 10:10:24.123 +01:00</code></p>
 </blockquote>
 <table>
@@ -177,10 +177,10 @@ source broker connections, while the second one is not used in this example.</p>
   <span class="hljs-attr">"authDefs"</span>:
   [
     {
-      <span class="hljs-attr">"id"</span>:<span class="hljs-string">"srcAuth"</span>, 
+      <span class="hljs-attr">"id"</span>:<span class="hljs-string">"srcAuth"</span>,
       <span class="hljs-attr">"user_name"</span>:<span class="hljs-string">"user1"</span>,
       <span class="hljs-attr">"password"</span>:<span class="hljs-string">"srcPasswd"</span>
-    }, 
+    },
     {
       <span class="hljs-attr">"id"</span>:<span class="hljs-string">"dstAuth"</span>,
       <span class="hljs-attr">"user_name"</span>:<span class="hljs-string">"user2"</span>,
@@ -203,7 +203,7 @@ The target stream is being replaced and can be accessed without any authenticati
     <span class="hljs-attr">"consumer_group"</span>:<span class="hljs-string">"hardwareStore"</span>
   },
   <span class="hljs-attr">"sources"</span>:
-  [  
+  [
     {
       <span class="hljs-attr">"broker_list"</span>:<span class="hljs-string">"demoserver:9092"</span>,
       <span class="hljs-attr">"name"</span>:<span class="hljs-string">"staff.FeatureVectorRecord.json"</span>,
@@ -219,7 +219,7 @@ The target stream is being replaced and can be accessed without any authenticati
       <span class="hljs-attr">"name"</span>:<span class="hljs-string">"cam.exit.FeatureVectorRecord.json"</span>,
       <span class="hljs-attr">"user_name"</span>:<span class="hljs-string">"user1"</span>,
       <span class="hljs-attr">"password"</span>:<span class="hljs-string">"srcPasswd"</span>
-    }    
+    }
   ],
   <span class="hljs-attr">"target_options"</span>:
   {

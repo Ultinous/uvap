@@ -198,7 +198,7 @@ e.g. the <a href="../../templates/uvap_kafka_tracker_base_TEMPLATE.properties.ht
 </code></pre>
 <p>will reload the configuration files.</p>
 <blockquote>
-<p><strong>Note</strong>  <br>
+<p><strong>Note</strong>
 The values of the <code>ultinous.service.kafka.tracker.monitoring.port</code>
 and <code>ultinous.service.kafka.tracker.monitoring.threads</code> properties cannot be changed.</p>
 </blockquote>
@@ -211,7 +211,7 @@ and switch to a valid configuration later. In this case, the service
 will be running and healthy but it will not process any inputs
 until an acceptable configuration is reloaded.</p>
 <blockquote>
-<p><strong>Attention</strong>  <br>
+<p><strong>Attention</strong>
 In order for the service to run, even the &quot;empty&quot; configuration must contain
 a valid value for <code>ultinous.service.kafka.tracker.monitoring.port</code>.</p>
 </blockquote>
@@ -243,9 +243,9 @@ found in the <a href="../../proto_files/ultinous/proto/common/kafka_data.proto.h
 </code></pre>
 <p><a name="empty_detection_key"></a></p>
 <blockquote>
-<p><strong>Empty Detection Key</strong>  <br>
+<p><strong>Empty Detection Key</strong>
 The <code>detection_key</code> is empty if there is no real detection and the
-change is a prediction of the next track position (or an end of a track).<br>
+change is a prediction of the next track position (or an end of a track).
 This means that there is no reference to any video frames or detections
 in another Kafka topic but these records are necessary for processing the
 whole &quot;lifecycle&quot; of a track.</p>

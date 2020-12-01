@@ -8,6 +8,7 @@ container_name="${container_name}" # the above source declares it - this just cl
 set -a
 models_dir="${current_directory}/../models"
 config_dir="${current_directory}/../config/${container_name}"
+cache_ac_dir=~/.cache/multi-graph-runner
 image_name="_auto_detected_"
 license_data_file="${current_directory}/../license/license.txt"
 license_key_file="${current_directory}/../license/license.key"
@@ -18,6 +19,7 @@ set +a
 parse_all_arguments "${@}"
 parse_argument_with_value "models_dir" "directory path of the AI models - default: ${models_dir}"
 parse_argument_with_value "config_dir" "directory path of the configuration files - default: ${config_dir}"
+parse_argument_with_value "cache_ac_dir" "directory path of model cache files - default: ${cache_ac_dir}"
 parse_argument_with_value "image_name" "tag of the docker image to use - default: will be determined by git tags"
 parse_argument_with_value "license_data_file" "data file of your UVAP license - default: ${license_data_file}"
 parse_argument_with_value "license_key_file" "key file of your UVAP license - default: ${license_key_file}"

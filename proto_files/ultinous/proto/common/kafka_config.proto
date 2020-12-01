@@ -162,7 +162,7 @@ message FVClusteringConfig
   Clusters are unrealized until either they contain num_samples observations or time_limit_ms is reached.
   Once they are realized, the action specified by realized_cluster_action is performed.
   The time until time_limit_ms is measured from the first observation belonging to the cluster, after the previous realization of the same cluster.
-  Registration events are generated for both realized and unrealized clusters. 
+  Registration events are generated for both realized and unrealized clusters.
   */
   message ClusterRealizationConfig
   {
@@ -364,6 +364,40 @@ message VideoCaptureConfigRecord
     int64 start_time = 4; ///< Overrides first frame's timestamp (if override_start_time is true).
     bool no_retry = 5; ///< True if url should not be reopened after a demuxing failure.
   }
-  
+
   repeated VCStreamConfig streams = 1;
+}
+
+/**
+ * Configuration for Video Player microservice.
+ */
+message VideoPlayerConfigRecord
+{
+  message VideoPlayerTopic
+  {
+    string port = 1; //< Reference to the topic.
+    string topic = 2; //< Name of the topic in Kafka.
+    bool config = 3; //< If true, last message from the topic will be sent at every seek.
+  }
+
+  message VideoPlayerJoinPort
+  {
+    string port = 1; //< The port of the joined topic.
+    string key = 2; //< The path of the joined key in the messages of the topic. Possible values: "key", "payload.[path in JSON object separated with dots]".
+  }
+
+  message VideoPlayerJoin
+  {
+    string name = 1; //< Name of the join, eq. "detections".
+    repeated VideoPlayerJoinPort ports = 2; //< Ports in the join.
+  }
+
+  message VideoPlayerStream
+  {
+    string id = 1; //< The id of the stream
+    repeated VideoPlayerTopic topics = 2; //< List of topics in the stream. Must contain exactly one video packet topic ("**.upw)".
+    repeated VideoPlayerJoin joins = 3; //< List of joins in the stream.
+  }
+
+  repeated VideoPlayerStream streams = 1;
 }

@@ -64,7 +64,7 @@ UVAP can be used in completely offline environment.</li>
 but hardware information does not have to be collected.</li>
 </ul>
 <blockquote>
-<p>Note:<br>
+<p>Note:
 To gather the necessary information for licensing, make sure the Docker
 environment is up and running.
 For more information, see <a href="../../docs/install/uvap_install_setup.html#adding-docker-environment">Adding Docker Environment</a></p>
@@ -74,15 +74,20 @@ For more information, see <a href="../../docs/install/uvap_install_setup.html#ad
 <p>To gather the information needed for the access:</p>
 <ol>
 <li><p>Collect the hardware information for license generation:</p>
-<pre><code class="hljs css language-plaintext codeBlockCopy">$ mkdir -p /tmp/uvap &amp;&amp; docker run --rm -u $(id -u) --runtime nvidia \
-  ultinous/licence_data_collector &gt; /tmp/uvap/data.txt
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ cd "$UVAP_HOME"
+$ scripts/licence_data_collector.sh &gt; ~/uvap_licence_data.txt
+</code></pre>
+<p>Verify completion. Resulting file should look similar to the following</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ cat ~/uvap_licence_data.txt
+Licence Version=2
+Hardware ID=GPU-bb91c626-cb5e-41f0-ab10-0a335fc87a35
 </code></pre></li>
-<li><p>Save <code>/tmp/uvap/data.txt</code> file, as it is needed at a later step during the
+<li><p>Save <code>~/uvap_licence_data.txt</code> file, as it is needed at a later step during the
 installation.</p></li>
 <li><p>To access the docker images of UVAP, a Docker account is required. Create one on
 <a href="https://hub.docker.com/" target="_blank">Docker Hub</a>.</p>
 <blockquote>
-<p><strong>Attention!</strong>  <br>
+<p><strong>Attention!</strong>
 The password of the Docker account is stored on the computer in a plain-text
 format, so it is recommended to choose a strong auto-generated password that
 is not used anywhere else.</p>
@@ -98,34 +103,29 @@ is not used anywhere else.</p>
 <ul>
 <li>Subject of email: <code>UVAP - Requesting access to licensed resources</code></li>
 <li>The Docker Hub account ID, created previously</li>
-<li>The hardware information, which can be found in the file <code>/tmp/uvap/data.txt</code></li>
+<li>The hardware information, which can be found in the file <code>~/uvap_licence_data.txt</code></li>
 </ul>
 <p>Based on the information above, you will receive the following:</p>
 <ul>
 <li>The license text and key</li>
 <li>Access to the UVAP Docker repository <code>ultinous/uvap</code></li>
-<li>A download URL for AI resources
-<blockquote>
-<p>Note:<br>
-The download URL is only valid for 72 hours.</p>
-</blockquote></li>
+<li>A download URL for AI resources</li>
 </ul></li>
 <li><p>Save the license text as <code>&quot;${UVAP_HOME}/license/license.txt&quot;</code>
 and the license key as <code>&quot;${UVAP_HOME}/license/license.key&quot;</code>.</p></li>
 <li><p>The license is provided within the following two files:</p>
 <ul>
-<li><p><code>licence.txt</code>:</p>
+<li><p><code>license.txt</code>:</p>
 <pre><code class="hljs">Product Name    = UVAP Multi Graph Runner
-GPU             = aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
-Expiration Date = 2018-01-01
+Hardware ID     = &lt;value from licence_data_collector&gt;
+Expiration Date = 2022-01-01
 Customer        = Demo User
+Licence Version = 2
 </code></pre></li>
-<li><p><code>licence.key</code>:</p>
-<pre><code class="hljs">--- No human readable key data ---
-</code></pre></li>
+<li><p><code>license.key</code> contains no human readable key data.</p></li>
 </ul>
 <blockquote>
-<p><strong>Note:</strong>  <br>
+<p><strong>Note:</strong>
 Without the license files, the installation process can be continued until
 the UVAP usage.</p>
 </blockquote></li>

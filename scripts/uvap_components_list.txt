@@ -2,9 +2,10 @@ kafka_tracker:ms:properties:base
 kafka_passdet:ms:properties:base
 kafka_detection_filter:ms:properties:base
 kafka_reid:ms:properties:fve
-mgr:ms:properties:data_flow:base:skeleton:fve:nvidia:video
+mgr:ms:properties:data_flow:base:skeleton:fve:nvidia:video:sys
 uvap_demo_applications
 uvap_web_player:properties:base:skeleton:fve
 kafka_fvc:ms:properties:fve:instance_per_stream
 stream_configurator_ui:ms:properties:base
 vc:ms:properties:base:video
+video_player_server

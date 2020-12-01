@@ -98,7 +98,8 @@ see the <a href="../../templates/uvap_mgr_base_TEMPLATE.properties.html">MGR bas
 <tr><td><code>ultinous.service.mgr.monitoring.port</code></td><td>Monitoring port</td><td>(required)</td></tr>
 <tr><td><code>ultinous.service.mgr.monitoring.threads</code></td><td>Monitoring server thread pool size</td><td><strong>1</strong></td></tr>
 <tr><td><code>ultinous.service.mgr.gpu.device.id</code></td><td>GPU device ID to use</td><td><strong>0</strong></td></tr>
-<tr><td><code>ultinous.service.mgr.max.message.size</code></td><td>Maximum gRPC message size in bytes</td><td><strong>134217728</strong></td></tr>
+<tr><td><code>ultinous.service.mgr.cache.dir</code></td><td>Cache directory for analysis files</td><td><strong>~/.cache/multi-graph-runner</strong></td></tr>
+<tr><td><code>ultinous.service.mgr.use.gstreamer</code></td><td>Use GStreamer for H264 decoding (instead of ffmpeg). This will enable using GPU for video decoding where possible.</td><td><strong>false</strong></td></tr>
 <tr><td><code>ultinous.service.mgr.export.dir</code></td><td>Data Flow Graph export directory</td><td><strong>.</strong></td></tr>
 <tr><td><code>ultinous.service.mgr.export.interval.mins</code></td><td>DataFlowGraph export interval in minutes</td><td><strong>60</strong></td></tr>
 <tr><td><code>ultinous.service.mgr.licensing.text.file</code></td><td>Licensing text file</td><td>(required)</td></tr>
@@ -115,7 +116,7 @@ given in the <a href="../../proto_files/ultinous/proto/dataflow/dataflow_pub.pro
 contains the documentation for the configuration of individual features
 provided by <strong>MGR</strong>.</p>
 <blockquote>
-<p><strong>Note:</strong>  <br>
+<p><strong>Note:</strong>
 <code>.proto</code> and <code>.prototxt</code> are two different formats. <code>.prototxt</code> is
 used to configure <strong>MGR</strong> while <code>.proto</code> is used to formally define the possible
 configuration options. For more information on these formats, see
@@ -182,6 +183,7 @@ definition (<code>...</code> is used to substitute for omitted parts):</p>
   #drop_on: {}    # if the system gets overloaded drop frames
   kafka_broker_list: "localhost:9092"
   no_input_policy: RUN_IF_DROP_ON
+  backend: TENSORRT_FP16
 }
 </code></pre>
 <p>The following table describes the environment configuration parameters:</p>
@@ -200,12 +202,25 @@ definition (<code>...</code> is used to substitute for omitted parts):</p>
 <tr><td><code>kafka_topic_prefix</code></td><td>Optional. String specifying the Kafka topic prefix.</td></tr>
 <tr><td><code>kafka_sasl_username</code></td><td>Optional. String specifying the Kafka SASL username. When this parameter is set it enables SASL authentication.</td></tr>
 <tr><td><code>kafka_sasl_password</code></td><td>Optional. String specifying the Kafka SASL password.</td></tr>
+<tr><td><code>backend</code></td><td>Optional. Default <code>CAFFE</code>. Other options are <code>TENSORRT_FP32</code> and <code>TENSORRT_FP16</code>. See below.</td></tr>
 <tr><td><code>no_input_policy</code></td><td>Optional. Defines the behaviour in case the inputs become empty. Values: <code>RUN</code>, <code>STOP</code>, <code>RUN_IF_DROP_ON</code>. Default is <code>RUN_IF_DROP_ON</code>.</td></tr>
 </tbody>
 </table>
+<p>Backend</p>
+<ul>
+<li><code>CAFFE</code>: Caffe backend. Legacy. Fair speed. This is the default of the program.</li>
+<li><code>TENSORRT_FP32</code>: TensorRT backend. Same precision as Caffe, but 2 times faster according to our
+measurements.</li>
+<li><code>TENSORRT_FP16</code>: TensorRT backend with half precision floating point numbers. Results are a few
+percent worse, but the speed is 4 times better than Caffe (2 times better than TensorRT FP32)
+according to our measurements. This option is available on GTX 16xx, from RTX 20xx, on
+all cards with Turing architect and on Jetson machines. If not available then the system will
+fall back to TensorRT FP32. This is the recommended option, especially on smaller machines like
+Jetson TX2. This is what is shipped in the sample configuration files.</li>
+</ul>
 <p>Below is a full example of a dataflow configuration file. This simply reads the
 webcam stream, runs head detector on every second frame then writes the
-detection results to a Kafka stream.<br>
+detection results to a Kafka stream.
 The following graph is annotated with comments embedded for better understanding:</p>
 <pre><code class="hljs css language-protobuf codeBlockCopy"># load the necessary engines (set of models that will be used)
 engines_file: <span class="hljs-string">"/opt/ultinous/models/engines/head_det.prototxt"</span>
@@ -218,6 +233,7 @@ environment:
   drop_on: {}               # drop frames if the processing cannot keep up with real-time
   kafka_broker_list: <span class="hljs-string">"localhost:9092"</span>
   no_input_policy: RUN_IF_DROP_ON
+  backend: TENSORRT_FP16
 }
 
 # a data run for the webcam stream (there can be multiple data runs)
@@ -270,8 +286,8 @@ data_run:
 <p>Process nodes are connected through data nodes. The following graph visualizes the
 dataflow:</p>
 <p><a name="fig_ex_dataflow"></a>
-<img src="../assets/fig_example_dataflow.png" alt="Example Dataflow">  <br>
-<em>Example Dataflow</em>  <br>
+<img src="../assets/fig_example_dataflow.png" alt="Example Dataflow">
+<em>Example Dataflow</em>
 Rectangles are data nodes and ellipses are process nodes.</p>
 <p>The <code>data_flow</code> section describes the dataflow itself. First, list all data
 nodes then list all process nodes. Process nodes are executed in the order of

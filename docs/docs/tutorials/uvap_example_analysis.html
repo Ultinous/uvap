@@ -98,7 +98,7 @@ $ sudo add-apt-repository "deb [arch=amd64] \
   https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 $ sudo apt-get install docker-ce
 </code></pre></li>
-<li><p>Add your unix user to the Docker unix group<br>
+<li><p>Add your unix user to the Docker unix group
 Replace <code>[USER]</code> with your logged in user name:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo adduser [USER] docker
 </code></pre></li>
@@ -115,7 +115,7 @@ can skip this section to continue with the <a href="#starting-docker-containers"
 <li><p>Create a Docker account on
 <a href="https://hub.docker.com/" target="_blank">Docker Hub</a>.</p>
 <blockquote>
-<p><strong>Attention!</strong>  <br>
+<p><strong>Attention!</strong>
 The password of the Docker account is stored on the computer in a plain-text
 format, so it is recommended to choose a strong auto-generated password that
 is not used anywhere else.</p>
@@ -145,7 +145,7 @@ Create and start the necessary Docker containers from these Docker images with t
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ docker rm -f zookeeper # Not necessary if not running
 $ docker run --net=uvap -d \
   --name=zookeeper -e ZOOKEEPER_CLIENT_PORT=2181 \
-  --volumes-from zookeeper-data confluentinc/cp-zookeeper:4.1.0
+  --volumes-from zookeeper-data ultinous/cp-zookeeper:5.4.0
 </code></pre></li>
 <li><p>Increase the retention time of the topics (i.e. infinite):</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ for topic in $(docker exec zookeeper kafka-topics --list \
@@ -164,7 +164,9 @@ $ docker run --net=uvap -d -p 9092:9092 --name=kafka \
   -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
   -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 \
   -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
-  -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-kafka:4.1.0
+  -e KAFKA_LOG_SEGMENT_DELETE_DELAY_MS=1000 \
+  -e ZOOKEEPER_CLIENT_PORT=2181 \
+  ultinous/cp-kafka:5.4.0
 </code></pre></li>
 <li><p>Remove the data containers, since those are not necessary anymore:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ docker rm zookeeper-data kafka-data

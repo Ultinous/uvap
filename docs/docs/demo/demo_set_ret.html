@@ -4,18 +4,18 @@ require a large amount of storage space because they contain all frames in
 JPEG image format. To change the retention period of JPEG topics run the
 <code>set_retention.sh</code> script.</p>
 <blockquote>
-<p><strong>Attention!</strong>  <br>
+<p><strong>Attention!</strong>
 By default, the retention period is 0 which means nothing is deleted. Without these settings, the
 <code>*.Image.jpg</code> topics use a lot of storage.</p>
 </blockquote>
 <p>To set retention period:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ "${UVAP_HOME}"/scripts/set_retention.sh --retention-unit [UNIT] \
-   --retention-number [NUMBER] 
+   --retention-number [NUMBER]
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><p><strong><code>[UNIT]</code></strong>:</p>
-<p>A unit of time.<br>
+<p>A unit of time.
 Replace <code>[UNIT]</code> (including brackets) with one of the following
 time units:</p>
 <ul>
@@ -26,7 +26,7 @@ time units:</p>
 <li><code>day</code> for days</li>
 </ul></li>
 <li><p><strong><code>[NUMBER]</code></strong>:</p>
-<p>A parameter defining duration.<br>
+<p>A parameter defining duration.
 Replace <code>[NUMBER]</code> (including brackets) with a number, that
 (together with the retention unit) defines the retention time to set.</p></li>
 </ul>

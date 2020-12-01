@@ -1,3 +1,5 @@
+#!/bin/sh
+
 #@IgnoreInspection BashAddShebang
 
 source "$(dirname "$(realpath "$0")")/bash_functions"
@@ -34,6 +36,18 @@ has_uvap_component_attribute() {
 }
 
 container_name="$(echo "${service_name}" | force_uvap_prefix)"
+
+get_current_uvap_flavour() {
+	test_executable git
+	url=$(git config --local remote.origin.url) # https://github.com/Ultinous/uvap[_beta][.git]
+	filename=$(echo "$url" | rev | cut -d / -f 1 | rev) # uvap[_beta][.git]
+	filename_noexts=$(echo "$filename" | cut -d . -f 1) # uvap[_beta]
+	flavour=$(echo "$filename_noexts" | rev | cut -d _ -f 1 | rev) # beta | test | uvap
+	if [ "$flavour" == "uvap" ]; then
+		flavour=""
+	fi
+	echo "$flavour"
+}
 
 get_current_release_git_tag() {
 	test_executable git
@@ -93,6 +107,7 @@ docker_container_run() {
 
 	test ! -z "${license_data_file:-}" && container_dynamic_options+=("--mount" "type=bind,readonly,source=${license_data_file},destination=/ultinous_app/license_data.txt")
 	test ! -z "${license_key_file:-}" && container_dynamic_options+=("--mount" "type=bind,readonly,source=${license_key_file},destination=/ultinous_app/licence.key")
+	test ! -z "${cache_ac_dir:-}" && mkdir -p ${cache_ac_dir} && container_dynamic_options+=("--mount" "type=bind,source=${cache_ac_dir},destination=/ultinous_app/cache")
 
 	if has_uvap_component_attribute "${service_name}" 'nvidia'; then
 		if test "${gpu_specification:-}" = "_auto_detected_"; then
@@ -114,6 +129,10 @@ docker_container_run() {
 		container_dynamic_options+=("--group-add" "video")
 	fi
 
+	if has_uvap_component_attribute "${service_name}" 'sys'; then
+		container_dynamic_options+=("--mount" "type=bind,readonly,source=/sys/firmware/,destination=/host_sys/firmware/")
+	fi
+
 	container_name_with_id="$(implode '-' "${container_name}" "${instance_id}")"
 
 	test "$(docker container ls --filter name="^${container_name_with_id}\$" --all --quiet | wc -l)" -eq 1 \
@@ -129,4 +148,29 @@ docker_container_run() {
 		"${@}"
 
 	docker container start $(test "${run_mode:-}" = "foreground" && echo "--attach") "${container_name_with_id}"
+}
+
+docker_generate_files_for_ui() {
+	script_name="$(basename "${0}")"
+	script_name_without_extension="${script_name%".sh"}"
+	service_name="${script_name_without_extension#"run_"}"
+	service_name="${service_name#"generate_"}"
+	container_name="$(echo "${service_name}" | force_uvap_prefix)"
+	test_executable "docker"
+	if test "${image_name:-}" = "_auto_detected_"; then
+		image_name="$(get_docker_image_tag_for_component "${service_name}")"
+	fi
+	container_name_with_id="$(implode '-' "${container_name}" "${instance_id}")"
+	docker rm -f ${container_name_with_id} || true
+	docker container create \
+		--name ${container_name_with_id} \
+		${image_name}
+	tmpdir=$(mktemp -d)
+	docker cp ${container_name_with_id}:/ultinous_app/ ${tmpdir}
+	docker rm -f ${container_name_with_id}
+	cd ${tmpdir}/ultinous_app/ || exit 1
+	./configure.sh "${@}"
+	cd -
+	rm -r ${tmpdir}
+
 }

@@ -4,6 +4,7 @@ environment {
   drop_{{ DROP }}: {}
   kafka_broker_list: "{{ KAFKA_BROKER_LIST }}"
   kafka_topic_prefix: "{{ KAFKA_TOPIC_PREFIX }}."
+  backend: TENSORRT_FP16
 }
 
 {% for INPUT_STREAM in INPUT_STREAMS %}

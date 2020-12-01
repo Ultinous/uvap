@@ -6,7 +6,12 @@ BROKER="${1}"
 SRC_ID="${2}"
 DST_ID="${3}"
 
-docker exec kafka /bin/sh -c "kafka-console-consumer --bootstrap-server ${BROKER} --topic 'detected.records.json' --from-beginning --timeout-ms 10 --property print.key=true 2>/dev/null | \\
-	sed -nE 's/^([0-9]+_[0-9]+)[[:space:]]${SRC_ID};$/\1:${DST_ID}/p' | \\
-	tail -n1 | \\
-	kafka-console-producer --broker-list ${BROKER} --topic 'named.records.json' --property 'parse.key=true' --property 'key.separator=:' >/dev/null"
+record=$(kafkacat -C -b "$BROKER" -t detected.records.json -o beginning -e -f "%o;%T;%k;%s\n" -u \
+  | grep ';'"$SRC_ID"';$') || (echo "Not fond." >&2 && exit 1 )
+
+key=$(echo "$record" | cut -d ";" -f 3)
+out="$key"";""$SRC_ID"":""$DST_ID"
+
+echo "$out" | kafkacat -P -b "$BROKER" -t named.records.json -K";"
+
+echo "Updated."

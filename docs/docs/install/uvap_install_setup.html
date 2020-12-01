@@ -58,6 +58,7 @@
 <p>This instruction page guides through the initial installation
 of UVAP. This procedure has to be executed only once. For upgrade instructions,
 see <a href="../../docs/upgrade/uvap_upgrade.html">Upgrading UVAP</a>.</p>
+<p>Some steps are different on Embedded (arm64/aarch64) and PC/Server (x86_64/amd64) architectures, these are indicated below.</p>
 <p>All shell commands in the UVAP Documentation have to run successfully.
 Always check the return value of an issued command (use <code>echo $?</code>). If a
 command fails (returns a non-zero return value), do not proceed.
@@ -75,11 +76,13 @@ and add it to the <code>sudo</code> group. To do so:</p>
 </code></pre></li>
 <li><p>Add the user to the <code>sudo</code> group:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo adduser ultinous sudo
+$ sudo adduser ultinous docker
 </code></pre></li>
 <li><p>Change user through UI (log out, then log in with <code>ultinous</code>
 user).</p></li>
 </ol>
 <h2><a class="anchor" aria-hidden="true" id="installing-nvidia-video-driver"></a><a href="#installing-nvidia-video-driver" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing NVIDIA Video Driver</h2>
+<p><em>PC/Server Only</em></p>
 <p>UVAP requires a specific GPU driver installed to run properly. To install
 NVIDIA® video driver:</p>
 <ol>
@@ -88,8 +91,12 @@ NVIDIA® video driver:</p>
 $ sudo apt update
 </code></pre></li>
 <li><p>Install NVIDIA video driver:</p>
-<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt install nvidia-driver-435
-</code></pre></li>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt install nvidia-driver-455
+</code></pre>
+<p>It is possible that an other nvidia-driver is already installed by your system, for example <code>nvidia-driver-450</code>. In such cases the above command will report failure. Try the following:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt install nvidia-driver-455 nvidia-driver-450-
+</code></pre>
+<p>Note the <code>-</code> sign at the end. This mean that that package is to be removed.</p></li>
 <li><p>Reboot the node to use the new driver (and log in with <code>ultinous</code> user).</p></li>
 </ol>
 <h2><a class="anchor" aria-hidden="true" id="adding-docker-environment"></a><a href="#adding-docker-environment" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding Docker Environment</h2>
@@ -99,7 +106,7 @@ extended with an NVIDIA driver related add-on.</p>
 <li><p>Add Docker source to the APT repositories:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
   sudo apt-key add -
-$ sudo add-apt-repository "deb [arch=amd64] \
+$ sudo add-apt-repository "deb [arch=$(dpkg --print-architecture)] \
   https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 $ sudo apt-get install docker-ce
 </code></pre></li>
@@ -107,7 +114,7 @@ $ sudo apt-get install docker-ce
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo adduser ultinous docker
 </code></pre></li>
 <li><p>Log out from the graphical environment and log in again, to make the previous step take effect.</p></li>
-<li><p>On the server machine, enable <code>nvidia-persistenced</code> to prevent the sleep
+<li><p><em>PC/Server only</em> On the server machine, enable <code>nvidia-persistenced</code> to prevent the sleep
 state of the GPU:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ cd /etc/systemd/system/
 $ sudo mkdir nvidia-persistenced.service.d
@@ -155,14 +162,16 @@ Remove the Docker image:</p>
 <p>UVAP provides several sample streams over Kafka® where the integrator can
 connect to and implement custom solutions based on the outcoming streams.
 The way how Kafka is started is just an example, which can be easily and quickly
-carried out.<br>
+carried out.
 The <a href="https://kafka.apache.org/10/documentation/streams/developer-guide/">Kafka developer guide</a> covers the necessary steps to permanently
 install and configure a Kafka environment that is suitable for production use cases.
 The following steps must be performed in a single boot up period of the node. After
-a reboot, start over each step.</p>
+a reboot, start over each step.
+Ultinous redistributes Kafka. The PC/Server edition of Kafka image is the unmodified image from Confluent Inc,
+for embedded systems, the ARM64 edition is made similar to the Confluent Inc's image.</p>
 <ol>
-<li><p>Edit <code>/etc/hosts</code> file: add <code>zookeeper</code> as name for <code>127.0.0.1</code>:</p>
-<pre><code class="hljs css language-plaintext codeBlockCopy">$ echo -e -n "\n127.0.0.1 zookeeper\n" | sudo tee -a /etc/hosts
+<li><p>Edit <code>/etc/hosts</code> file: add <code>zookeeper</code> and <code>kafka</code> as name for <code>127.0.0.1</code>:</p>
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ echo -e -n "\n127.0.0.1 zookeeper\n127.0.0.1 kafka\n" | sudo tee -a /etc/hosts
 </code></pre></li>
 <li><p>Create a separate internal Docker network:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ docker network create uvap
@@ -173,7 +182,7 @@ the name of the Docker container, and has the address of the Docker container.</
 <li><p>Start or restart a Zookeeper container:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ docker rm -f zookeeper # Not necessary if not running
 $ docker run --net=uvap -d --name=zookeeper \
-  -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-zookeeper:4.1.0
+  -e ZOOKEEPER_CLIENT_PORT=2181 ultinous/cp-zookeeper:5.4.0
 </code></pre></li>
 <li><p>Start or restart a Kafka container:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ docker rm -f kafka # Not necessary if not running
@@ -182,7 +191,9 @@ $ docker run --net=uvap -d -p 9092:9092 --name=kafka \
   -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 \
   -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
   -e KAFKA_MESSAGE_MAX_BYTES=10485760 \
-  -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-kafka:4.1.0
+  -e KAFKA_LOG_SEGMENT_DELETE_DELAY_MS=4000 \
+  -e ZOOKEEPER_CLIENT_PORT=2181 \
+  ultinous/cp-kafka:5.4.0
 </code></pre></li>
 <li><p>Wait 30 seconds then check if the containers are still running:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ docker container inspect --format '{{.State.Status}}' kafka zookeeper
@@ -206,7 +217,7 @@ running
   'RND="${RANDOM}${RANDOM}${RANDOM}"; echo $RND | \
   kafka-console-producer --broker-list localhost:9092 --topic test \
   &gt; /dev/null &amp;&amp; kafka-console-consumer --bootstrap-server \
-  localhost:9092 --topic test --from-beginning --timeout-ms 1000 \
+  localhost:9092 --topic test --from-beginning --timeout-ms 10000 \
   2&gt; /dev/null | grep -Fq $RND; if [ $? -eq 0 ]; then echo OK; \
   else echo ERROR; fi'
 </code></pre>
@@ -241,7 +252,7 @@ $ echo "export UVAP_HOME=${UVAP_HOME}" &gt;&gt; "${HOME}/.bashrc"
 <p><strong>VLC media player</strong> is a video playback application that can be used
 to test live streams or playback a pre-recorded file.</p>
 <p>To install VLC:</p>
-<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt-get install vlc  
+<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt-get install vlc
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="installing-ffmpeg"></a><a href="#installing-ffmpeg" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing FFmpeg</h3>
 <p><strong>FFmpeg</strong> is a command line tool which can convert between different video
@@ -249,12 +260,7 @@ formats and codecs.</p>
 <p>To install ffmpeg:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt-get install ffmpeg
 </code></pre>
-<h3><a class="anchor" aria-hidden="true" id="installing-kafkacat"></a><a href="#installing-kafkacat" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing kafkacat</h3>
-<p>Kafkacat is a command line utility to test and debug Apache Kafka deployments.</p>
-<p>To install kafkacat:</p>
-<pre><code class="hljs css language-plaintext codeBlockCopy">$ sudo apt-get install kafkacat
-</code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="../../docs/install/uvap_install_license.html"><span class="arrow-prev">← </span><span>License Key</span></a><a class="docs-next button" href="../../docs/upgrade/uvap_upgrade.html"><span>Upgrade Procedure</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#prerequisite">Prerequisite</a></li><li><a href="#creating-uvap-user">Creating UVAP User</a></li><li><a href="#installing-nvidia-video-driver">Installing NVIDIA Video Driver</a></li><li><a href="#adding-docker-environment">Adding Docker Environment</a></li><li><a href="#starting-kafka">Starting Kafka</a></li><li><a href="#downloading-helper-scripts">Downloading Helper Scripts</a></li><li><a href="#installing-uvap">Installing UVAP</a></li><li><a href="#uvap-configuration">UVAP Configuration</a></li><li><a href="#additional-tools">Additional Tools</a><ul class="toc-headings"><li><a href="#installing-vlc-media-player">Installing VLC media player</a></li><li><a href="#installing-ffmpeg">Installing FFmpeg</a></li><li><a href="#installing-kafkacat">Installing kafkacat</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="../../docs/install/uvap_install_license.html"><span class="arrow-prev">← </span><span>License Key</span></a><a class="docs-next button" href="../../docs/upgrade/uvap_upgrade.html"><span>Upgrade Procedure</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#prerequisite">Prerequisite</a></li><li><a href="#creating-uvap-user">Creating UVAP User</a></li><li><a href="#installing-nvidia-video-driver">Installing NVIDIA Video Driver</a></li><li><a href="#adding-docker-environment">Adding Docker Environment</a></li><li><a href="#starting-kafka">Starting Kafka</a></li><li><a href="#downloading-helper-scripts">Downloading Helper Scripts</a></li><li><a href="#installing-uvap">Installing UVAP</a></li><li><a href="#uvap-configuration">UVAP Configuration</a></li><li><a href="#additional-tools">Additional Tools</a><ul class="toc-headings"><li><a href="#installing-vlc-media-player">Installing VLC media player</a></li><li><a href="#installing-ffmpeg">Installing FFmpeg</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="../../" class="nav-home"></a><div class="help"><h5>Help</h5><a href="docs/assets/UVAP_License_Terms.pdf">UVAP License Terms</a><a href="../../docs/help/uvap_gloss.html">Glossary</a><a href="../../docs/help/uvap_notations.html">Typographic Conventions</a><a href="../../docs/help/uvap_tm.html">Trademark Information</a><a href="../../docs/help/uvap_support.html">Support</a></div><div class="nav"><h5>Navigation</h5><a href="../../docs/feat/feat_overview.html">Key Features</a><a href="../../docs/demo/demo_overview.html">Feature Demos</a><a href="../../docs/install/uvap_install_sysreq.html">Installation</a><a href="../../docs/dev/uvap_architect.html">Developer Guide</a><a href="../../docs/tutorials/uvap_example_analysis.html">Tutorials</a><a href="../../help.html">Help</a></div><div class="comm"><h5>Community</h5><a href="https://github.com/Ultinous/uvap" target="_blank">GitHub</a><a href="https://www.facebook.com/ultinousltd/" target="_blank">Facebook</a><a href="https://www.linkedin.com/company/6380970/" target="_blank">LinkedIn</a><a href="https://twitter.com/ultinousltd" target="_blank">Twitter</a><a href="https://www.youtube.com/channel/UCeQmAy_RLLhgcTxSCFljBDA" target="_blank">YouTube</a></div></section><a href="https://www.ultinous.com" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="../../img/Ultinous-logo_white_web.png" alt="Ultinous"/></a><section class="copyright">Copyright © 2019-2020 Ultinous</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;

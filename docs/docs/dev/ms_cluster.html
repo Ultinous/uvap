@@ -63,7 +63,7 @@ of a general and an algorithm-specific part.</p>
 clusters. Currently, only trivial algorithms are supported where a single feature vector represents a cluster. The representative feature vector can be the
 last one belonging to this cluster, or an average of all previous ones.</p>
 <p><a name="fig_cluster"></a>
-<img src="../assets/fig_cluster.png" alt="Clustering Process">  <br>
+<img src="../assets/fig_cluster.png" alt="Clustering Process">
 <em>Clustering Process</em></p>
 <p>The input of the microservice can be one or more topics containing feature
 vectors or feature vector clusters.
@@ -74,13 +74,13 @@ any number of samples is interpreted as if the number of samples were 1.</p>
 clusters. The internal cluster representation can be algorithm-specific.
 Stored feature vector clusters are first unrealized and may later become realized.
 The conditions of realizing a cluster are determined by the Feature Vector
-Clustering configuration, see <a href="../../docs/dev/conf_cluster.html">Configuring Feature Vector Clustering</a>.<br>
+Clustering configuration, see <a href="../../docs/dev/conf_cluster.html">Configuring Feature Vector Clustering</a>.
 Registration events are generated for both realized and unrealized clusters
 with according value of the <code>is_realized</code> field.</p>
 <p>Each change to the database is optionally administered to a compacted
 Kafka® topic so that the database can be rebuilt from this topic at restart.
 This method is an alternative to replaying input topics with a window of
-retention period where data loss may occur in case of a fatal error.<br>
+retention period where data loss may occur in case of a fatal error.
 See <a href="../../docs/dev/func_save_start_from_int_state.html">Save and Start from Internal State</a>.</p>
 <p>Each registration stream can have an own retention period if configured so.
 If a cluster is updated, its retention period becomes the maximum of its previous

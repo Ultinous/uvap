@@ -226,7 +226,7 @@ e.g. the <a href="../../templates/uvap_kafka_passdet_base_TEMPLATE.properties.ht
 </code></pre>
 <p>will reload the configuration files.</p>
 <blockquote>
-<p><strong>Note</strong>  <br>
+<p><strong>Note</strong>
 The values of the <code>ultinous.service.kafka.passdet.monitoring.port</code>
 and <code>ultinous.service.kafka.passdet.monitoring.threads</code> properties cannot be changed.</p>
 </blockquote>
@@ -239,7 +239,7 @@ and switch to a valid configuration later. In this case, the service
 will be running and healthy but it will not process any inputs
 until an acceptable configuration is reloaded.</p>
 <blockquote>
-<p><strong>Attention</strong>  <br>
+<p><strong>Attention</strong>
 In order for the service to run, even the &quot;empty&quot; configuration must contain
 a valid value for <code>ultinous.service.kafka.passdet.monitoring.port</code>.</p>
 </blockquote>
@@ -318,7 +318,7 @@ END_OF_TRACK:
 }
 </code></pre>
 <blockquote>
-<p><strong>Note</strong>:<br>
+<p><strong>Note</strong>:
 The <code>key</code> is empty in the following cases:</p>
 <ul>
 <li>The record is only a <code>HEARTBEAT</code> message.</li>
@@ -327,11 +327,11 @@ The <code>key</code> is empty in the following cases:</p>
 </ul>
 </blockquote>
 <p><a name="pass_detection_example"></a>
-<img src="../assets/pass_detection_example.png" alt="Dataflow Architecture of UVAP">  <br>
+<img src="../assets/pass_detection_example.png" alt="Dataflow Architecture of UVAP">
 <em>Pass Detection Example</em></p>
 <p><a name="pass_realization"></a></p>
 <blockquote>
-<p><strong>Pass Realization</strong>  <br>
+<p><strong>Pass Realization</strong>
 A <code>TrackChangeRecord</code> triggering a Pass Detection is not always derived from a
 &quot;real&quot; detection. The track change can also come from a prediction of the next
 track position. In this case, the <code>is_extrapolated</code> field of the <code>PassDetectionRecord</code>

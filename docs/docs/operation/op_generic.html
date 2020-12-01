@@ -163,7 +163,7 @@ container, as these are not present in the Docker image, but are
 present on the host computer. All Microservices require a <em>properties</em>
 configuration file, and aside that, some need a <em>prototxt</em> or a <em>JSON</em>
 configuration file as well. See the configuration documentation of the
-given Microservice in the <a href="../../docs/dev/uvap_architect.html">Developer Guide</a> for details.<br>
+given Microservice in the <a href="../../docs/dev/uvap_architect.html">Developer Guide</a> for details.
 It is advised to create a separate subdirectory for the configuration
 files of the Microservice, and place all the necessary configuration
 files there, so mounting this one subdirectory will make all the
@@ -187,7 +187,7 @@ this configuration file of properties of the Microservice has to be in
 the directory (or in a subdirectory of) <code>[conf_in_container]</code>.</p></li>
 <li><p>The Docker network in which the Microservice will take place has to be
 given. Any network is suitable, from which the configured Kafka cluster
-can be reached. Let's refer to this network as <code>[network]</code>.<br>
+can be reached. Let's refer to this network as <code>[network]</code>.
 To quickly test, whether the configured Kafka cluster is reachable from
 <code>[network]</code> with the Kafka broker <code>[broker]</code>, run a
 produce-and-consume <code>kafkacat</code> routine with the following test
@@ -223,7 +223,7 @@ container-management system.</p>
 <p>Using the command-line-interface of the Docker engine is the most basic
 way to create a Docker container. It's suitable for practicing and
 smoke-testing UVAP, but less usable for managing a reasonably big
-production environment.<br>
+production environment.
 A container can be created with the following example command:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ docker container create \
   --name [name] \
@@ -259,7 +259,7 @@ makes your UVAP Microservices manageable in a more convenient way. Docker
 Compose makes it possible to describe all your containers in one or more
 configuration files (called <a href="https://docs.docker.com/compose/compose-file/compose-file-v2/">Compose files</a>), defining a whole
 application by doing so, and then use the Docker Compose CLI anytime to
-manage the application easily.<br>
+manage the application easily.
 An example Compose file for creating a container follows:</p>
 <pre><code class="hljs css language-yaml codeBlockCopy"><span class="hljs-attr">version:</span> <span class="hljs-string">'2.3'</span>
 <span class="hljs-attr">services:</span>

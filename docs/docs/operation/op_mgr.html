@@ -59,26 +59,26 @@
 <p>This guide describes how to start MGR for head detection on the frames of
 video streams.</p>
 <blockquote>
-<p><strong>Note:</strong>  <br>
+<p><strong>Note:</strong>
 The aim of this guide is to describe how to start <strong>MGR</strong> for production
 use only. To start <strong>MGR</strong> for running the UVAP Feature Demos, see the
 <a href="../../docs/demo/start/start_mgr.html">Starting Multi-Graph Runner</a> in the Feature Demos section.</p>
 </blockquote>
 <blockquote>
-<p><strong>Note:</strong>  <br>
+<p><strong>Note:</strong>
 This guide describes <strong>MGR</strong>-specific operation information only.
 Please, read the <a href="../../docs/operation/op_generic.html">Generic Operation Guide</a> before proceeding with
 reading this guide.</p>
 </blockquote>
 <h3><a class="anchor" aria-hidden="true" id="prerequisites"></a><a href="#prerequisites" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Prerequisites</h3>
 <p>Starting <strong>MGR</strong> requires an UVAP license, and AI resources as well. For
-information about these, see <a href="../../docs/install/uvap_install_license.html">License Key</a>.<br>
+information about these, see <a href="../../docs/install/uvap_install_license.html">License Key</a>.
 It is assumed that <strong>MGR</strong> is properly configured. For information on
 <strong>MGR</strong> configuration, see <a href="../../docs/dev/conf_mgr.html#configuring-multi-graph-runner">Configuring Multi-Graph Runner</a>.</p>
 <h3><a class="anchor" aria-hidden="true" id="mgr-docker-image"></a><a href="#mgr-docker-image" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>MGR Docker image</h3>
 <p>As described in the <a href="../../docs/operation/op_generic.html#docker-images">Docker images</a> section of the Generic Operation
 Guide, the name of the Docker image of <strong>MGR</strong> can be determined based on
-Git tags present in the UVAP Git repository.<br>
+Git tags present in the UVAP Git repository.
 In the case of <strong>MGR</strong>, the UVAP component name is <code>mgr</code>, so for a given
 UVAP version (<code>[version]</code>), the Docker image name is:
 <code>ultinous/uvap:mgr_[version]</code>, and for the actual most recent version:
@@ -92,7 +92,7 @@ following additional information:</p>
 <code>MGR_PROPERTY_FILE_PATHS</code>.</p></li>
 <li><p><strong>MGR</strong> requires the Nvidia container runtime library to be used. This
 can be done by adding the <code>--runtime nvidia</code> flag to the command which
-creates the Docker container.<br>
+creates the Docker container.
 By default, all the Nvidia devices (GPU cards) are visible in the
 Docker container, but it can be overridden with the environment
 variable <code>NVIDIA_VISIBLE_DEVICES</code>. On a host with multiple GPU devices,
@@ -104,15 +104,15 @@ this environment variable. Let's refer to the value of this environment
 variable as <code>[gpu_specification]</code>.</p></li>
 <li><p><strong>MGR</strong> requires the AI models when running, but since these are not
 present in the Docker image, these have to be mounted into the
-container.<br>
+container.
 Let's refer to the directory of the models on the host as
 <code>[model_directory_on_the_host]</code>, and as
 <code>[model_directory_in_the_container]</code> in the container.</p></li>
 <li><p><strong>MGR</strong> requires an UVAP license when running, but since these are not
 included in the Docker image, these have to be mounted into the
-container.<br>
+container.
 The license, be it either an online license or an offline license, it
-consists of a license data file and a license key file.<br>
+consists of a license data file and a license key file.
 It is advised to create a separate subdirectory for the license files
 of the <strong>MGR</strong> instance, and place both the license data and the key
 files there, so mounting this one subdirectory will make all the
@@ -120,7 +120,7 @@ license files present in the container. Let's refer to this directory
 on the host as <code>[license_directory_on_the_host]</code>, and as
 <code>[license_directory_in_the_container]</code> in the container.</p>
 <blockquote>
-<p><strong>Note</strong>:<br>
+<p><strong>Note</strong>:
 If you are using an offline license, care must be taken to specify
 the ID of the same GPU device to the value of the
 <code>NVIDIA_VISIBLE_DEVICES</code> environment variable as the one given in the
@@ -141,7 +141,7 @@ video files can be mounted similarly.</p></li>
 <code>[network]</code> in the <a href="../../docs/operation/op_generic.html#docker-containers">Docker containers</a> section of the Generic
 Operation Guide, it must be made sure, that all RTSP streams
 configured for <strong>MGR</strong> to be analysed can be reached from that
-network.<br>
+network.
 To quickly test, whether the RTSP stream <code>[rtsp_url]</code> is reachable from
 <code>[network]</code>, try to connect to the stream with the following test
 container (The IP and the port parts of the URL of the RTSP stream are
@@ -166,6 +166,7 @@ following example command:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ docker container create \
   --name mgr_[instance_number] \
   --user [uid]:[gid] \
+  -v /sys/firmware/:/host_sys/firmware/:ro \
   -v "[conf_on_host]:[conf_in_container]:ro" \
   --env MGR_PROPERTY_FILE_PATHS="[properties_env_var_value]" \
   --net [network] \
@@ -189,6 +190,10 @@ information how to start the above created container.</p>
     <span class="hljs-attr">image:</span> <span class="hljs-string">'[image]'</span>
     <span class="hljs-attr">user:</span> <span class="hljs-string">'[uid]:[gid]'</span>
     <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">type:</span> <span class="hljs-string">bind</span>
+        <span class="hljs-attr">source:</span> <span class="hljs-string">'/sys/firmware/'</span>
+        <span class="hljs-attr">target:</span> <span class="hljs-string">'/host_sys/firmware/'</span>
+        <span class="hljs-attr">read_only:</span> <span class="hljs-literal">true</span>
       <span class="hljs-bullet">-</span> <span class="hljs-attr">type:</span> <span class="hljs-string">bind</span>
         <span class="hljs-attr">source:</span> <span class="hljs-string">'[conf_on_host]'</span>
         <span class="hljs-attr">target:</span> <span class="hljs-string">'[conf_in_container]'</span>

@@ -53,7 +53,7 @@ def main():
 
     out = cv2.VideoWriter(
         str(output_video_name),
-        cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'),
+        cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
         int(args.frames_per_second),
         (args.width_of_output, args.height_of_output)
     )

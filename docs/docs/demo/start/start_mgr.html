@@ -57,7 +57,7 @@
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="starting-multi-graph-runner"></a><a href="#starting-multi-graph-runner" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Starting Multi-Graph Runner</h1>
 <p>Starts head detection on the frames of a previously configured video stream.</p>
 <blockquote>
-<p><strong>Note:</strong>  <br>
+<p><strong>Note:</strong>
 The aim of this guide is to describe how to start MGR for running the
 UVAP Feature Demos only. To start MGR for production use, see the
 <a href="../../../docs/operation/op_mgr.html">Operating the Multi-Graph Runner</a> guide in the Operation Guide section.</p>
@@ -72,12 +72,19 @@ configuration, see <a href="../../../docs/demo/demo_overview.html#configuring-uv
 <ol>
 <li><p>Run the microservice:</p>
 <blockquote>
-<p><strong>Attention!</strong>  <br>
+<p><strong>Attention!</strong>
 Before starting this microservice, the command below silently stops and
 removes the Docker container named <code>uvap_mgr</code>, if such already exists.</p>
 </blockquote>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ "${UVAP_HOME}"/scripts/run_mgr.sh -- --net=uvap
 </code></pre>
+<blockquote>
+<p><strong>Attention!</strong> First startup of MGR can take a few minutes, especially on Jetson TX2 or other
+small machines. The cause of this is the optimization of neural networks for the given runtime
+environment. These optimized model files then are stored in cache (usually
+<code>~/.cache/multi-graph-runner/</code>). This script mounts it to <code>/ultinous_app/cache</code> in guest
+and MGR is configured to use that location.</p>
+</blockquote>
 <p>The output of the above command contains the following:</p>
 <ul>
 <li>Information about pulling the required Docker image</li>
@@ -91,28 +98,30 @@ detail:</p>
 <li><code>--</code>: any options after <code>--</code> will be passed to the <code>docker container create</code> command, which is called by the script</li>
 <li><code>--help</code>: prints out brief information of the usage of the
 script</li>
-<li><code>--models-dir</code>: directory path of the AI models.<br>
+<li><code>--models-dir</code>: directory path of the AI models.
 Default value: <code>${UVAP_HOME}/models</code></li>
-<li><code>--config-dir</code>: directory path of the configuration files.<br>
+<li><code>--config-dir</code>: directory path of the configuration files.
 Default value: <code>${UVAP_HOME}/config/uvap_mgr</code></li>
-<li><code>--image-name</code>: tag of the Docker image to use.<br>
+<li><code>--cache-dir</code>: directory path of model cache files.
+Default value: <code>~/.config/mult-graph-runner</code></li>
+<li><code>--image-name</code>: tag of the Docker image to use.
 The default value will be determined by Git tags</li>
-<li><code>--license-data-file</code>: data file of your UVAP license.<br>
+<li><code>--license-data-file</code>: data file of your UVAP license.
 Default value: <code>${UVAP_HOME}/license/license.txt</code></li>
-<li><code>--license-key-file</code>: key file of your UVAP license.<br>
+<li><code>--license-key-file</code>: key file of your UVAP license.
 Default value: <code>${UVAP_HOME}/license/license.key</code></li>
 <li><code>--gpu-specification</code>: NVIDIA® GPU specification for Docker.
 Controls which GPU cards should be visible for the container. See
 the <a href="https://github.com/NVIDIA/nvidia-container-runtime/blob/master/README.md#nvidia_visible_devices">NVIDIA Container Runtime documentation</a> for the possible
-values.<br>
+values.
 default value:
 <ul>
 <li>in case of the license is bound to GPU information: the GPU UUID
 found in the license data file</li>
 <li>otherwise: the GPU index <code>0</code></li>
 </ul></li>
-<li><code>--run-mode</code>: determines, how the service should be started.<br>
-Possible values: <code>background</code> or <code>foreground</code>  <br>
+<li><code>--run-mode</code>: determines, how the service should be started.
+Possible values: <code>background</code> or <code>foreground</code>
 Default value: <code>background</code></li>
 </ul>
 <p>All video devices (<code>/dev/video*</code>) on the host (where <strong>MGR</strong> is
@@ -138,7 +147,7 @@ documentation of Docker.</p>
 <pre><code class="hljs">running
 </code></pre>
 <blockquote>
-<p><strong>Note:</strong>  <br>
+<p><strong>Note:</strong>
 If the status of the UVAP container is <code>not running</code>, send the output of
 the following command to <code>support@ultinous.com</code>:</p>
 <pre><code class="hljs css language-plaintext codeBlockCopy">$ docker logs uvap_mgr
